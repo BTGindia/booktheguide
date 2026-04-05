@@ -5,6 +5,8 @@ import prisma from '@/lib/prisma';
 import { createAuditLog } from '@/lib/audit';
 import { kycReviewSchema } from '@/lib/validations';
 
+export const dynamic = 'force-dynamic';
+
 // Helper: check admin role
 async function requireAdmin(session: any) {
   if (!session) return null;
