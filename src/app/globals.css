@@ -1,0 +1,286 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ADLaM Display for brand/logo */
+@import url('https://fonts.googleapis.com/css2?family=ADLaM+Display&display=swap');
+
+/* TT Norms Pro – headings, prices, buttons */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+
+:root {
+  --font-heading: 'TT Norms Pro', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif;
+  --font-brand: 'ADLaM Display', cursive;
+  --font-serif: 'TT Norms Pro', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --color-primary: #58bdae;
+  --color-highlight: #58bdae;
+  --color-cta: #58bdae;
+  /* Updated palette */
+  --btg-cream: #F5F0E8;
+  --btg-sand: #EDE8DF;
+  --btg-terracotta: #58bdae;
+  --btg-rust: #4aa99b;
+  --btg-sage: #7A9E7E;
+  --btg-teal: #58bdae;
+  --btg-blush: #58bdae;
+  --btg-gold: #E8943A;
+  --btg-dark: #1A1A18;
+  --btg-mid: #6B6560;
+  --btg-light-text: #6B6560;
+  --btg-cta: #58bdae;
+  --btg-cta-hover: #e5673e;
+  --btg-nav: #1A1A18;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--btg-dark);
+  background: var(--btg-cream);
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+
+/* Brand/Logo font */
+.font-brand {
+  font-family: var(--font-brand);
+}
+
+/* Serif heading class — now TT Norms Pro */
+.font-heading-override {
+  font-family: var(--font-heading);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #999;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+/* Star rating display */
+.stars {
+  color: #FFE80A;
+}
+
+/* Animation classes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-slideIn {
+  animation: slideIn 0.4s ease-out forwards;
+}
+
+.animate-marquee {
+  animation: marquee 20s linear infinite;
+}
+
+/* Search box styling */
+.search-container {
+  backdrop-filter: blur(24px) saturate(1.4);
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.18),
+    0 0 0 1px rgba(88, 189, 174, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  position: relative;
+}
+
+.search-container::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(88, 189, 174, 0.3), rgba(255, 255, 255, 0.1), rgba(88, 189, 174, 0.15));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.search-container .search-field {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-container .search-field:focus-within {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 2px rgba(88, 189, 174, 0.3);
+  transform: translateY(-1px);
+}
+
+.search-btn {
+  background: #FF7F50;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px rgba(255, 127, 80, 0.35);
+}
+
+.search-btn:hover {
+  background: #e5673e;
+  box-shadow: 0 6px 20px rgba(255, 127, 80, 0.5);
+  transform: translateY(-2px);
+}
+
+@keyframes btn-shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 60% 50%; }
+}
+
+/* Card hover effects */
+.guide-card {
+  transition: all 0.3s ease;
+}
+
+.guide-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+}
+
+/* Badge styles */
+.badge-verified {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+/* AI Chat floating button pulse */
+@keyframes pulseSlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(88, 189, 174, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(88, 189, 174, 0);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 2.5s ease-in-out infinite;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #58bdae 0%, #4aa99b 50%, #3d9485 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Yellow border badge - Figma style: 8px 8px 8px 0px */
+.badge-yellow-corner {
+  border: 1px solid #FFE80A;
+  border-radius: 8px 8px 8px 0px;
+}
+
+/* Green section divider */
+.divider-green {
+  width: 100%;
+  height: 3px;
+  background: #37B049;
+}
+
+/* Hero gradient backgrounds for pages */
+.bg-hero-gradient {
+  background: linear-gradient(135deg, #0015FF 0%, #000c8c 100%);
+}
+
+/* Feature box with green left border - Figma style */
+.feature-box-green {
+  background: #F9F9F9;
+  border-left: 30px solid #37B049;
+  border-radius: 30px;
+}
+
+/* Destination label - bottom-left anchored, top-right rounded */
+.dest-label {
+  border-radius: 0px 8px 0px 0px;
+  background: #58bdae;
+}
+
+/* ── Mockup animations ── */
+@keyframes subtle-zoom {
+  0% { transform: scale(1.04); }
+  100% { transform: scale(1.00); }
+}
+
+@keyframes float {
+  from { transform: translateY(0px); }
+  to { transform: translateY(-6px); }
+}
+
+.animate-subtle-zoom {
+  animation: subtle-zoom 18s ease-in-out infinite alternate;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite alternate;
+}
+
+.animation-delay-1500 {
+  animation-delay: 1.5s;
+}
+
+/* Hide scrollbar for carousels */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

@@ -1,0 +1,70 @@
+Section,Field Name,Character Limit,Content Type,SEO Importance,Instructions,Example
+META,Page Title,60,Text,Critical,"Format: {Trip Title} — {Location} | Book The Guide",Kedarnath Trek — 5 Day Guided Expedition — Rishikesh | Book The Guide
+META,Meta Description,155,Text,Critical,"Include trip name + location + price + trust signals","Kedarnath Trek with verified guide from Rishikesh. 5 days ₹4,999/person. ✓ Verified ✓ Reviewed ✓ Instant Booking"
+META,Keywords,200,Comma-separated,High,"Include: {trip-name}, {location} {category}, {state} {activity}","Kedarnath trek, Kedarnath trek guide, Uttarakhand trekking, Rishikesh adventure guide"
+META,Canonical URL,-,URL,Critical,Format: https://www.booktheguide.com/trips/{slug},https://www.booktheguide.com/trips/kedarnath-trek-5-day-expedition
+META,OG Image,1200x630,Image URL,Critical,Best trip photo — high-res action/scenery shot,Product hero image
+BREADCRUMB,Level 1,-,Link,High,Home,Home
+BREADCRUMB,Level 2,-,Link,High,Explore → State,Uttarakhand
+BREADCRUMB,Level 3,-,Link,High,State → Category,Adventure Guides
+BREADCRUMB,Level 4,-,Text,High,Current product,Kedarnath Trek
+HERO_GALLERY,Primary Image,-,Image URL,Critical,"Hero image. Landscape 16:9. Best representation of the trip.",Trip primary image
+HERO_GALLERY,Gallery Images,4-8 images,Image URLs,High,"Additional images showing different aspects (scenery, campsite, group, food)",Gallery image array
+HERO_GALLERY,Video,-,Video URL,Medium,Optional. 30-60 sec highlight reel.,Video embed URL
+PRODUCT_HEADER,H1 Title,80,Text,Critical,Full descriptive trip title,Kedarnath Trek — 5 Day Guided Expedition
+PRODUCT_HEADER,Location,40,Text,High,"City · State",Rishikesh · Uttarakhand
+PRODUCT_HEADER,Category Badge,30,Text,Medium,Category label,Adventure Guides
+PRODUCT_HEADER,Price,15,Currency,Critical,"Format: ₹X,XXX","₹4,999"
+PRODUCT_HEADER,Price Unit,15,Text,High,Per person / per group / per day,per person
+PRODUCT_HEADER,Original Price,15,Currency,Medium,Strikethrough price if discounted,"₹6,499"
+PRODUCT_HEADER,Rating,5,Stars,High,"Aggregate rating — X.X (Y reviews)","4.9 (85 reviews)"
+PRODUCT_HEADER,Duration,20,Text,High,Days · Nights / Hours,5 Days · 4 Nights
+PRODUCT_HEADER,Difficulty,20,Text,Medium,"Easy / Moderate / Challenging / Expert",Moderate
+PRODUCT_HEADER,Group Size,20,Text,Medium,"Format: X-Y people",4-12 people
+PRODUCT_HEADER,Availability Badge,25,Text,Medium,"Available / Limited Spots / Fully Booked",Limited Spots
+GUIDE_INFO,Guide Name,50,Text,High,Guide's full display name,Rajesh Sharma
+GUIDE_INFO,Guide Photo,-,Image URL,High,"Square 1:1 headshot. Professional, friendly.",Guide profile photo
+GUIDE_INFO,Guide Rating,5,Stars + count,High,"Format: 4.9 (120 reviews)","4.9 (120 reviews)"
+GUIDE_INFO,Guide Experience,40,Text,Medium,"Years of guiding experience","8+ years experience"
+GUIDE_INFO,Guide Languages,60,Text,Medium,"Languages spoken","Hindi, English, Garhwali"
+GUIDE_INFO,Guide Certifications,100,Text,Medium,"Relevant certifications","NIMAS Certified, Wilderness First Aid"
+GUIDE_INFO,Guide Short Bio,200,Text,Medium,1-2 line personal bio,"Born in the mountains, Rajesh has been guiding treks for 8 years and knows every trail in Uttarakhand."
+GUIDE_INFO,Verified Badge,-,Boolean,High,"Show if guide is verified",true
+OVERVIEW,Section H2,40,Text,High,Section title,Overview
+OVERVIEW,Full Description,800,Text,Critical,"Detailed trip description. 3-5 paragraphs. Include what makes it unique, key attractions, what to expect.","The Kedarnath Trek is one of India's most sacred and scenic treks... Start from Gaurikund..."
+OVERVIEW,Key Highlights,6-8 items,Bullet list,High,"Quick scannable highlights","Trek to one of 12 Jyotirlingas, Professional mountaineering guide, Alpine meadows & glacier views, All meals & camping included, Small group sizes, Emergency evacuation support"
+ITINERARY,Section H2,40,Text,High,Section title,Itinerary
+ITINERARY,"Day {N} Title",60,Text per day,High,"Format: Day {N}: {Title}","Day 1: Arrive at Rishikesh"
+ITINERARY,"Day {N} Description",200,Text per day,High,"Key activities + distance + altitude if relevant","Arrive at Rishikesh. Meet the group and transfer to Gaurikund (220 km, 8 hrs). Overnight at guesthouse."
+ITINERARY,"Day {N} Meals",30,Text per day,Low,"Meals included","Dinner"
+ITINERARY,"Day {N} Accommodation",40,Text per day,Medium,"Where they stay","Guesthouse in Gaurikund"
+INCLUSIONS,Section H2,40,Text,High,Section title,What's Included
+INCLUSIONS,Included Items,8-12 items,Checklist,High,"Things included in the price","Professional certified guide, All meals (veg & non-veg), Camping equipment, First aid kit, Permits & entry fees, Support staff"
+INCLUSIONS,Excluded Items,4-6 items,Checklist,High,"Things NOT included","Travel to base location, Personal gear, Insurance, Tips for staff, Emergency evacuation costs"
+IMPORTANT_INFO,Section H2,40,Text,Medium,Section title,Important Information
+IMPORTANT_INFO,Fitness Level,100,Text,Medium,"Required fitness description","Moderate fitness required. Should be able to walk 6-8 hours per day with a daypack."
+IMPORTANT_INFO,What to Bring,6-10 items,Checklist,Medium,Packing checklist,"Sturdy trekking shoes, Warm layers, Rain jacket, Sunscreen, Water bottle, Headlamp"
+IMPORTANT_INFO,Cancellation Policy,200,Text,High,"Clear cancellation terms","Free cancellation up to 7 days before. 50% refund 3-7 days before. No refund within 3 days."
+IMPORTANT_INFO,Meeting Point,100,Text,Medium,Where and when to meet,"Rishikesh Bus Stand, 8:00 AM on Day 1"
+REVIEWS,Section H2,40,Text,High,Section title,Reviews
+REVIEWS,Review: Name,50,Text,Medium,Reviewer name,Priya Mehta
+REVIEWS,Review: Date,20,Date,Low,Review date,March 2025
+REVIEWS,Review: Rating,1,Number (1-5),High,Individual rating,5
+REVIEWS,Review: Text,300,Text,High,"Authentic review text. Include specific details about the experience.","Rajesh was an incredible guide. The trek was well-organized and the views were breathtaking..."
+REVIEWS,Review: Trip Taken,60,Text,Low,"Which trip they reviewed",Kedarnath Trek
+FIXED_DEPARTURES,Section H2,40,Text,High,Section title,Upcoming Departures
+FIXED_DEPARTURES,Departure: Start Date,20,Date,High,Trip start date,15 Mar 2026
+FIXED_DEPARTURES,Departure: End Date,20,Date,Medium,Trip end date,19 Mar 2026
+FIXED_DEPARTURES,Departure: Price,15,Currency,High,"Price for this batch","₹4,999"
+FIXED_DEPARTURES,Departure: Spots Left,10,Number,Medium,Remaining spots,6 spots left
+FIXED_DEPARTURES,Departure: Status,15,Text,Medium,"Open / Almost Full / Sold Out",Open
+BOOKING_CTA,Primary Button,25,Text,Critical,"Book Now / Book This Trip",Book This Trip
+BOOKING_CTA,Secondary Button,25,Text,Medium,Enquiry option,Send Enquiry
+BOOKING_CTA,Price Reminder,30,Text,High,"Format: From ₹X,XXX/person","From ₹4,999/person"
+BOOKING_CTA,Trust Badges,3-4 items,Icons + text,Medium,"Payment & trust badges","Secure Payment, Instant Confirmation, Free Cancellation (7d)"
+SIMILAR_TRIPS,Section H2,60,Text,High,"Format: Similar Trips in {State}",Similar Adventures in Uttarakhand
+SIMILAR_TRIPS,Trip Cards,4-6 max,Card data,High,"Related trips — same state or category",Similar product cards
+GUIDE_OTHER_TRIPS,Section H2,60,Text,Medium,"Format: More Trips by {Guide Name}",More Trips by Rajesh Sharma
+GUIDE_OTHER_TRIPS,Trip Cards,3-4 max,Card data,Medium,"Other products by the same guide",Guide's other product cards
+JSON_LD,Product Schema,-,Structured Data,Critical,"Product type with name/description/offers/aggregateRating/image",Auto-generated from content above
+JSON_LD,BreadcrumbList,-,Structured Data,Critical,"Home > State > Category > Product",Auto-generated from breadcrumb

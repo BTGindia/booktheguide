@@ -1,0 +1,1254 @@
+// Book The Guide - Database Schema
+// Platform: Guide Booking for Treks, Tours, Hill Stations
+// Region: India (North India first, expandable Pan-India)
+// Architecture: Normalized relational design with separate identity, certification, 
+// package, pricing, media, and audit layers per Seller Master Data specification.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// ENUMS
+// ==========================================
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  GUIDE_MANAGER
+  GUIDE
+  CUSTOMER
+  UI_MANAGER
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  AWAITING_QUOTE     // Guide needs to send quote for personal booking
+  QUOTE_SENT         // Guide sent pricing package, awaiting customer approval
+}
+
+enum ProductStatus {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  CHANGES_REQUESTED
+  PAUSED             // Paused by guide (e.g. on leave)
+  SUSPENDED          // Suspended by admin
+  ARCHIVED           // Soft-deleted / archived
+}
+
+enum DepartureStatus {
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+}
+
+enum TripType {
+  FIXED_DEPARTURE
+  PERSONAL_BOOKING
+}
+
+enum DifficultyLevel {
+  EASY
+  MODERATE
+  DIFFICULT
+  EXTREME
+}
+
+enum ActivityType {
+  TREKKING
+  CAMPING
+  MOUNTAINEERING
+  CITY_TOUR
+  HILL_STATION
+  PILGRIMAGE
+  WILDLIFE_SAFARI
+  ADVENTURE_SPORT
+  CULTURAL_TOUR
+  FOOD_TOUR
+  PHOTOGRAPHY_TOUR
+  PARAGLIDING
+  RAFTING
+  SKIING
+  PET_FRIENDLY
+  OTHER
+}
+
+// Guide verification lifecycle
+enum GuideVerificationStatus {
+  UNVERIFIED        // Just signed up
+  IN_REVIEW         // Documents submitted, awaiting admin review
+  VERIFIED          // Cleared by trust team
+  SUSPENDED         // Failed re-verification or complaint
+}
+
+// Certification verification lifecycle
+enum CertVerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  EXPIRED
+}
+
+// KYC verification status
+enum KycStatus {
+  NOT_SUBMITTED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+// Media approval status
+enum MediaApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// Field ownership categories for data governance
+enum FieldOwnership {
+  GUIDE_OWNED       // Guide can edit anytime, changes go live
+  JOINTLY_OWNED     // Guide can edit, changes trigger review flag
+  PLATFORM_OWNED    // Only admin/platform can write
+}
+
+// ==========================================
+// USER & AUTH
+// ==========================================
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  password       String?
+  name           String
+  phone          String?
+  role           UserRole  @default(CUSTOMER)
+  image          String?
+  isActive       Boolean   @default(true)
+  emailVerified  DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  guideProfile        GuideProfile?
+  adminProfile        AdminProfile?
+  guideManagerProfile GuideManagerProfile?
+  bookings            Booking[]       @relation("CustomerBookings")
+  reviews             Review[]
+  sessions            Session[]
+  accounts            Account[]
+  inspirationContent  InspirationContent[]
+  aiQueryLogs         AiQueryLog[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ==========================================
+// ADMIN PROFILE (State-based admins)
+// ==========================================
+
+model AdminProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  designation String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  managedStates  IndianState[] @relation("AdminManagedStates")
+  reviewedProducts   Product[]
+  reviewedDepartures FixedDeparture[]
+}
+
+// ==========================================
+// GUIDE MANAGER PROFILE (manages guides globally)
+// ==========================================
+
+model GuideManagerProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  designation String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ==========================================
+// GUIDE PROFILE (Layer 1: Guide Identity Data)
+// ==========================================
+
+model GuideProfile {
+  id                  String    @id @default(cuid())
+  userId              String    @unique
+  slug                String    @unique
+  
+  // === IDENTITY & CONTACT (Platform-owned for legal name; Guide-owned for display) ===
+  legalName           String?               // Full legal name as on government ID (platform-owned)
+  displayName         String?               // Public display name (guide-owned)
+  shortBio            String?               // 300 char max for card display (guide-owned)
+  bio                 String?   @db.Text    // 1000 char max for full profile (guide-owned)
+  tagline             String?
+
+  // Structured Address (never a single text field)
+  addressLine         String?   @db.Text  // House/Street/Village (typed by guide)
+  cityTown            String?             // City or Town (typed by guide)
+  district            String?             // Auto-filled from pincode — filterable
+  addressState        String?             // Auto-filled from pincode — filterable
+  country             String?   @default("India") // Auto-filled from pincode
+  pincode             String?             // Entered by guide — filterable
+
+  // Contact Details
+  phone               String?             // Guide contact phone (verified via OTP)
+  email               String?             // Guide contact email (verified)
+
+  // Personal Details
+  gender              String?   // MALE, FEMALE, OTHER, PREFER_NOT_TO_SAY
+  dateOfBirth         DateTime?
+  maritalStatus       String?   // SINGLE, MARRIED, DIVORCED, WIDOWED, PREFER_NOT_TO_SAY
+
+  // === GEOGRAPHIC EXPERTISE (Jointly-owned: guide edits, triggers review flag) ===
+  // Primary operating regions — structured multi-select from taxonomy, NOT free text
+  // Stored via GuideServiceArea relation (state level) and GuideOperatingRegion (region/destination level)
+
+  // Type of Guide — multi-select from controlled vocabulary (jointly-owned)
+  guideTypes          String[]  // TREK_GUIDE, ADVENTURE_SPORTS_GUIDE, GROUP_TRIP_LEADER
+
+  // === EXPERIENCE & BACKGROUND ===
+  experienceYears     Int?      @default(0)    // Number field
+  maxAltitudeLed      Int?                      // Maximum altitude led, in metres
+  totalTrips          Int       @default(0)
+  averageRating       Float     @default(0)
+  totalReviews        Int       @default(0)
+
+  // Qualifications (jointly-owned)
+  education           String?
+  certifications      String[]          // Legacy: names of certifications (kept for backward compat)
+  languages           String[]          // Multi-select from defined list (jointly-owned)
+  specializations     String[]          // Multi-select from controlled vocabulary (jointly-owned)
+
+  // Proof of Specialization (uploaded documents/certificates for each specialization)
+  specializationProofs Json     @default("[]")
+  // Structure: [{specialization: "Trekking", proofUrl: "https://...", description: "BMC Certificate"}]
+
+  // Legacy certification documents (kept for backward compat)
+  certificationDocs   Json      @default("[]")
+
+  // === VERIFICATION STATUS (Platform-owned — only admin can write) ===
+  verificationStatus  GuideVerificationStatus @default(UNVERIFIED)
+  verificationNote    String?   @db.Text  // Admin note on verification decision
+  verifiedAt          DateTime?           // When guide was verified
+  verifiedById        String?             // Which admin verified
+
+  // Legacy verification fields (kept for backward compat)
+  idType              String?
+  idNumber            String?
+  isVerified          Boolean   @default(false) // Legacy — use verificationStatus instead
+  phoneVerified       Boolean   @default(false)
+
+  // Portfolio (guide-owned, but media goes to review queue)
+  portfolioImages     String[]
+  coverImage          String?
+
+  // Terms & Conditions
+  termsAccepted       Boolean   @default(false)
+  termsAcceptedAt     DateTime?
+
+  // === PROFILE COMPLETENESS (auto-calculated) ===
+  profileCompleteness Int       @default(0)   // 0-100 percentage
+
+  // Flags (platform-owned)
+  isActive            Boolean   @default(true)  // Soft delete flag
+  deactivatedAt       DateTime?                 // When deactivated (for soft delete)
+
+  // === GUIDE HEALTH SCORE ===
+  guideScore          Float     @default(0)
+  scoreBreakdown      Json      @default("{}")
+  scoreUpdatedAt      DateTime?
+
+  // === ACTIVITY TRACKING ===
+  lastLoginAt         DateTime?  // Track for 90-day stale re-verification
+  complaintCount30d   Int        @default(0)  // Complaints in last 30 days
+
+  // === REVIEW FLAGS (for jointly-owned field changes) ===
+  pendingReviewFields String[]   // Fields that have been changed and need lightweight review
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  // Relations
+  user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  serviceAreas        GuideServiceArea[]
+  operatingRegions    GuideOperatingRegion[]
+  operatingDestinations GuideOperatingDestination[]
+  guideCertifications GuideCertification[]
+  kyc                 GuideKyc?
+  products            Product[]
+  availability        GuideAvailability[]
+  bookings            Booking[]         @relation("GuideBookings")
+  reviews             Review[]
+  influencerPnLs      InfluencerPnL[]
+  dataVersions        DataVersion[]
+  auditLogs           AuditLog[]
+
+  @@index([slug])
+  @@index([averageRating])
+  @@index([isActive, verificationStatus])
+  @@index([verificationStatus])
+  @@index([district])
+  @@index([addressState])
+  @@index([profileCompleteness])
+  @@index([lastLoginAt])
+}
+
+// Guide service areas — links guide to states
+model GuideServiceArea {
+  id        String   @id @default(cuid())
+  guideId   String
+  stateId   String
+  createdAt DateTime @default(now())
+
+  guide  GuideProfile @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  state  IndianState  @relation(fields: [stateId], references: [id])
+
+  @@unique([guideId, stateId])
+}
+
+// Guide operating regions — structured multi-select from region taxonomy
+model GuideOperatingRegion {
+  id        String   @id @default(cuid())
+  guideId   String
+  regionId  String
+  createdAt DateTime @default(now())
+
+  guide  GuideProfile @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  region Region       @relation(fields: [regionId], references: [id])
+
+  @@unique([guideId, regionId])
+  @@index([guideId])
+}
+
+// Guide operating destinations — controlled vocabulary of place names
+model GuideOperatingDestination {
+  id            String   @id @default(cuid())
+  guideId       String
+  destinationId String
+  createdAt     DateTime @default(now())
+
+  guide       GuideProfile @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  destination Destination  @relation(fields: [destinationId], references: [id])
+
+  @@unique([guideId, destinationId])
+  @@index([guideId])
+}
+
+// ==========================================
+// GUIDE CERTIFICATIONS (Layer 1: Highest-trust data)
+// Separate entity linked to guide — NOT fields on the profile
+// ==========================================
+
+model GuideCertification {
+  id                  String   @id @default(cuid())
+  guideId             String
+
+  // Certification details — all from controlled vocabulary
+  certType            String   // e.g. "Mountaineering Basic", "Wilderness First Aid", "Paragliding Pilot"
+  issuingAuthority    String   // e.g. "ITBP", "NIM", "HMI", "IMF"
+  certificateNumber   String?
+  issueDate           DateTime?
+  expiryDate          DateTime?  // CRITICAL: triggers automated alerts
+
+  // Document upload
+  documentUrl         String?    // Image or PDF
+  documentType        String?    // "image" or "pdf"
+
+  // Verification (platform-owned — only admin can write)
+  verificationStatus  CertVerificationStatus @default(PENDING)
+  verifiedById        String?
+  verifiedAt          DateTime?
+  rejectionReason     String?
+
+  // Automated expiry tracking
+  expiryAlertSent60d  Boolean  @default(false)
+  expiryAlertSent30d  Boolean  @default(false)
+  expiryAlertSent7d   Boolean  @default(false)
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  guide GuideProfile @relation(fields: [guideId], references: [id], onDelete: Cascade)
+
+  @@index([guideId])
+  @@index([verificationStatus])
+  @@index([expiryDate])
+  @@index([certType])
+  @@index([issuingAuthority])
+}
+
+// ==========================================
+// GUIDE KYC (Identity Verification)
+// Linked to payout eligibility, NOT profile visibility
+// ==========================================
+
+model GuideKyc {
+  id                  String   @id @default(cuid())
+  guideId             String   @unique
+
+  // Aadhaar — store ONLY last 4 digits after verification
+  aadhaarLast4        String?  // Last 4 digits only
+  aadhaarVerified     Boolean  @default(false)
+  aadhaarDocumentUrl  String?  // Uploaded document for verification
+
+  // PAN (for guides earning above tax threshold)
+  panNumber           String?  // Masked after verification
+  panVerified         Boolean  @default(false)
+  panDocumentUrl      String?
+
+  // Bank account details (for payouts — encrypted)
+  bankAccountEncrypted String?  @db.Text  // AES-256 encrypted JSON: {accountNumber, ifsc, bankName, branchName}
+  bankVerified        Boolean  @default(false)
+
+  // Overall KYC status (platform-owned)
+  kycStatus           KycStatus @default(NOT_SUBMITTED)
+  payoutEligible      Boolean   @default(false) // Guide can be live but can't receive payouts without KYC
+
+  verifiedById        String?
+  verifiedAt          DateTime?
+  rejectionReason     String?
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  guide GuideProfile @relation(fields: [guideId], references: [id], onDelete: Cascade)
+
+  @@index([kycStatus])
+  @@index([payoutEligible])
+}
+
+// ==========================================
+// DATA VERSIONING (audit trail for critical data)
+// Store old version when guide updates bio, description, pricing
+// ==========================================
+
+model DataVersion {
+  id            String   @id @default(cuid())
+  entityType    String   // "GuideProfile", "Product", "FixedDeparture"
+  entityId      String   // ID of the record
+  guideId       String?
+  fieldName     String   // Which field changed
+  oldValue      String?  @db.Text  // Previous value (JSON serialized)
+  newValue      String?  @db.Text  // New value (JSON serialized)
+  changedById   String   // Who made the change (user ID)
+  changeReason  String?  // Optional reason
+  createdAt     DateTime @default(now())
+
+  guide GuideProfile? @relation(fields: [guideId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([guideId])
+  @@index([createdAt])
+}
+
+// ==========================================
+// AUDIT LOG (platform-owned field changes)
+// Every change to verification, KYC, suspension — logged with who/when/why
+// ==========================================
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  guideId       String?
+  entityType    String   // "GuideProfile", "GuideCertification", "GuideKyc", "Product"
+  entityId      String
+  action        String   // "VERIFY", "SUSPEND", "REJECT", "APPROVE", "UPDATE_KYC", etc.
+  fieldName     String?  // Specific field changed
+  oldValue      String?  @db.Text
+  newValue      String?  @db.Text
+  reason        String?  @db.Text  // Why the change was made
+  performedById String   // Admin user ID who made the change
+  performedByName String? // Admin name for quick display
+  createdAt     DateTime @default(now())
+
+  guide GuideProfile? @relation(fields: [guideId], references: [id], onDelete: SetNull)
+
+  @@index([guideId])
+  @@index([entityType, entityId])
+  @@index([performedById])
+  @@index([createdAt])
+  @@index([action])
+}
+
+// ==========================================
+// MEDIA REVIEW QUEUE
+// Photos/videos go through review before going live
+// ==========================================
+
+model MediaReviewQueue {
+  id            String   @id @default(cuid())
+  entityType    String   // "GuideProfile", "Product"
+  entityId      String   // Guide or product ID
+  mediaUrl      String
+  mediaType     String   // "image", "video"
+  context       String   // "profile_photo", "cover_image", "portfolio", "package_image", "package_video"
+  status        MediaApprovalStatus @default(PENDING)
+  reviewedById  String?
+  reviewedAt    DateTime?
+  rejectionReason String?
+  createdAt     DateTime @default(now())
+
+  @@index([status])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+// ==========================================
+// GEOGRAPHY (India-specific, expandable)
+// ==========================================
+
+model IndianState {
+  id                String   @id @default(cuid())
+  name              String   @unique
+  code              String   @unique
+  isNorthIndia      Boolean  @default(false)
+  commissionPercent Float    @default(15)
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+
+  cities        City[]
+  regions       Region[]
+  admins        AdminProfile[] @relation("AdminManagedStates")
+  serviceAreas  GuideServiceArea[]
+  corporateInquiries CorporateTripInquiry[]
+  categoryCommissions CategoryCommission[]
+
+  @@index([isNorthIndia])
+}
+
+model City {
+  id        String   @id @default(cuid())
+  name      String
+  stateId   String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  state        IndianState        @relation(fields: [stateId], references: [id])
+  destinations Destination[]
+
+  @@unique([name, stateId])
+  @@index([stateId])
+}
+
+model Region {
+  id          String   @id @default(cuid())
+  name        String
+  stateId     String
+  description String?  @db.Text
+  coverImage  String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  state          IndianState            @relation(fields: [stateId], references: [id])
+  guideRegions   GuideOperatingRegion[]
+
+  @@unique([name, stateId])
+  @@index([stateId])
+}
+
+model Destination {
+  id           String   @id @default(cuid())
+  name         String
+  cityId       String
+  description  String?  @db.Text
+  altitude     Int?
+  bestMonths   String[]
+  openMonths   String[]  // months when destination is open (empty = year-round)
+  avoidMonths  String[]  // months to avoid (e.g. heavy rain)
+  coverImage   String?
+  images       String[]
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  city     City      @relation(fields: [cityId], references: [id])
+  products Product[]
+  guideDestinations GuideOperatingDestination[]
+
+  @@unique([name, cityId])
+  @@index([cityId])
+}
+
+// ==========================================
+// PRODUCTS / PACKAGES (Layer 2: Package / Listing Data)
+// Each package is a separate record linked to a guide.
+// Never embed package data inside the guide record.
+// ==========================================
+
+model Product {
+  id               String    @id @default(cuid())
+  guideId          String
+  destinationId    String
+
+  // Core Listing Fields
+  title            String
+  slug             String    @unique
+  
+  // Structured description — NOT one text blob
+  overview         String?   @db.Text   // Package overview
+  description      String    @db.Text   // Legacy: full description (kept for backward compat)
+  whatsIncluded    String[]             // Structured inclusions
+  whatsNotIncluded String[]             // Structured exclusions
+  whatToBring      String[]             // What to bring/carry
+  highlights       String[]
+
+  activityType     String    @default("TREKKING")
+  packageCategory  String    @default("TOURIST_GUIDES")
+  difficultyLevel  String    @default("MODERATE")   // Controlled vocabulary: EASY, MODERATE, CHALLENGING, EXPERT
+  durationDays     Int                               // Positive integer
+  durationNights   Int
+
+  // Group size constraints (integers, max >= min)
+  minGroupSize     Int?      @default(1)
+  maxGroupSize     Int?      @default(15)
+
+  // Pet friendly flag
+  isPetFriendly    Boolean   @default(false)
+
+  // Structured itinerary
+  itinerary        Json      @default("[]")
+  inclusions       String[]  // Legacy (kept for backward compat)
+  exclusions       String[]  // Legacy (kept for backward compat)
+
+  // Cancellation Policy
+  cancellationPolicy Json    @default("[]")
+
+  // Age restrictions
+  minAge           Int?
+  maxAge           Int?
+
+  // Languages guide can lead in for THIS package (subset of profile languages)
+  packageLanguages String[]
+
+  // Best season — multi-select months from controlled vocabulary
+  bestSeasonMonths String[]  // e.g. ["March", "April", "May", "October"]
+
+  // Legacy media fields (kept for backward compat; new media goes to PackageMedia)
+  coverImage       String?
+  images           String[]
+
+  // Status — independent of guide status (platform-owned)
+  status           ProductStatus @default(DRAFT)
+  reviewedById     String?
+  reviewNotes      String?
+  reviewedAt       DateTime?
+
+  isTrending       Boolean   @default(false)
+  isActive         Boolean   @default(true)
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  guide           GuideProfile    @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  destination     Destination     @relation(fields: [destinationId], references: [id])
+  reviewedBy      AdminProfile?   @relation(fields: [reviewedById], references: [id])
+  fixedDepartures FixedDeparture[]
+  bookings        Booking[]
+  aiQueryLogs     AiQueryLog[]
+  influencerPnLs  InfluencerPnL[]
+  packageMedia    PackageMedia[]
+  packagePricing  PackagePricing[]
+
+  @@index([guideId])
+  @@index([destinationId])
+  @@index([slug])
+  @@index([status])
+  @@index([difficultyLevel])
+  @@index([packageCategory])
+  @@index([activityType])
+}
+
+// ==========================================
+// PACKAGE MEDIA (separate records with approval)
+// ==========================================
+
+model PackageMedia {
+  id            String   @id @default(cuid())
+  productId     String
+  mediaUrl      String
+  mediaType     String   @default("image")  // "image" or "video"
+  sequenceOrder Int      @default(0)         // Display order
+  caption       String?
+  uploadDate    DateTime @default(now())
+  approvalStatus MediaApprovalStatus @default(PENDING)
+  reviewedById  String?
+  reviewedAt    DateTime?
+  rejectionReason String?
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([approvalStatus])
+  @@index([sequenceOrder])
+}
+
+// ==========================================
+// PACKAGE PRICING (seasonal pricing table)
+// Discounts are separate records, never hardcoded into base price
+// BTG commission is on FINAL price including discounts
+// ==========================================
+
+model PackagePricing {
+  id            String   @id @default(cuid())
+  productId     String
+  label         String   @default("Standard")  // e.g. "Standard", "Peak Season", "Off-Season"
+  basePrice     Float                           // Base price per person (validated: min-max range)
+  startMonth    String?                         // e.g. "March" — when this pricing applies
+  endMonth      String?                         // e.g. "June"
+  isDefault     Boolean  @default(false)        // Default pricing when no seasonal match
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+// ==========================================
+// PACKAGE DISCOUNTS (separate from base price)
+// ==========================================
+
+model PackageDiscount {
+  id            String   @id @default(cuid())
+  productId     String
+  label         String   // e.g. "Early Bird", "Group Discount", "Returning Customer"
+  discountType  String   // "PERCENTAGE" or "FLAT"
+  discountValue Float    // Percentage (e.g. 10) or flat amount (e.g. 500)
+  minGroupSize  Int?     // Minimum group size to qualify
+  validFrom     DateTime?
+  validUntil    DateTime?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([productId])
+  @@index([isActive])
+}
+
+// ==========================================
+// FIXED DEPARTURES
+// ==========================================
+
+model FixedDeparture {
+  id              String    @id @default(cuid())
+  productId       String
+
+  startDate       DateTime
+  endDate         DateTime
+  totalSeats      Int
+  bookedSeats     Int       @default(0)
+
+  // Group size (moved from Product)
+  maxGroupSize    Int       @default(15)
+  minGroupSize    Int       @default(1)
+
+  // Gender Policy (moved from Product)
+  genderPolicy    String    @default("MIXED")   // MIXED, MALE_ONLY, FEMALE_ONLY, COUPLES_ONLY, SOLO_ONLY
+
+  // Multiple pricing tiers based on stay type
+  // Structure: {privateRoom: 5000, doubleSharing: 4000, tripleSharing: 3500, quadSharing: 3000, dormBed: 2500}
+  pricingTiers    Json      @default("{}")
+  pricePerPerson  Float     @default(0) // Fallback/default price
+
+  // Pet friendly pricing (only if product.isPetFriendly = true)
+  // Structure: {personWithoutPet: 5000, personWithOnePet: 7000, perAdditionalPet: 1500}
+  petPricing      Json      @default("{}")
+
+  commissionPercent Float?
+  cgstPercent     Float     @default(2.5)
+  sgstPercent     Float     @default(2.5)
+
+  meetingPoint    String?
+  endingPoint     String?
+  meetingTime     String?
+  notes           String?   @db.Text
+
+  // Admin approval
+  approvalStatus  DepartureStatus @default(PENDING_APPROVAL)
+  reviewedById    String?
+  reviewNotes     String?
+  reviewedAt      DateTime?
+
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  product    Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  reviewedBy AdminProfile?  @relation(fields: [reviewedById], references: [id])
+  bookings   Booking[]
+
+  @@index([productId])
+  @@index([startDate])
+  @@index([isActive])
+  @@index([approvalStatus])
+}
+
+// ==========================================
+// GUIDE AVAILABILITY (for personal bookings)
+// ==========================================
+
+model GuideAvailability {
+  id          String   @id @default(cuid())
+  guideId     String
+  date        DateTime @db.Date
+  isAvailable Boolean  @default(true)
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  guide GuideProfile @relation(fields: [guideId], references: [id], onDelete: Cascade)
+
+  @@unique([guideId, date])
+  @@index([guideId])
+  @@index([date])
+  @@index([isAvailable])
+}
+
+// ==========================================
+// BOOKINGS
+// ==========================================
+
+model Booking {
+  id                String        @id @default(cuid())
+  bookingNumber     String        @unique
+  customerId        String
+  guideId           String
+
+  tripType          TripType
+
+  fixedDepartureId  String?
+  productId         String?
+
+  startDate         DateTime?
+  endDate           DateTime?
+
+  numberOfGuests    Int           @default(1)
+  guestDetails      Json?
+
+  // Personal booking request fields
+  meetingPoint      String?
+  destinationName   String?
+  requirements      Json?         // { food: bool, travel: bool, stay: bool, other: string }
+
+  // Guide's package/quote for personal bookings
+  // [{label: "Guide Fee", amount: 3000, unit: "per day", scope: "per group"}, ...]
+  packageDetails    Json?
+
+  baseAmount        Float
+  commissionAmount  Float         @default(0)
+  cgstAmount        Float         @default(0)
+  sgstAmount        Float         @default(0)
+  totalAmount       Float
+
+  status            BookingStatus @default(PENDING)
+  specialRequests   String?       @db.Text
+
+  cancelledAt       DateTime?
+  cancellationReason String?
+  refundAmount      Float?
+
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  customer        User            @relation("CustomerBookings", fields: [customerId], references: [id])
+  guide           GuideProfile    @relation("GuideBookings", fields: [guideId], references: [id])
+  fixedDeparture  FixedDeparture? @relation(fields: [fixedDepartureId], references: [id])
+  product         Product?        @relation(fields: [productId], references: [id])
+  review          Review?
+
+  @@index([customerId])
+  @@index([guideId])
+  @@index([bookingNumber])
+  @@index([status])
+  @@index([tripType])
+}
+
+// ==========================================
+// REVIEWS & RATINGS
+// ==========================================
+
+model Review {
+  id         String   @id @default(cuid())
+  bookingId  String?  @unique
+  guideId    String
+  customerId String
+
+  overallRating       Int
+  knowledgeRating     Int?
+  communicationRating Int?
+  valueForMoneyRating Int?
+  safetyRating        Int?
+
+  comment    String?  @db.Text
+  isAdminReview Boolean @default(false)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  booking  Booking?     @relation(fields: [bookingId], references: [id])
+  guide    GuideProfile @relation(fields: [guideId], references: [id])
+  customer User         @relation(fields: [customerId], references: [id])
+
+  @@index([guideId])
+  @@index([customerId])
+}
+
+// ==========================================
+// PLATFORM SETTINGS
+// ==========================================
+
+model PlatformSettings {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
+}
+
+// ==========================================
+// CORPORATE / SCHOOL TRIP INQUIRIES
+// ==========================================
+
+model CorporateTripInquiry {
+  id               String   @id @default(cuid())
+  organizationType String   // "corporate" or "school"
+  organizationName String
+  contactName      String
+  officialEmail    String
+  phone            String
+  groupSize        Int
+  preferredStateId String?
+  approxDays       Int
+  additionalNotes  String?  @db.Text
+  isResolved       Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  preferredState   IndianState? @relation(fields: [preferredStateId], references: [id])
+
+  @@index([isResolved])
+  @@index([createdAt])
+}
+
+// ==========================================
+// INSPIRATION CONTENT (Blogs, Videos, Podcasts)
+// ==========================================
+
+model InspirationContent {
+  id            String   @id @default(cuid())
+  title         String
+  slug          String   @unique
+  type          String   // BLOG, VIDEO, PODCAST
+  content       String?  @db.Text
+  embedUrl      String?  // For videos/podcasts
+  thumbnail     String?
+  excerpt       String?  @db.Text
+  tags          String[]
+  destinations  String[] // Destination IDs for related destinations
+  activityTypes String[] // Related activity types
+  isPublished   Boolean  @default(false)
+  publishedAt   DateTime?
+  authorId      String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  author User @relation(fields: [authorId], references: [id])
+
+  @@index([slug])
+  @@index([type])
+  @@index([isPublished])
+  @@index([createdAt])
+}
+
+// ==========================================
+// PAGE CONFIGURATION (UI Manager controls)
+// ==========================================
+
+model PageConfig {
+  id          String   @id @default(cuid())
+  pageSlug    String   @unique  // e.g. "home", "group-trips", "destinations", "explore/himachal-pradesh"
+  config      Json     @default("{}")  // Flexible JSON for section ordering, featured items, display rules
+  updatedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([pageSlug])
+}
+
+// ==========================================
+// PAGE CONTENT (Rich content for pages — SEO, descriptions, FAQs)
+// ==========================================
+
+model PageContent {
+  id          String   @id @default(cuid())
+  pageType    String   // STATE, DESTINATION, EXPERIENCE, HOMEPAGE, ABOUT, etc.
+  entityId    String?  // Reference to state/destination/experience ID (null for generic pages)
+  entityName  String?  // Human-readable name for easy lookup
+  content     Json     @default("{}")  // Flexible JSON: { heading, subheading, description, seoTitle, seoDescription, sections: [...] }
+  updatedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([pageType, entityId])
+  @@index([pageType])
+  @@index([entityId])
+}
+
+// ==========================================
+// FAQ MANAGEMENT
+// ==========================================
+
+model FAQ {
+  id          String   @id @default(cuid())
+  question    String
+  answer      String   @db.Text
+  category    String   // GENERAL, STATE, DESTINATION, EXPERIENCE, BOOKING, etc.
+  entityId    String?  // Link to state/destination/experience (null for general)
+  entityName  String?
+  sortOrder   Int      @default(0)
+  isPublished Boolean  @default(true)
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([entityId])
+  @@index([isPublished])
+}
+
+// ==========================================
+// AI QUERY LOG (Travel Planner interactions)
+// ==========================================
+
+model AiQueryLog {
+  id              String   @id @default(cuid())
+  userId          String?
+  sessionId       String
+  query           String   @db.Text
+  response        String   @db.Text
+  clickedPackageId String?
+  responseTimeMs  Int?
+  // NEEV conversation context
+  emotionalTone   String?  // detected mood: exhausted, excited, curious, etc.
+  travelStyle     String?  // solo, couple, family, friends
+  intentSignal    String?  // high, medium, low, browsing
+  suggestedIds    String[] // product IDs suggested in this response
+  createdAt       DateTime @default(now())
+
+  user           User?    @relation(fields: [userId], references: [id])
+  clickedPackage Product? @relation(fields: [clickedPackageId], references: [id])
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([createdAt])
+  @@index([emotionalTone])
+  @@index([intentSignal])
+}
+
+// ==========================================
+// EXPERIENCE CATEGORIES (DB-driven)
+// ==========================================
+
+model ExperienceCategory {
+  id            String   @id @default(cuid())
+  slug          String   @unique   // e.g. "TOURIST_GUIDES"
+  label         String              // e.g. "Tourist Guides"
+  urlSlug       String   @unique   // e.g. "tourist-guides"
+  image         String?
+  description   String?  @db.Text
+  isEnabled     Boolean  @default(true)
+  showInNav     Boolean  @default(false)
+  navLabel      String?             // Custom label shown in nav bar (null = use label)
+  navOrder      Int      @default(0)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  subCategories SubCategory[]
+  commissions   CategoryCommission[]
+
+  @@index([isEnabled])
+  @@index([sortOrder])
+}
+
+model SubCategory {
+  id            String   @id @default(cuid())
+  categoryId    String
+  name          String
+  slug          String
+  isEnabled     Boolean  @default(true)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  category      ExperienceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  commissions   CategoryCommission[]
+
+  @@unique([categoryId, slug])
+  @@index([isEnabled])
+}
+
+// ==========================================
+// CATEGORY-LEVEL COMMISSION (per state × category × subcategory)
+// ==========================================
+
+model CategoryCommission {
+  id                String   @id @default(cuid())
+  stateId           String
+  categoryId        String?
+  subCategoryId     String?
+  commissionPercent Float
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  state       IndianState         @relation(fields: [stateId], references: [id])
+  category    ExperienceCategory? @relation(fields: [categoryId], references: [id])
+  subCategory SubCategory?        @relation(fields: [subCategoryId], references: [id])
+
+  @@unique([stateId, categoryId, subCategoryId])
+  @@index([stateId])
+  @@index([categoryId])
+}
+
+// ==========================================
+// SPONSORED ITEMS (promoted products/guides with ranking)
+// ==========================================
+
+model SponsoredItem {
+  id            String   @id @default(cuid())
+  entityType    String   // PRODUCT, GUIDE
+  entityId      String
+  rank          Int      @default(0) // Lower = higher priority
+  context       String   @default("both") // search, homepage, both
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([entityType, entityId])
+  @@index([entityType, isActive])
+  @@index([rank])
+}
+
+// ==========================================
+// HOMEPAGE MANUAL SELECTIONS (super admin picks what shows)
+// ==========================================
+
+model HomepageSelection {
+  id            String   @id @default(cuid())
+  section       String   // trending, weekend, adventure, heritage, influencers, destinations, categories
+  entityType    String   // PRODUCT, DESTINATION, CATEGORY
+  entityId      String
+  sortOrder     Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([section, entityType, entityId])
+  @@index([section, isActive])
+  @@index([sortOrder])
+}
+
+// ==========================================
+// INFLUENCER P&L TRACKING
+// ==========================================
+
+model InfluencerPnL {
+  id                  String   @id @default(cuid())
+  guideId             String   // The influencer (guide with TRAVEL_WITH_INFLUENCERS packages)
+  productId           String?  // Specific product/trip (optional — can be per-trip or global)
+  contractType        String   @default("COMMISSION") // COMMISSION or PNL_SHARING
+  profitSharePercent  Float?   // Influencer's share of profit (e.g. 50%)
+  
+  // Revenue tracking
+  onlineSaleAmount    Float    @default(0) // Sales from website
+  onlineSalePersons   Int      @default(0)
+  offlineSaleAmount   Float    @default(0) // Offline sales (input by admin)
+  offlineSalePersons  Int      @default(0)
+  totalCostAmount     Float    @default(0) // Total trip costs
+  
+  // Calculated fields (stored for quick reads)
+  totalRevenue        Float    @default(0)
+  totalProfit         Float    @default(0)
+  influencerShare     Float    @default(0)
+  platformShare       Float    @default(0)
+  
+  notes               String?  @db.Text
+  period              String?  // e.g. "March 2026" or departure date range
+  isFinalized         Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  guide    GuideProfile @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  product  Product?     @relation(fields: [productId], references: [id])
+
+  @@index([guideId])
+  @@index([productId])
+  @@index([isFinalized])
+}
+
+// ==========================================
+// GUIDE TERMS & CONDITIONS
+// ==========================================
+
+model GuideTermsConditions {
+  id          String   @id @default(cuid())
+  title       String
+  content     String   @db.Text
+  state       String?  // null = applies to all states
+  guideType   String?  // null = applies to all guide types
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([state, guideType])
+  @@index([isActive])
+}

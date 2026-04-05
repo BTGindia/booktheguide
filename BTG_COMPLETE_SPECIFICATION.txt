@@ -1,0 +1,1130 @@
+================================================================================
+  BOOKTHEGUIDE (BTG) — COMPLETE PLATFORM SPECIFICATION
+  A Guide-Booking Platform for Treks, Tours & Adventures (India-focused)
+================================================================================
+
+Use this document as input to VS Code Copilot to replicate the entire website
+with a new template. It covers EVERY feature, user role, data model, business
+rule, pricing formula, API endpoint, page, and workflow.
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+1.  Platform Overview
+2.  Tech Stack
+3.  User Roles & Abilities
+4.  Data Models (Complete Schema)
+5.  Geography System
+6.  Package Categories
+7.  Product (Tour Package) System
+8.  Fixed Departure System
+9.  Booking System (Two Flows)
+10. Pricing, Commission & Tax Formulas
+11. Review & Rating System
+12. Guide Profile & Availability
+13. Admin & Approval Workflows
+14. Corporate/School Trip Inquiries
+15. File Upload System
+16. Search & Filtering
+17. Public Pages
+18. Dashboard Pages (Per Role)
+19. Authentication & Registration
+20. Middleware & Route Protection
+21. Seed Data (States, Cities, Destinations)
+22. Key Business Rules Summary
+
+================================================================================
+1. PLATFORM OVERVIEW
+================================================================================
+
+BookTheGuide (BTG) is a marketplace that connects travelers with local guides
+across India. Guides create tour packages (products) for specific destinations,
+schedule fixed departures, and accept personal booking requests. The platform
+earns commission on each booking. State-level admins manage guides and approve
+content for their respective states.
+
+Key flows:
+- Guides register → set up profile → create packages → schedule departures
+- Admins review & approve packages and departures
+- Customers search, browse, and book trips (fixed departure or personal request)
+- Platform collects commission + GST on every booking
+
+================================================================================
+2. TECH STACK
+================================================================================
+
+- Framework:       Next.js 14 (App Router) with TypeScript
+- Database:        PostgreSQL with Prisma ORM
+- Auth:            NextAuth.js v4 (JWT strategy, Credentials provider)
+- Styling:         Tailwind CSS
+- Icons:           Lucide React
+- Notifications:   react-hot-toast
+- Date handling:   date-fns
+- Validation:      Zod
+- Password hash:   bcryptjs (salt rounds: 12)
+- Image handling:   sharp
+- URL slugs:       slugify
+- Date picker:     react-datepicker
+
+NPM Packages:
+  @next-auth/prisma-adapter, @prisma/client, bcryptjs, class-variance-authority,
+  clsx, date-fns, geist, lucide-react, next, next-auth, react, react-datepicker,
+  react-dom, react-hot-toast, sharp, slugify, tailwind-merge, zod
+
+================================================================================
+3. USER ROLES & ABILITIES
+================================================================================
+
+There are 5 roles. Each has specific dashboards and permissions:
+
+┌─────────────────┬──────────────────────────────────────────────────────────────┐
+│ ROLE            │ ABILITIES                                                    │
+├─────────────────┼──────────────────────────────────────────────────────────────┤
+│ SUPER_ADMIN     │ • Full platform control                                      │
+│                 │ • Create/manage State Admin & Guide Manager accounts          │
+│                 │ • Set per-state commission rates (0–50%)                      │
+│                 │ • View platform-wide analytics (revenue, commission, GST,     │
+│                 │   monthly trends, state-wise breakdown, top guides)           │
+│                 │ • Approve/reject products and departures (all states)         │
+│                 │ • Manage destinations (CRUD)                                  │
+│                 │ • Toggle trending products                                    │
+│                 │ • View all bookings across all states                         │
+│                 │ • Verify/unverify guides                                      │
+│                 │ • View/edit guide profiles                                    │
+│                 │ • Create/delete admin-authored reviews for guides             │
+│                 │ • Access all admin dashboards                                 │
+├─────────────────┼──────────────────────────────────────────────────────────────┤
+│ ADMIN           │ • State-scoped admin (assigned to exactly 1 state)           │
+│ (State Admin)   │ • Can ONLY see guides/products/bookings/departures in their  │
+│                 │   assigned state                                              │
+│                 │ • Approve/reject products in their state                      │
+│                 │ • Approve/reject departures in their state (commission auto-  │
+│                 │   applied from state's rate)                                  │
+│                 │ • Verify/unverify guides in their state                       │
+│                 │ • View state-scoped analytics                                 │
+│                 │ • View bookings in their state                                │
+│                 │ • Edit guide profiles in their state                          │
+│                 │ • Create/delete admin-authored reviews                        │
+│                 │ • View destinations & regions (read-only)                     │
+│                 │ • CONSTRAINT: Max 1 admin per state                           │
+├─────────────────┼──────────────────────────────────────────────────────────────┤
+│ GUIDE_MANAGER   │ • Cross-state guide management                               │
+│                 │ • View all guides (all states)                                │
+│                 │ • Verify/unverify any guide                                   │
+│                 │ • View/edit guide profiles                                    │
+│                 │ • Filter guides by verified/pending/all status                │
+│                 │ • Search guides by name                                       │
+│                 │ • Does NOT approve products or departures                     │
+├─────────────────┼──────────────────────────────────────────────────────────────┤
+│ GUIDE           │ • Manage own profile (bio, tagline, experience, languages,   │
+│                 │   specializations, certifications, photos, ID proof)          │
+│                 │ • Select ONE operating state with service area cities         │
+│                 │ • Create tour packages (products) → submitted for review      │
+│                 │ • Edit own packages (resets to PENDING_REVIEW)                │
+│                 │ • Delete own packages (blocked if active bookings exist)      │
+│                 │ • Schedule fixed departures for APPROVED packages             │
+│                 │ • Set pricing tiers for departures (private/double/triple/    │
+│                 │   quad/dorm) + pet pricing if applicable                      │
+│                 │ • Manage availability calendar (mark available/unavailable)   │
+│                 │ • View own bookings (all types)                               │
+│                 │ • Send custom quotes for personal bookings (build package     │
+│                 │   with line items)                                            │
+│                 │ • View own reviews and ratings                                │
+├─────────────────┼──────────────────────────────────────────────────────────────┤
+│ CUSTOMER        │ • Browse all public pages (search, destinations, guides,     │
+│                 │   trips, trending, upcoming)                                  │
+│                 │ • Book fixed departure trips                                  │
+│                 │ • Request personal bookings with any verified guide           │
+│                 │ • View own bookings with status tracking                      │
+│                 │ • Write reviews for COMPLETED bookings (one per booking)      │
+│                 │ • View own reviews                                            │
+│                 │ • Guest checkout: can book without an account (auto-creates   │
+│                 │   passwordless account with email)                            │
+└─────────────────┴──────────────────────────────────────────────────────────────┘
+
+================================================================================
+4. DATA MODELS (COMPLETE SCHEMA)
+================================================================================
+
+--- ENUMS ---
+
+UserRole:       SUPER_ADMIN | ADMIN | GUIDE_MANAGER | GUIDE | CUSTOMER
+BookingStatus:  PENDING | CONFIRMED | CANCELLED | COMPLETED | AWAITING_QUOTE | QUOTE_SENT
+ProductStatus:  DRAFT | PENDING_REVIEW | APPROVED | REJECTED | CHANGES_REQUESTED
+DepartureStatus: PENDING_APPROVAL | APPROVED | REJECTED
+TripType:       FIXED_DEPARTURE | PERSONAL_BOOKING
+DifficultyLevel: EASY | MODERATE | DIFFICULT | EXTREME
+
+ActivityType: TREKKING | CAMPING | MOUNTAINEERING | CITY_TOUR | HILL_STATION |
+  PILGRIMAGE | WILDLIFE_SAFARI | ADVENTURE_SPORT | CULTURAL_TOUR | FOOD_TOUR |
+  PHOTOGRAPHY_TOUR | PARAGLIDING | RAFTING | SKIING | PET_FRIENDLY | OTHER
+
+--- MODELS ---
+
+User
+  id              String (cuid, PK)
+  email           String (unique)
+  password        String? (nullable for guest accounts)
+  name            String
+  phone           String?
+  role            UserRole (default: CUSTOMER)
+  image           String?
+  isActive        Boolean (default: true)
+  emailVerified   DateTime?
+  createdAt       DateTime
+  updatedAt       DateTime
+  Relations: guideProfile, adminProfile, guideManagerProfile, bookings, reviews, sessions, accounts
+  Indexes: email, role
+
+Account (NextAuth OAuth - for future providers)
+  id, userId, type, provider, providerAccountId, refresh_token, access_token,
+  expires_at, token_type, scope, id_token, session_state
+  Unique: [provider, providerAccountId]
+
+Session (NextAuth)
+  id, sessionToken (unique), userId, expires
+
+VerificationToken
+  identifier, token (unique), expires
+  Unique: [identifier, token]
+
+AdminProfile
+  id              String (cuid, PK)
+  userId          String (unique → User)
+  designation     String?
+  Relations: user, managedStates (many IndianState), reviewedProducts, reviewedDepartures
+
+GuideManagerProfile
+  id              String (cuid, PK)
+  userId          String (unique → User)
+  designation     String?
+  Relations: user
+
+GuideProfile
+  id                  String (cuid, PK)
+  userId              String (unique → User)
+  slug                String (unique, auto-generated from name)
+  bio                 String? (text)
+  tagline             String?
+  experienceYears     Int? (default: 0)
+  totalTrips          Int (default: 0)
+  averageRating       Float (default: 0) — auto-calculated
+  totalReviews        Int (default: 0) — auto-calculated
+  education           String?
+  certifications      String[]
+  languages           String[]
+  specializations     String[]
+  specializationProofs Json (default: "[]")
+    Structure: [{specialization: "Trekking", proofUrl: "https://...", description: "Certificate name"}]
+  idType              String?
+  idNumber            String?
+  isVerified          Boolean (default: false) — toggled by Admin/Guide Manager
+  portfolioImages     String[]
+  coverImage          String?
+  isActive            Boolean (default: true)
+  Relations: user, serviceAreas, products, availability, bookings, reviews
+  Indexes: slug, averageRating, [isActive + isVerified]
+
+GuideServiceArea
+  id        String (cuid, PK)
+  guideId   String → GuideProfile
+  stateId   String → IndianState
+  Relations: guide, state, cities (many City)
+  Unique: [guideId, stateId]
+
+IndianState
+  id                String (cuid, PK)
+  name              String (unique)
+  code              String (unique, 2-letter)
+  isNorthIndia      Boolean (default: false) — used for search filter grouping
+  commissionPercent Float (default: 15)
+  isActive          Boolean (default: true)
+  Relations: cities, regions, admins, serviceAreas, corporateInquiries
+  Index: isNorthIndia
+
+City
+  id        String (cuid, PK)
+  name      String
+  stateId   String → IndianState
+  isActive  Boolean (default: true)
+  Relations: state, destinations, serviceAreas
+  Unique: [name, stateId]
+
+Region
+  id          String (cuid, PK)
+  name        String
+  stateId     String → IndianState
+  description String? (text)
+  coverImage  String?
+  isActive    Boolean (default: true)
+  Unique: [name, stateId]
+
+Destination
+  id           String (cuid, PK)
+  name         String
+  cityId       String → City
+  description  String? (text)
+  altitude     Int? (in meters)
+  bestMonths   String[] (e.g., ["Mar", "Apr", "May"])
+  openMonths   String[] (months when open; empty = year-round)
+  avoidMonths  String[] (months to avoid)
+  coverImage   String?
+  images       String[]
+  isActive     Boolean (default: true)
+  Relations: city, products
+  Unique: [name, cityId]
+
+Product (Tour Package)
+  id               String (cuid, PK)
+  guideId          String → GuideProfile
+  destinationId    String → Destination
+  title            String
+  slug             String (unique, auto-generated)
+  description      String (text, min 100 chars)
+  highlights       String[]
+  activityType     String (default: "TREKKING")
+  packageCategory  String (default: "TOURIST_GUIDES")
+    Values: TOURIST_GUIDES | GROUP_TRIPS | ADVENTURE_GUIDES | HERITAGE_WALKS | TRAVEL_WITH_INFLUENCERS
+  difficultyLevel  String (default: "MODERATE")
+  durationDays     Int
+  durationNights   Int (default: durationDays - 1)
+  isPetFriendly    Boolean (default: false)
+  itinerary        Json (default: "[]")
+    Structure: [{day: 1, title: "Arrival", description: "...", meals: "Lunch, Dinner",
+                 accommodation: "Guesthouse", distance: "5 km", altitude: "3000m"}]
+  inclusions       String[]
+  exclusions       String[]
+  cancellationPolicy Json (default: "[]")
+    Structure: [{hours: 72, refundPercent: 100}, {hours: 48, refundPercent: 50}]
+  minAge           Int?
+  maxAge           Int?
+  coverImage       String?
+  images           String[]
+  status           ProductStatus (default: DRAFT)
+  reviewedById     String? → AdminProfile
+  reviewNotes      String?
+  reviewedAt       DateTime?
+  isTrending       Boolean (default: false) — toggled by Super Admin
+  isActive         Boolean (default: true)
+  Relations: guide, destination, reviewedBy, fixedDepartures, bookings
+  Indexes: guideId, destinationId, slug, status
+
+FixedDeparture
+  id              String (cuid, PK)
+  productId       String → Product
+  startDate       DateTime
+  endDate         DateTime (auto-calculated: startDate + durationDays - 1)
+  totalSeats      Int (default: 15)
+  bookedSeats     Int (default: 0, incremented on booking)
+  maxGroupSize    Int (default: 15)
+  minGroupSize    Int (default: 1)
+  genderPolicy    String (default: "MIXED")
+    Values: MIXED | MALE_ONLY | FEMALE_ONLY | COUPLES_ONLY
+  pricingTiers    Json (default: "{}")
+    Structure: {privateRoom: 5000, doubleSharing: 4000, tripleSharing: 3500,
+                quadSharing: 3000, dormBed: 2500}
+  pricePerPerson  Float (default: 0) — fallback price if no tiers
+  petPricing      Json (default: "{}")
+    Structure: {personWithoutPet: 5000, personWithOnePet: 7000, perAdditionalPet: 1500}
+    Only used if product.isPetFriendly = true
+  commissionPercent Float? — auto-set from state rate on approval
+  cgstPercent     Float (default: 2.5)
+  sgstPercent     Float (default: 2.5)
+  meetingPoint    String?
+  endingPoint     String?
+  meetingTime     String? (default: "06:00 AM")
+  notes           String? (text)
+  approvalStatus  DepartureStatus (default: PENDING_APPROVAL)
+  reviewedById    String? → AdminProfile
+  reviewNotes     String?
+  reviewedAt      DateTime?
+  isActive        Boolean (default: true)
+  Relations: product, reviewedBy, bookings
+  Indexes: productId, startDate, isActive, approvalStatus
+
+GuideAvailability
+  id          String (cuid, PK)
+  guideId     String → GuideProfile
+  date        DateTime (date only)
+  isAvailable Boolean (default: true)
+  notes       String?
+  Unique: [guideId, date]
+  Indexes: guideId, date, isAvailable
+
+Booking
+  id                String (cuid, PK)
+  bookingNumber     String (unique, format: "BTG-YYYY-XXXXX")
+  customerId        String → User
+  guideId           String → GuideProfile
+  tripType          TripType
+  fixedDepartureId  String? → FixedDeparture
+  productId         String? → Product
+  startDate         DateTime?
+  endDate           DateTime?
+  numberOfGuests    Int (default: 1)
+  guestDetails      Json?
+    Structure: [{name: "John", age: 25, gender: "Male"}]
+  meetingPoint      String?
+  destinationName   String?
+  requirements      Json?
+    Structure: {food: true, travel: false, stay: true, other: "Need vegetarian meals"}
+  packageDetails    Json? (guide's quote for personal bookings)
+    Structure: [{label: "Guide Fee", amount: 3000, unit: "per day", scope: "per group"}, ...]
+  baseAmount        Float
+  commissionAmount  Float (default: 0) — platform's cut from guide's share
+  cgstAmount        Float (default: 0)
+  sgstAmount        Float (default: 0)
+  totalAmount       Float
+  status            BookingStatus (default: PENDING)
+  specialRequests   String? (text)
+  cancelledAt       DateTime?
+  cancellationReason String?
+  refundAmount      Float?
+  Relations: customer, guide, fixedDeparture, product, review
+
+Review
+  id                  String (cuid, PK)
+  bookingId           String? (unique → Booking)
+  guideId             String → GuideProfile
+  customerId          String → User
+  overallRating       Int (1–5)
+  knowledgeRating     Int? (1–5)
+  communicationRating Int? (1–5)
+  valueForMoneyRating Int? (1–5)
+  safetyRating        Int? (1–5)
+  comment             String? (text)
+  isAdminReview       Boolean (default: false) — for admin-authored reviews
+  Relations: booking, guide, customer
+
+PlatformSettings
+  id          String (cuid, PK)
+  key         String (unique)
+  value       String
+  description String?
+
+CorporateTripInquiry
+  id               String (cuid, PK)
+  organizationType String ("corporate" or "school")
+  organizationName String
+  contactName      String
+  officialEmail    String
+  phone            String
+  groupSize        Int
+  preferredStateId String? → IndianState
+  approxDays       Int
+  additionalNotes  String? (text)
+  isResolved       Boolean (default: false)
+
+================================================================================
+5. GEOGRAPHY SYSTEM
+================================================================================
+
+Hierarchy: State → City → Destination
+
+States have:
+- name, 2-letter code, isNorthIndia flag (for search filter grouping)
+- commissionPercent (configurable per-state, default 15%)
+- isActive flag
+
+Cities belong to one state. Destinations belong to one city.
+
+Destinations have:
+- name, description, altitude (meters)
+- bestMonths (recommended), openMonths (accessible), avoidMonths (dangerous/closed)
+- coverImage, images array
+- isActive flag
+
+Regions are informational groupings within states (e.g., "Garhwal" in Uttarakhand).
+
+Guides operate in ONE state with specific city selections in that state.
+
+================================================================================
+6. PACKAGE CATEGORIES
+================================================================================
+
+There are 5 core experience categories that group activity types:
+
+1. TOURIST_GUIDES — "Tourist Guides"
+   Activity types: CITY_TOUR, FOOD_TOUR, PHOTOGRAPHY_TOUR, HILL_STATION, PET_FRIENDLY, OTHER
+   Description: Explore cities and tourist spots with expert local guides
+
+2. GROUP_TRIPS — "Group Trips"
+   Activity types: TREKKING, CAMPING, MOUNTAINEERING, ADVENTURE_SPORT, PARAGLIDING, RAFTING, SKIING, WILDLIFE_SAFARI
+   Description: Join group departures and travel with like-minded adventurers
+
+3. ADVENTURE_GUIDES — "Adventure Guides"
+   Activity types: TREKKING, CAMPING, MOUNTAINEERING, ADVENTURE_SPORT, PARAGLIDING, RAFTING, SKIING
+   Description: Trek, climb, raft and explore with certified adventure guides
+
+4. HERITAGE_WALKS — "Heritage Walks"
+   Activity types: CULTURAL_TOUR, PILGRIMAGE
+   Description: Walk through history — forts, temples, old cities and cultural trails
+
+5. TRAVEL_WITH_INFLUENCERS — "Travel with Influencers"
+   Activity types: PHOTOGRAPHY_TOUR, FOOD_TOUR
+   Description: Travel alongside popular creators and influencers
+
+Each product stores a `packageCategory` field which determines which category it appears under.
+The homepage shows these 5 categories as clickable experience cards.
+
+================================================================================
+7. PRODUCT (TOUR PACKAGE) SYSTEM
+================================================================================
+
+--- CREATION (Guide) ---
+A guide creates a product (tour package) with:
+
+Required:
+- title (min 5 chars)
+- description (min 100 chars, rich text)
+- destinationId (from dropdown: state → city → destination cascade)
+- durationDays (min 1)
+- activityType (from ActivityType enum)
+- difficultyLevel (EASY/MODERATE/DIFFICULT/EXTREME)
+
+Optional:
+- durationNights (defaults to durationDays - 1)
+- highlights (array of strings)
+- inclusions (array of strings, e.g., "Meals", "Tent", "Guide fee")
+- exclusions (array of strings, e.g., "Personal expenses", "Insurance")
+- isPetFriendly (boolean)
+- minAge, maxAge (age restrictions)
+- coverImage (single image)
+- images (gallery, up to 8)
+- cancellationPolicy: array of {hours, refundPercent}
+  Example: [{hours: 72, refundPercent: 100}, {hours: 48, refundPercent: 50}, {hours: 24, refundPercent: 0}]
+- itinerary: day-by-day plan, array of:
+  {day: 1, title: "Day Title", description: "Details", meals: "Lunch, Dinner",
+   accommodation: "Guesthouse", distance: "5 km", altitude: "3000m"}
+  Number of days auto-syncs with durationDays
+
+Slug auto-generated from title (with uniqueness via timestamp hash if duplicate).
+
+--- LIFECYCLE ---
+Created → PENDING_REVIEW → APPROVED / REJECTED / CHANGES_REQUESTED
+- Any edit by guide resets status to PENDING_REVIEW
+- Only APPROVED products can have departures scheduled
+- Products with active bookings (CONFIRMED/PENDING) cannot be deleted
+
+--- TRENDING ---
+Super Admin can toggle isTrending flag on any approved product.
+Trending products appear on the homepage and dedicated /trending page.
+
+================================================================================
+8. FIXED DEPARTURE SYSTEM
+================================================================================
+
+--- CREATION (Guide) ---
+A guide schedules a fixed departure for an APPROVED product:
+
+Required:
+- productId (must be guide's own APPROVED product)
+- startDate (must be in the future)
+- totalSeats (min 1, default: 15)
+
+Optional:
+- pricePerPerson (fallback default price)
+- pricingTiers: {privateRoom, doubleSharing, tripleSharing, quadSharing, dormBed}
+  Each is a price in currency units (e.g., INR)
+- petPricing: {personWithoutPet, personWithOnePet, perAdditionalPet}
+  Only shown/used if product.isPetFriendly = true
+- maxGroupSize (default: 15)
+- minGroupSize (default: 1)
+- genderPolicy: MIXED (default) | MALE_ONLY | FEMALE_ONLY | COUPLES_ONLY
+- meetingPoint, endingPoint (text)
+- meetingTime (default: "06:00 AM")
+- notes (additional info)
+
+Auto-calculated:
+- endDate = startDate + product.durationDays - 1
+
+Validations:
+- No overlapping departures for the same guide (across all products)
+- No duplicate startDate for the same product
+
+--- LIFECYCLE ---
+Created → PENDING_APPROVAL → APPROVED / REJECTED
+- Admin sets commissionPercent on approval (auto-pulled from state's commission rate)
+- Only APPROVED departures accept bookings
+
+================================================================================
+9. BOOKING SYSTEM (TWO FLOWS)
+================================================================================
+
+=== FLOW 1: FIXED DEPARTURE BOOKING ===
+
+Customer (or guest) books a specific departure:
+
+Inputs:
+- fixedDepartureId
+- numberOfGuests (stepper +/-)
+- guestDetails: [{name, age, gender}] per guest
+- specialRequests (textarea, optional)
+- For guests: guestEmail, guestName, guestPhone
+
+Process:
+1. Validate departure exists, is active, and approvalStatus = APPROVED
+2. Check seats: remaining = totalSeats - bookedSeats; reject if < numberOfGuests
+3. Calculate pricing:
+   - baseAmount = pricePerPerson × numberOfGuests
+   - commissionAmount = baseAmount × (commissionPercent / 100) — default 15%
+   - cgstAmount = baseAmount × (cgstPercent / 100) — default 2.5%
+   - sgstAmount = baseAmount × (sgstPercent / 100) — default 2.5%
+   - totalAmount = baseAmount + cgstAmount + sgstAmount
+   NOTE: Commission is from guide's share, NOT added to customer price
+4. Create booking with status = CONFIRMED
+5. Increment fixedDeparture.bookedSeats by numberOfGuests
+6. Generate bookingNumber: "BTG-{YYYY}-{RANDOM5}" (e.g., BTG-2026-X7K2A)
+
+=== FLOW 2: PERSONAL BOOKING ===
+
+Customer requests a custom trip with a guide:
+
+Form shows "How it works" 4-step process:
+  Step 1: Choose dates & tell guide what you need
+  Step 2: Guide sends you a custom package
+  Step 3: Review & confirm
+  Step 4: Travel!
+
+Inputs:
+- guideId (from guide profile slug)
+- startDate, endDate (with real-time availability check)
+- destinationName (text field)
+- meetingPoint (text field)
+- numberOfGuests (stepper)
+- requirements: {food: bool, travel: bool, stay: bool, other: string}
+- specialRequests (textarea, optional)
+
+Process:
+1. Validate startDate and endDate provided
+2. Check for conflicting bookings for the guide (overlapping dates, CONFIRMED/PENDING)
+3. Create booking with:
+   - status = AWAITING_QUOTE
+   - baseAmount = 0, commissionAmount = 0, totalAmount = 0
+   - No payment at this point
+4. Guide receives notification, builds custom quote
+
+=== GUIDE QUOTE BUILDER (for Personal Bookings) ===
+
+Guide sees customer's requirements and builds a package:
+
+Interface:
+- Shows customer details, dates, requirements
+- Line item builder with fields: label, description, amount
+- Quick-add suggestions: Guide Fee, Meals, Transport, Accommodation, Equipment, Permits, Porter
+- Each line item has an amount; total = sum of all line items
+- Grand total = total per person × numberOfGuests
+
+Inputs:
+- packageDetails: [{label: "Guide Fee", amount: 3000, description: "Per day for 5 days"}]
+- totalAmount (calculated)
+- commissionPercent (uses state default, typically 15%)
+
+Process:
+1. Validates booking belongs to guide, status is AWAITING_QUOTE
+2. Calculates: commissionAmount = totalAmount × (commissionPercent / 100)
+3. Updates booking: status → QUOTE_SENT, sets packageDetails, baseAmount, totalAmount, commissionAmount
+
+After quote sent, customer can accept → CONFIRMED.
+
+=== GUEST CHECKOUT ===
+
+Both booking flows support guest checkout:
+- If user is not logged in, form shows email + name + phone fields
+- System finds existing user by email or creates a new passwordless CUSTOMER account
+- Booking proceeds as normal using that user's ID
+
+================================================================================
+10. PRICING, COMMISSION & TAX FORMULAS
+================================================================================
+
+--- FIXED DEPARTURE ---
+baseAmount        = pricePerPerson × numberOfGuests
+commissionAmount  = baseAmount × (commissionPercent / 100)     [default 15%]
+cgstAmount        = baseAmount × (cgstPercent / 100)           [default 2.5%]
+sgstAmount        = baseAmount × (sgstPercent / 100)           [default 2.5%]
+totalAmount       = baseAmount + cgstAmount + sgstAmount
+
+Customer pays:  totalAmount (base + 5% GST)
+Platform earns: commissionAmount (deducted from guide's share of baseAmount)
+Guide earns:    baseAmount - commissionAmount
+
+--- PERSONAL BOOKING ---
+Quote-based. Guide sets totalAmount via line items.
+commissionAmount = totalAmount × (commissionPercent / 100)
+
+--- COMMISSION ---
+- Per-state, configurable by Super Admin (0–50%)
+- Default 15% for all states
+- Auto-applied when departure is approved by admin
+- Stored on each departure and each booking
+
+--- TAX ---
+- CGST = 2.5% on baseAmount
+- SGST = 2.5% on baseAmount
+- Total GST = 5%
+- GST breakdown visible in Super Admin analytics
+
+================================================================================
+11. REVIEW & RATING SYSTEM
+================================================================================
+
+--- CUSTOMER REVIEWS ---
+Eligibility: Customer can review only COMPLETED bookings, one review per booking.
+
+Inputs:
+- overallRating (1–5, required)
+- knowledgeRating (1–5, optional sub-rating)
+- communicationRating (1–5, optional)
+- valueForMoneyRating (1–5, optional)
+- safetyRating (1–5, optional)
+- comment (text, optional)
+
+--- ADMIN REVIEWS ---
+Admins/Super Admins can create reviews for guides (isAdminReview = true).
+Used for bootstrapping or moderation.
+Inputs: rating (1–5), comment.
+
+--- RATING RECALCULATION ---
+Triggered on every review create or delete:
+1. Fetch all reviews for the guide
+2. averageRating = mean(overallRating), rounded to 1 decimal
+3. totalReviews = count of reviews
+4. Update guideProfile.averageRating and totalReviews
+
+--- DISPLAY ---
+Guide profile page shows: average rating, total reviews, each review with sub-ratings.
+Guide dashboard shows: summary stats (avg, total, positive/negative count).
+
+================================================================================
+12. GUIDE PROFILE & AVAILABILITY
+================================================================================
+
+--- PROFILE SETUP ---
+When a guide first visits dashboard, they're redirected to profile setup.
+
+Profile fields:
+- Profile picture (image upload)
+- Cover image (image upload)
+- Portfolio gallery (up to 10 images)
+- Tagline (max 100 chars)
+- Bio (min 50 chars, text)
+- Operating state (single state selection)
+- Service area cities (within selected state)
+- Experience years
+- Education
+- Certifications (dynamic list — add/remove)
+- Languages (multi-select from predefined list)
+  Available: Hindi, English, Punjabi, Bengali, Tamil, Telugu, Marathi, Gujarati,
+  Kannada, Malayalam, Odia, Assamese, Kashmiri, Urdu, Nepali, Tibetan, Garhwali,
+  Kumaoni, Dogri, Ladakhi, French, German, Spanish, Japanese, Korean, Chinese
+- Specializations (multi-select, 15 options matching ActivityType enum)
+- Specialization proofs (upload certificate/document per specialization)
+- ID proof type and number
+
+Slug auto-generated from name. Profile auto-creates GuideServiceArea linking guide to state + cities.
+
+--- AVAILABILITY CALENDAR ---
+Monthly calendar view. Guide can:
+- Click individual dates or select ranges
+- Mark as Available (green) or Unavailable (red)
+- Blue = dates with existing bookings
+- Cannot mark unavailable on dates with active bookings (CONFIRMED/PENDING)
+
+Data stored as GuideAvailability records (one per date per guide).
+
+Public availability check API: anyone can check a guide's availability for a month
+(used in personal booking form for real-time date validation).
+
+================================================================================
+13. ADMIN & APPROVAL WORKFLOWS
+================================================================================
+
+--- PRODUCT REVIEW ---
+1. Guide creates product → status: PENDING_REVIEW
+2. Admin sees it in "Review Products" tab (filterable: Pending/Approved/Rejected/All)
+3. Admin views full product detail (itinerary, inclusions, guide info)
+4. Admin approves or rejects with optional reviewNotes
+5. Approved products can have departures scheduled
+
+--- DEPARTURE APPROVAL ---
+1. Guide schedules departure → status: PENDING_APPROVAL
+2. Admin sees it in "Departures" tab (filterable: Pending/Approved/Rejected)
+3. Shows: product name, location, guide, dates, seats, pricing, gender policy
+4. Admin approves or rejects with optional notes
+5. On APPROVAL: commission auto-applied from state's commissionPercent (default 15%)
+6. Approved departures are bookable by customers
+
+--- GUIDE VERIFICATION ---
+Admin or Guide Manager toggles isVerified on guide profiles.
+Only verified + active guides appear on personal booking pages.
+
+--- ADMIN ACCOUNT MANAGEMENT (Super Admin only) ---
+Create State Admin:
+  - name, email, password (min 6 chars), phone
+  - Assign exactly 1 state
+  - Enforces: max 1 admin per state (error 409 if state already assigned)
+  - Creates User (role: ADMIN) + AdminProfile linked to state
+
+Create Guide Manager:
+  - name, email, password, phone
+  - No state assignment (cross-state access)
+  - Creates User (role: GUIDE_MANAGER) + GuideManagerProfile
+
+================================================================================
+14. CORPORATE/SCHOOL TRIP INQUIRIES
+================================================================================
+
+Public form (no auth required) for corporate or school groups.
+
+Organization type: "corporate" or "school" (toggle)
+
+Inputs:
+- organizationName (required)
+- contactName (required)
+- officialEmail (required)
+- phone (required)
+- groupSize (required, numeric)
+- preferredStateId (optional, dropdown from active states)
+- approxDays (required, numeric)
+- additionalNotes (optional, textarea)
+
+Creates CorporateTripInquiry record. Admins can view/resolve these.
+
+================================================================================
+15. FILE UPLOAD SYSTEM
+================================================================================
+
+Endpoint: POST /api/upload
+Auth: Any authenticated user
+
+Input: FormData with "file" field + optional "folder" string
+
+Constraints:
+- Max file size: 100KB
+- Allowed types: JPEG, PNG, WebP only
+- Files saved to: public/uploads/{folder}/{timestamp}-{random}.{ext}
+- Returns: public URL path (e.g., "/uploads/guides/1708123456789-abc123.webp")
+
+Used for: guide profile images, cover images, portfolio, product images, etc.
+
+================================================================================
+16. SEARCH & FILTERING
+================================================================================
+
+--- HERO SEARCH (Homepage) ---
+Three-field search bar:
+- Destination: autocomplete text field (250ms debounce)
+  API: GET /api/destinations/suggest?q=text
+  Returns up to 8 matches (searches destination name, city name, state name)
+  Format: {id, name, city, state, label: "Name, State"}
+- Month: dropdown of next 18 months (e.g., "March 2026", "April 2026")
+- Group type: Solo | Couple | Group (if Group: size selector 2–30)
+- All 3 fields required to search
+- Also shows a CTA button for corporate/school trip inquiries
+
+--- SEARCH RESULTS PAGE ---
+URL: /search?destination=&category=&activity=&state=&minPrice=&maxPrice=&rating=&sort=
+
+Server-side Prisma query filters:
+- destination (text search on destination/city/state names)
+- category (packageCategory field)
+- activity (activityType field)
+- state (via destination → city → state chain)
+- minPrice/maxPrice (on departure's pricePerPerson)
+- rating (post-query filter on guide's averageRating)
+- sort options: relevant (default), price_low, price_high, rating, newest
+
+Sidebar filters (SearchFilters component):
+- State: dropdown grouped into "North India" and "Other States"
+- Activity Type: radio buttons for all ActivityType values
+- Gender Policy: Any, Mixed Only, Female Only, Male Only
+- Guide Rating: Any, 4+, 3+
+- Price Range: min/max numeric inputs
+- Sort: Relevance, Price (Low), Price (High), Rating, Newest
+- Clear All button
+
+Results show PackageCard components with:
+- Cover image, title, location, difficulty badge, activity type
+- Duration, rating/reviews count, price
+- Link to /trips/{slug}
+
+================================================================================
+17. PUBLIC PAGES
+================================================================================
+
+/ (Homepage)
+- Hero: "India through the EYES OF EXPERTS" with search bar
+- Green marquee banner (BTG10 coupon code)
+- 5 experience category cards (clickable → search page)
+- Destination grid
+- Trending packages section
+- "Why Choose BookTheGuide" section
+- Guide recruitment CTA
+
+/search — Full search with sidebar filters + PackageCard results grid
+
+/upcoming-trips — All upcoming approved fixed departures, sorted by date
+
+/trending — All products marked as trending
+
+/destinations — All active destinations grouped by state
+
+/destinations/[id] — Destination detail:
+  - Hero image with name, location, altitude, best months
+  - 5 category sections with per-category package counts
+  - Package grid (PackageCard components)
+  - AI assistant chat widget (mock — keyword matching, not real AI)
+  - Photo gallery
+
+/guides/[slug] — Guide profile page:
+  - Cover/avatar hero
+  - Profile info card (rating, experience, trips, verified badge)
+  - Bio, languages, education, certifications
+  - Service areas, specializations
+  - Tour packages grid
+  - Reviews section with sub-ratings
+  - "Book This Guide" CTA → /book/personal/{slug}
+
+/trips/[slug] — Product detail page:
+  - Hero image with title, guide photo
+  - Green rating bar
+  - Price with "BOOK NOW" button
+  - Departure slot selector dropdown (upcoming approved departures)
+  - "About This Tour" section
+  - Day-by-day itinerary
+  - Inclusions/exclusions lists
+  - Guide info section
+  - Links to /book/fixed/{departureId}
+
+/book/fixed/[id] — Fixed departure booking page:
+  - 2/3 width: booking form (FixedDepartureBookingForm)
+  - 1/3 width: trip summary sidebar (image, title, dates, guide, meeting point)
+  - Shows "Trip is Full" if no seats remaining
+
+/book/personal/[slug] — Personal booking page:
+  - 2/3 width: booking form (PersonalBookingForm)
+  - 1/3 width: guide summary sidebar (photo, name, rating, bio)
+  - Only for active + verified guides
+
+/about — About page
+/contact — Contact page
+/login — Login page (email + password)
+/register — Registration page (name, email, phone, password, confirm password)
+/corporate-trip — Corporate/school inquiry form
+
+================================================================================
+18. DASHBOARD PAGES (PER ROLE)
+================================================================================
+
+=== SUPER ADMIN DASHBOARD ===
+Layout sidebar: Dashboard, Admins, Guides, Products, Departures, Destinations,
+                Commission, Trending, Bookings, Analytics
+
+Pages:
+- Dashboard: 6 stat cards (guides, admins, products, pending products, pending departures, bookings)
+- Admins: Create + list admin/guide-manager accounts (form with role toggle)
+- Guides: Table of all guides with verify toggle (re-uses admin guides page)
+- Products: All products with filter tabs + search (re-uses admin products page)
+- Departures: Approval workflow with tabs (re-uses admin departures page)
+- Destinations: CRUD for destinations (create form: name, state→city, description, altitude, months)
+- Commission: Per-state commission % editor (list of states with editable % input)
+- Trending: Toggle trending flag on approved products
+- Bookings: All bookings across all states
+- Analytics: 10 KPIs, tax breakdown, monthly chart, state comparison, donut chart (fixed vs personal), top guides
+
+=== ADMIN (STATE) DASHBOARD ===
+Layout sidebar: Dashboard, Guides, Review Products, Departures, Destinations,
+                Regions, Bookings, Analytics, Settings
+
+Pages:
+- Dashboard: Stats for managed state(s) — guides, products, pending, bookings, commission
+- Guides: Table of guides in state, searchable, verify toggle, link to detail/edit
+- Guides/[id]: Full guide editor — bio, tagline, experience, rating, verification, admin reviews
+- Review Products: Product list with Pending/Approved/Rejected/All tabs, search
+- Products/[id]: Full product detail for review with approve/reject form
+- Departures: Departure approval with tabs, auto-commission on approve
+- Destinations: Read-only destination table
+- Regions: Read-only region cards
+- Bookings: Booking table for state
+- Analytics: KPIs, charts, top guides (state-scoped)
+- Settings: Admin profile, managed states, commission rates (read-only)
+
+=== GUIDE MANAGER DASHBOARD ===
+Layout sidebar: Dashboard, Manage Guides (indigo theme)
+
+Pages:
+- Dashboard: Stats (total/verified/pending guides), quick action links
+- Guides: Filterable (All/Verified/Pending) + searchable guide table, verify toggle
+  Supports ?filter=pending URL param
+
+=== GUIDE DASHBOARD ===
+Layout sidebar: Dashboard, Edit Profile, My Packages, Create Package, Departures,
+                Bookings, Availability, Reviews
+
+Pages:
+- Dashboard: Stats (rating, trips, bookings, earnings), quick actions, recent bookings
+  Redirects to profile setup if no profile exists
+- Edit Profile: Full profile form (see Section 12)
+- My Packages: Grid of guide's packages with status badges, actions (view/edit/delete)
+- Create Package: Comprehensive creation form (see Section 7)
+- Edit Package: Same form pre-populated, resubmits for review
+- Departures: Create departure form + upcoming/past departure lists
+  Form: product select, dates, gender policy, pricing tiers, pet pricing, meeting points
+- Bookings: Filterable list (All/Confirmed/Completed/Cancelled)
+  Shows trip type, special requests
+  Quote builder for personal bookings (AWAITING_QUOTE status)
+- Availability: Interactive monthly calendar with available/unavailable/booked states
+- Reviews: Average rating summary, review list with sub-ratings
+
+=== CUSTOMER DASHBOARD ===
+Layout sidebar: Dashboard, My Bookings, My Reviews, Profile, Settings
+
+Pages:
+- Dashboard: Stats (total bookings, upcoming, reviews written), bookings list
+  "Write a Review" link for completed trips without reviews
+- Reviews: Customer's written reviews with sub-ratings, guide names, booking numbers
+
+================================================================================
+19. AUTHENTICATION & REGISTRATION
+================================================================================
+
+--- LOGIN ---
+Credentials-based (email + password) via NextAuth.js
+JWT strategy with 30-day expiry
+Guest accounts (no password) cannot log in via credentials
+
+--- REGISTRATION ---
+Public endpoint. Allowed roles: CUSTOMER (default) and GUIDE only.
+Any other role in request defaults to CUSTOMER.
+
+Inputs: name (required), email (required, unique), phone (optional),
+        password (required, min 6 chars), confirmPassword (must match)
+
+Password hashed with bcrypt (12 salt rounds).
+
+--- SESSION ---
+JWT carries: id, role, email, name, image
+Session callback enriches session.user with id and role
+
+--- GUEST CHECKOUT ---
+If user books without account:
+1. Check if email exists → use that user
+2. If not → create passwordless CUSTOMER (no password, emailVerified = null)
+3. Proceed with booking using that user's ID
+
+================================================================================
+20. MIDDLEWARE & ROUTE PROTECTION
+================================================================================
+
+Public routes (no auth): /, /login, /register, /search, /about, /contact,
+  /upcoming-trips, /destinations, /trending, /guides/*, /trips/*, /destinations/*,
+  /book/*, all /api/* routes, all static files
+
+Protected routes (require login):
+- /dashboard/* — requires authentication
+
+Role-based access:
+- /dashboard/admin/*        → ADMIN or SUPER_ADMIN
+- /dashboard/super-admin/*  → SUPER_ADMIN only
+- /dashboard/guide-manager/* → GUIDE_MANAGER or SUPER_ADMIN
+- /dashboard/guide/*        → GUIDE or SUPER_ADMIN
+- /dashboard/customer/*     → CUSTOMER or SUPER_ADMIN
+
+Unauthorized users redirected to / (homepage).
+Unauthenticated users redirected to /login?callbackUrl={originalPath}.
+
+================================================================================
+21. SEED DATA
+================================================================================
+
+Default Super Admin:
+  email: admin@booktheguide.com
+  password: SuperAdmin@123
+  role: SUPER_ADMIN
+
+States (31 Indian states/territories):
+  North India: Uttarakhand (UK), Himachal Pradesh (HP), Jammu & Kashmir (JK),
+    Ladakh (LA), Punjab (PB), Haryana (HR), Delhi (DL), Uttar Pradesh (UP),
+    Rajasthan (RJ)
+  Others: Sikkim (SK), West Bengal (WB), Meghalaya (ML), Arunachal Pradesh (AR),
+    Assam (AS), Goa (GA), Maharashtra (MH), Karnataka (KA), Kerala (KL),
+    Tamil Nadu (TN), Madhya Pradesh (MP), Gujarat (GJ), Bihar (BR),
+    Jharkhand (JH), Odisha (OD), Chhattisgarh (CG), Andhra Pradesh (AP),
+    Telangana (TG), Nagaland (NL), Manipur (MN), Mizoram (MZ), Tripura (TR)
+
+Cities: 80+ cities across all states (see seed file for full list)
+
+Regions: Garhwal, Kumaon (UK), Kullu Valley, Parvati Valley, Spiti Region (HP),
+  Kashmir Valley (JK), Ladakh Region (LA), Rajasthan Desert (RJ)
+
+Destinations: 55+ real trekking/touring destinations with:
+  - Accurate altitudes
+  - Best months, open months, avoid months
+  - Descriptions of each trek/tour
+
+The seed also creates:
+- 4 test guide accounts with full profiles, products, and fixed departures
+- Sample bookings and reviews for demonstration
+
+================================================================================
+22. KEY BUSINESS RULES SUMMARY
+================================================================================
+
+PRICING:
+- Customer pays: base + 5% GST (2.5% CGST + 2.5% SGST)
+- Commission deducted from guide's share, NOT added to customer price
+- Commission rates: per-state, configurable 0–50%, default 15%
+- Booking number format: BTG-YYYY-XXXXX
+
+PRODUCTS:
+- Created → PENDING_REVIEW → APPROVED/REJECTED
+- Any edit resets status to PENDING_REVIEW
+- Cannot delete if active bookings exist
+- Only APPROVED products can have departures
+
+DEPARTURES:
+- Created → PENDING_APPROVAL → APPROVED/REJECTED
+- Only APPROVED departures accept bookings
+- No overlapping departures for same guide
+- Commission auto-applied from state rate on approval
+- End date auto-calculated from product duration
+
+BOOKINGS:
+- Fixed: instant CONFIRMED, seats decremented immediately
+- Personal: starts as AWAITING_QUOTE → QUOTE_SENT → CONFIRMED
+- Guest checkout creates passwordless account
+
+GUIDES:
+- Single operating state
+- Must be verified to appear on personal booking page
+- Can't mark unavailable on dates with active bookings
+- Profile slug auto-generated from name
+
+ADMINS:
+- Max 1 admin per state
+- State admins see only their state's data
+- Super admin sees everything
+
+RATINGS:
+- Auto-recalculated on every review create/delete
+- Mean of overallRating, rounded to 1 decimal
+- Sub-ratings: knowledge, communication, value-for-money, safety
+
+FILE UPLOADS:
+- Max 100KB, JPEG/PNG/WebP only
+- Saved to public/uploads/{folder}/{timestamp}-{random}.{ext}
+
+AI ASSISTANT:
+- Mock implementation (keyword matching, no real AI)
+- Responds to keywords: trek, beach, budget, Rajasthan, etc.
+- Used on destination detail pages
+
+================================================================================
+END OF SPECIFICATION
+================================================================================
+
+This document covers 100% of the business logic, data models, user roles, pricing
+formulas, approval workflows, and page structures found in the BookTheGuide (BTG)
+codebase. Use it as a complete blueprint to replicate the platform with any
+template or tech stack.

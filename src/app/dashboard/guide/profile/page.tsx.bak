@@ -1,0 +1,494 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { Input } from '@/components/ui/Input';
+import { Textarea } from '@/components/ui/Textarea';
+import { Select } from '@/components/ui/Select';
+import { Button } from '@/components/ui/Button';
+import { Card, CardContent } from '@/components/ui/Card';
+import { ImageUpload, MultiImageUpload } from '@/components/ui/ImageUpload';
+import { LANGUAGES } from '@/lib/utils';
+import { Plus, X, Upload } from 'lucide-react';
+import toast from 'react-hot-toast';
+
+interface SpecializationProof {
+  specialization: string;
+  description: string;
+  documentUrl: string;
+}
+
+export default function GuideProfilePage() {
+  const { data: session } = useSession();
+  const [loading, setLoading] = useState(false);
+  const [states, setStates] = useState<{ id: string; name: string }[]>([]);
+  const [form, setForm] = useState({
+    bio: '',
+    tagline: '',
+    selectedState: '' as string,
+    experienceYears: 0,
+    education: '',
+    certifications: [''],
+    languages: [] as string[],
+    specializations: [] as string[],
+    specializationProofs: [] as SpecializationProof[],
+    idProofType: '',
+    idProofNumber: '',
+    profileImage: '',
+    coverImage: '',
+    portfolioImages: [] as string[],
+  });
+
+  useEffect(() => {
+    // Fetch states
+    fetch('/api/geography/states')
+      .then((r) => r.json())
+      .then((data) => setStates(data.states || []))
+      .catch(() => {});
+    
+    // Load existing profile
+    fetch('/api/guide/profile')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.profile) {
+          // Extract single state ID from service areas
+          const stateId = (data.profile.serviceAreas || [])[0]?.stateId || '';
+          // Parse specialization proofs
+          let proofs: SpecializationProof[] = [];
+          try {
+            const parsed = typeof data.profile.specializationProofs === 'string'
+              ? JSON.parse(data.profile.specializationProofs)
+              : data.profile.specializationProofs;
+            if (Array.isArray(parsed)) proofs = parsed;
+          } catch {}
+
+          setForm({
+            bio: data.profile.bio || '',
+            tagline: data.profile.tagline || '',
+            selectedState: stateId,
+            experienceYears: data.profile.experienceYears || 0,
+            education: data.profile.education || '',
+            certifications: data.profile.certifications?.length > 0 ? data.profile.certifications : [''],
+            languages: data.profile.languages || [],
+            specializations: data.profile.specializations || [],
+            specializationProofs: proofs,
+            idProofType: data.profile.idProofType || '',
+            idProofNumber: data.profile.idProofNumber || '',
+            profileImage: data.profile.user?.image || '',
+            coverImage: data.profile.coverImage || '',
+            portfolioImages: data.profile.portfolioImages || [],
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const toggleArrayItem = (key: 'languages' | 'specializations', item: string) => {
+    setForm((prev) => ({
+      ...prev,
+      [key]: prev[key].includes(item)
+        ? prev[key].filter((i) => i !== item)
+        : [...prev[key], item],
+    }));
+  };
+
+  const handleCertChange = (index: number, value: string) => {
+    const updated = [...form.certifications];
+    updated[index] = value;
+    setForm((prev) => ({ ...prev, certifications: updated }));
+  };
+
+  const addCertification = () => {
+    setForm((prev) => ({ ...prev, certifications: [...prev.certifications, ''] }));
+  };
+
+  const removeCertification = (index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      certifications: prev.certifications.filter((_, i) => i !== index),
+    }));
+  };
+
+  const updateSpecProof = (index: number, field: keyof SpecializationProof, value: string) => {
+    setForm((prev) => {
+      const updated = [...prev.specializationProofs];
+      updated[index] = { ...updated[index], [field]: value };
+      return { ...prev, specializationProofs: updated };
+    });
+  };
+
+  const removeSpecProof = (index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      specializationProofs: prev.specializationProofs.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.selectedState) {
+      toast.error('Please select your operating state');
+      return;
+    }
+
+    // Confirmation check before saving
+    const confirmed = window.confirm(
+      'Are you sure you want to save your profile? Changes to your profile will require admin approval before becoming visible.'
+    );
+    if (!confirmed) return;
+
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/guide/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...form,
+          selectedStates: [form.selectedState],
+          certifications: form.certifications.filter((c) => c.trim() !== ''),
+          experienceYears: Number(form.experienceYears),
+          specializationProofs: form.specializationProofs,
+          profileImage: form.profileImage,
+          coverImage: form.coverImage,
+          portfolioImages: form.portfolioImages,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || 'Failed to save profile');
+        return;
+      }
+      toast.success('Profile saved successfully!');
+    } catch {
+      toast.error('Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const specializations = [
+    'Trekking', 'City Tour', 'Hill Station', 'Pilgrimage',
+    'Wildlife Safari', 'Adventure Sport', 'Cultural Tour',
+    'Food Tour', 'Photography Tour', 'Mountaineering',
+    'Camping', 'Rafting', 'Skiing', 'Rock Climbing',
+    'Pet Friendly',
+  ];
+
+  return (
+    <div className="max-w-3xl">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold font-serif text-btg-dark">Guide Profile</h1>
+        <p className="text-gray-600 mt-1">Set up your profile to start receiving bookings</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Profile Picture & Cover */}
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <h2 className="font-bold text-btg-dark mb-2">Profile Picture & Cover</h2>
+            <p className="text-sm text-gray-500 mb-3">
+              Your profile picture will be shown on all your packages and search results. Cover image appears on your profile page.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-6">
+              <ImageUpload
+                folder="guides"
+                value={form.profileImage}
+                onChange={(url) => setForm(prev => ({ ...prev, profileImage: url }))}
+                label="Profile Picture"
+                rounded
+                size="md"
+              />
+              <ImageUpload
+                folder="guides"
+                value={form.coverImage}
+                onChange={(url) => setForm(prev => ({ ...prev, coverImage: url }))}
+                label="Cover Image"
+                size="lg"
+                className="flex-1"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Portfolio Images */}
+        <Card>
+          <CardContent className="p-6">
+            <h2 className="font-bold text-btg-dark mb-2">Portfolio / Gallery</h2>
+            <p className="text-sm text-gray-500 mb-3">
+              Upload photos from your trips. These will appear in a carousel on your profile page.
+            </p>
+            <MultiImageUpload
+              folder="guides"
+              values={form.portfolioImages}
+              onChange={(urls) => setForm(prev => ({ ...prev, portfolioImages: urls }))}
+              label=""
+              maxImages={10}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Basic Info */}
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <h2 className="font-bold text-btg-dark mb-2">Basic Information</h2>
+            <Input
+              id="tagline"
+              name="tagline"
+              label="Tagline"
+              value={form.tagline}
+              onChange={handleChange}
+              placeholder="e.g., Expert Himalayan Trekking Guide"
+              helperText="A short catchy line about you (max 100 chars)"
+            />
+            <Textarea
+              id="bio"
+              name="bio"
+              label="Bio / About You"
+              value={form.bio}
+              onChange={handleChange}
+              placeholder="Tell travellers about your experience, what makes you unique as a guide..."
+              rows={5}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Service State (Single select) */}
+        <Card>
+          <CardContent className="p-6">
+            <h2 className="font-bold text-btg-dark mb-2">Operating State</h2>
+            <p className="text-sm text-gray-500 mb-3">Select the one state where you operate. Your products will be restricted to destinations in this state. One guide can operate in one state only.</p>
+            <select
+              name="selectedState"
+              value={form.selectedState}
+              onChange={handleChange}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-btg-terracotta/40 focus:border-transparent"
+            >
+              <option value="">Select your state</option>
+              {states.map((state) => (
+                <option key={state.id} value={state.id}>
+                  {state.name}
+                </option>
+              ))}
+            </select>
+            {form.selectedState && (
+              <p className="text-xs text-btg-terracotta mt-2">✓ Operating in: {states.find(s => s.id === form.selectedState)?.name}</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Professional Details */}
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <h2 className="font-bold text-btg-dark mb-2">Professional Details</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                id="experienceYears"
+                name="experienceYears"
+                label="Years of Experience"
+                type="number"
+                min={0}
+                value={form.experienceYears}
+                onChange={handleChange}
+              />
+              <Input
+                id="education"
+                name="education"
+                label="Education"
+                value={form.education}
+                onChange={handleChange}
+                placeholder="e.g., B.Sc. in Tourism Management"
+              />
+            </div>
+
+            {/* Certifications */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Certifications & Courses
+              </label>
+              {form.certifications.map((cert, i) => (
+                <div key={i} className="flex gap-2 mb-2">
+                  <Input
+                    value={cert}
+                    onChange={(e) => handleCertChange(i, e.target.value)}
+                    placeholder="e.g., Basic Mountaineering Course (ABVIMAS)"
+                  />
+                  {form.certifications.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeCertification(i)}
+                      className="text-red-500 hover:text-red-700 px-2"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addCertification}
+                className="text-sm text-btg-terracotta hover:underline"
+              >
+                + Add Certification
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Languages */}
+        <Card>
+          <CardContent className="p-6">
+            <h2 className="font-bold text-btg-dark mb-3">Languages Spoken</h2>
+            <div className="flex flex-wrap gap-2">
+              {LANGUAGES.map((lang) => (
+                <button
+                  key={lang}
+                  type="button"
+                  onClick={() => toggleArrayItem('languages', lang)}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                    form.languages.includes(lang)
+                      ? 'bg-btg-terracotta text-white border-btg-terracotta'
+                      : 'bg-white text-gray-600 border-gray-200 hover:border-btg-blush'
+                  }`}
+                >
+                  {lang}
+                </button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Specializations */}
+        <Card>
+          <CardContent className="p-6">
+            <h2 className="font-bold text-btg-dark mb-3">Specializations</h2>
+            <div className="flex flex-wrap gap-2">
+              {specializations.map((spec) => (
+                <button
+                  key={spec}
+                  type="button"
+                  onClick={() => toggleArrayItem('specializations', spec)}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                    form.specializations.includes(spec)
+                      ? 'bg-btg-sage text-white border-btg-sage'
+                      : 'bg-white text-gray-600 border-gray-200 hover:border-btg-sage'
+                  }`}
+                >
+                  {spec}
+                </button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Specialization Proofs */}
+        {form.specializations.length > 0 && (
+          <Card>
+            <CardContent className="p-6 space-y-4">
+              <div>
+                <h2 className="font-bold text-btg-dark mb-1">Proof of Specialization</h2>
+                <p className="text-sm text-gray-500">Upload certificates or documents proving your expertise for each specialization</p>
+              </div>
+              <div className="space-y-4">
+                {form.specializations.map((spec) => {
+                  const existingProof = form.specializationProofs.find((p) => p.specialization === spec);
+                  return (
+                    <div key={spec} className="p-4 border border-gray-200 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium text-gray-800">{spec}</span>
+                        {existingProof ? (
+                          <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Uploaded</span>
+                        ) : (
+                          <span className="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Pending</span>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <input
+                          type="text"
+                          value={existingProof?.description || ''}
+                          onChange={(e) => {
+                            const proofIdx = form.specializationProofs.findIndex((p) => p.specialization === spec);
+                            if (proofIdx >= 0) {
+                              updateSpecProof(proofIdx, 'description', e.target.value);
+                            } else {
+                              setForm((prev) => ({
+                                ...prev,
+                                specializationProofs: [...prev.specializationProofs, { specialization: spec, description: e.target.value, documentUrl: '' }],
+                              }));
+                            }
+                          }}
+                          placeholder="Certificate name / description"
+                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-btg-terracotta/40"
+                        />
+                        <input
+                          type="url"
+                          value={existingProof?.documentUrl || ''}
+                          onChange={(e) => {
+                            const proofIdx = form.specializationProofs.findIndex((p) => p.specialization === spec);
+                            if (proofIdx >= 0) {
+                              updateSpecProof(proofIdx, 'documentUrl', e.target.value);
+                            } else {
+                              setForm((prev) => ({
+                                ...prev,
+                                specializationProofs: [...prev.specializationProofs, { specialization: spec, description: '', documentUrl: e.target.value }],
+                              }));
+                            }
+                          }}
+                          placeholder="Document URL (uploaded link)"
+                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-btg-terracotta/40"
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* ID Verification */}
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <h2 className="font-bold text-btg-dark mb-2">ID Verification</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Select
+                id="idProofType"
+                name="idProofType"
+                label="ID Proof Type"
+                value={form.idProofType}
+                onChange={handleChange}
+                placeholder="Select ID Type"
+                options={[
+                  { value: 'AADHAAR', label: 'Aadhaar Card' },
+                  { value: 'PAN', label: 'PAN Card' },
+                  { value: 'PASSPORT', label: 'Passport' },
+                  { value: 'DRIVING_LICENSE', label: 'Driving License' },
+                ]}
+              />
+              <Input
+                id="idProofNumber"
+                name="idProofNumber"
+                label="ID Number"
+                value={form.idProofNumber}
+                onChange={handleChange}
+                placeholder="Enter ID number"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex justify-end">
+          <Button type="submit" isLoading={loading} size="lg">
+            Save Profile
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+}

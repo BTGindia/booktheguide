@@ -1,0 +1,86 @@
+Page Name,URL Path,Parent Page,Category,Description,Status,Priority,Notes
+Homepage,/,Root,Frontend,Main landing page with hero search and featured content,Active,High,
+About Us,/about,Homepage,Frontend,Company information and mission,Active,Medium,
+Contact,/contact,Homepage,Frontend,Contact form and company details,Active,Medium,
+Terms & Conditions,/terms,Homepage,Frontend,Legal terms of service,Active,Low,
+Privacy Policy,/privacy,Homepage,Frontend,Privacy policy and data handling,Active,Low,
+Login,/login,Homepage,Auth,User authentication login page,Active,High,
+Register,/register,Homepage,Auth,New user registration,Active,High,
+Forgot Password,/forgot-password,Login,Auth,Password recovery initiation,Active,Medium,
+Reset Password,/reset-password/[token],Forgot Password,Auth,Password reset with token,Active,Medium,
+
+Destinations,/destinations,Homepage,Frontend,Main destinations listing with state filters,Active,High,
+Uttarakhand,/destinations?state=uttarakhand,Destinations,State,Destinations in Uttarakhand state,Active,High,Needs city data
+Himachal Pradesh,/destinations?state=himachal-pradesh,Destinations,State,Destinations in Himachal Pradesh state,Active,High,Needs city data
+Ladakh,/destinations?state=ladakh,Destinations,State,Destinations in Ladakh region,Active,High,Needs city data
+Kashmir,/destinations?state=kashmir,Destinations,State,Destinations in Kashmir valley,Active,High,Needs city data
+Delhi,/destinations?state=delhi,Destinations,State,Destinations in Delhi NCR,Active,High,Needs city data
+Rajasthan,/destinations?state=rajasthan,Destinations,State,Destinations in Rajasthan state,Active,High,Needs city data
+Uttar Pradesh,/destinations?state=uttar-pradesh,Destinations,State,Destinations in Uttar Pradesh state,Active,High,Needs city data
+Destination Detail,/destinations/[id],Destinations,Frontend,Individual destination page with packages,Active,High,Dynamic page
+
+Tourist Guides,/experiences/tourist-guides,Experiences,Experience,Professional tourist guide services,Active,High,
+Heritage Walks,/experiences/heritage-walks,Experiences,Experience,Guided heritage and cultural walks,Active,High,
+Group Trips,/experiences/group-trips,Experiences,Experience,Group travel packages,Active,High,
+Adventure Guides,/experiences/adventure-guides,Experiences,Experience,Adventure and trekking guides,Active,High,
+Influencer Trips,/experiences/influencer-trips,Experiences,Experience,Social media and influencer trips,Active,High,
+
+Search,/search,Homepage,Frontend,Package search with filters,Active,High,Supports state/city/category filters
+Inspiration,/inspiration,Homepage,Frontend,Travel inspiration and ideas,Active,Medium,
+Trending,/trending,Homepage,Frontend,Trending destinations and packages,Active,Medium,
+Upcoming Trips,/upcoming-trips,Homepage,Frontend,Scheduled group departures,Active,Medium,
+All Guides,/guides,Homepage,Frontend,Browse all guides listing,Planned,Medium,Needs implementation
+Guide Profile,/guides/[slug],All Guides,Frontend,Individual guide profile page,Active,Medium,
+Trip Detail,/trips/[slug],Search,Frontend,Package detail with booking,Active,High,
+Wishlist,/wishlist,Homepage,Frontend,User saved packages,Active,Medium,
+
+Corporate Trip,/corporate-trip,Homepage,Frontend,Corporate inquiry form,Active,Medium,
+Book Fixed Departure,/book/fixed,Homepage,Booking,Fixed departure booking flow,Active,High,
+Book Personal Trip,/book/personal,Homepage,Booking,Personal/custom trip booking,Active,High,
+
+Customer Dashboard,/dashboard/customer,Homepage,Dashboard,Customer account overview,Active,High,
+Customer Bookings,/dashboard/customer/bookings,Customer Dashboard,Dashboard,View customer bookings,Active,High,
+Customer Profile,/dashboard/customer/profile,Customer Dashboard,Dashboard,Edit customer profile,Active,High,
+Customer Wishlist,/dashboard/customer/wishlist,Customer Dashboard,Dashboard,Saved packages,Active,Medium,
+
+Guide Dashboard,/dashboard/guide,Homepage,Dashboard,Guide main dashboard,Active,High,
+Guide Profile,/dashboard/guide/profile,Guide Dashboard,Dashboard,Edit guide profile,Active,High,
+Guide Products,/dashboard/guide/products,Guide Dashboard,Dashboard,Manage packages/products,Active,High,
+New Product,/dashboard/guide/products/new,Guide Products,Dashboard,Create new package,Active,High,
+Edit Product,/dashboard/guide/products/[id],Guide Products,Dashboard,Edit existing package,Active,High,
+Guide Bookings,/dashboard/guide/bookings,Guide Dashboard,Dashboard,Manage bookings received,Active,High,
+Guide Availability,/dashboard/guide/availability,Guide Dashboard,Dashboard,Set availability calendar,Active,Medium,
+Guide Reviews,/dashboard/guide/reviews,Guide Dashboard,Dashboard,View customer reviews,Active,Medium,
+Guide Earnings,/dashboard/guide/earnings,Guide Dashboard,Dashboard,Track earnings and payments,Active,Medium,
+
+Admin Dashboard,/dashboard/admin,Homepage,Dashboard,Admin main dashboard,Active,High,
+Admin Bookings,/dashboard/admin/bookings,Admin Dashboard,Dashboard,Manage all bookings,Active,High,
+Admin Products,/dashboard/admin/products,Admin Dashboard,Dashboard,Manage all products,Active,High,
+Admin Guides,/dashboard/admin/guides,Admin Dashboard,Dashboard,Manage guides,Active,High,
+Admin Reviews,/dashboard/admin/reviews,Admin Dashboard,Dashboard,Moderate reviews,Active,Medium,
+Admin Settings,/dashboard/admin/settings,Admin Dashboard,Dashboard,Admin settings,Active,Medium,
+
+Guide Manager Dashboard,/dashboard/guide-manager,Homepage,Dashboard,Guide manager overview,Active,High,
+Guide Manager Onboarding,/dashboard/guide-manager/onboarding,Guide Manager Dashboard,Dashboard,Guide onboarding queue,Active,High,
+Guide Manager Guides,/dashboard/guide-manager/guides,Guide Manager Dashboard,Dashboard,Manage assigned guides,Active,High,
+
+Super Admin Dashboard,/dashboard/super-admin,Homepage,Dashboard,Super admin overview,Active,High,
+Super Admin Analytics,/dashboard/super-admin/analytics,Super Admin Dashboard,Dashboard,Platform analytics,Active,High,
+Super Admin Bookings,/dashboard/super-admin/bookings,Super Admin Dashboard,Dashboard,All platform bookings,Active,High,
+Super Admin AI Analytics,/dashboard/super-admin/ai-analytics,Super Admin Dashboard,Dashboard,AI usage analytics,Active,High,
+Super Admin Users,/dashboard/super-admin/users,Super Admin Dashboard,Dashboard,Manage all users,Active,High,
+Super Admin Settings,/dashboard/super-admin/settings,Super Admin Dashboard,Dashboard,Platform settings,Active,High,
+
+API Auth,/api/auth/*,API,Backend,NextAuth authentication endpoints,Active,Critical,
+API Guide Products,/api/guide/products,API,Backend,Guide package CRUD,Active,High,
+API Bookings,/api/bookings,API,Backend,Booking management,Active,High,
+API Destinations,/api/destinations,API,Backend,Destination data endpoints,Active,High,
+API States,/api/states,API,Backend,State listing with cities,Active,High,
+API Reviews,/api/reviews,API,Backend,Review management,Active,Medium,
+API Navigation,/api/navigation,API,Backend,Dynamic navigation data,Active,High,
+API Geography,/api/geography,API,Backend,Geographic data endpoints,Active,Medium,
+API Upload,/api/upload,API,Backend,File upload handling,Active,Medium,
+API Corporate Inquiry,/api/corporate-inquiry,API,Backend,Corporate form submissions,Active,Medium,
+API Customer,/api/customer/*,API,Backend,Customer-specific endpoints,Active,High,
+API Admin,/api/admin/*,API,Backend,Admin management endpoints,Active,High,
+API Super Admin,/api/super-admin/*,API,Backend,Super admin analytics and management,Active,High,

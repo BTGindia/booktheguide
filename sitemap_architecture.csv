@@ -1,0 +1,141 @@
+Page Name,URL,Hierarchy Level,Parent Page,Page Type,SEO Priority,Description,Status
+Homepage,/,1,,Static,High,Main landing page with hero search - trending trips - experience categories - weekend picks,Existing
+Explore All States,/explore,2,Homepage,Static,High,Gateway to all state hub pages - browse India state by state,New
+Explore Himachal Pradesh,/explore/himachal-pradesh,3,Explore All States,State Hub,High,State hub for Himachal Pradesh — guides - treks - heritage walks - group trips,New
+Explore Uttarakhand,/explore/uttarakhand,3,Explore All States,State Hub,High,State hub for Uttarakhand — guides - treks - temples - safaris,New
+Explore Rajasthan,/explore/rajasthan,3,Explore All States,State Hub,High,State hub for Rajasthan — heritage walks - city tours - desert safaris,New
+Explore Ladakh,/explore/ladakh,3,Explore All States,State Hub,High,State hub for Ladakh — high-altitude treks - monasteries - lakes,New
+Explore Jammu & Kashmir,/explore/kashmir,3,Explore All States,State Hub,High,State hub for Kashmir — Great Lakes trek - skiing - houseboat experiences,New
+Explore Delhi,/explore/delhi,3,Explore All States,State Hub,High,State hub for Delhi — food walks - Mughal heritage - city tours,New
+Explore Uttar Pradesh,/explore/uttar-pradesh,3,Explore All States,State Hub,High,State hub for UP — Taj Mahal - Varanasi - Lucknow heritage,New
+Explore Goa,/explore/goa,3,Explore All States,State Hub,High,State hub for Goa — heritage walks - beach tours - spice plantations,New
+Explore Kerala,/explore/kerala,3,Explore All States,State Hub,High,State hub for Kerala — backwaters - tea plantations - wildlife,New
+Explore Karnataka,/explore/karnataka,3,Explore All States,State Hub,High,State hub for Karnataka — Hampi - Coorg - Bangalore food,New
+Explore Tamil Nadu,/explore/tamil-nadu,3,Explore All States,State Hub,Medium,State hub for Tamil Nadu — temples - Pondicherry - Ooty,New
+Explore Maharashtra,/explore/maharashtra,3,Explore All States,State Hub,Medium,State hub for Maharashtra — forts - Ajanta Ellora - Mumbai walks,New
+Explore West Bengal,/explore/west-bengal,3,Explore All States,State Hub,Medium,State hub for West Bengal — Darjeeling - Kolkata - Sundarbans,New
+Explore Punjab,/explore/punjab,3,Explore All States,State Hub,Medium,State hub for Punjab — Golden Temple - Wagah Border - food walks,New
+Explore Meghalaya,/explore/meghalaya,3,Explore All States,State Hub,Medium,State hub for Meghalaya — living root bridges - Dawki - waterfalls,New
+Explore Sikkim,/explore/sikkim,3,Explore All States,State Hub,Medium,State hub for Sikkim — Goechala trek - monasteries - mountain views,New
+Explore Assam,/explore/assam,3,Explore All States,State Hub,Medium,State hub for Assam — Kaziranga - tea gardens - Majuli island,New
+Explore Madhya Pradesh,/explore/madhya-pradesh,3,Explore All States,State Hub,Medium,State hub for Madhya Pradesh — tiger safaris - Khajuraho - Orchha,New
+Explore Gujarat,/explore/gujarat,3,Explore All States,State Hub,Medium,State hub for Gujarat — Rann of Kutch - Gir lions - Ahmedabad heritage,New
+Explore Odisha,/explore/odisha,3,Explore All States,State Hub,Low,State hub for Odisha — Konark - Puri - Chilika - tribal tours,New
+Explore Andhra Pradesh,/explore/andhra-pradesh,3,Explore All States,State Hub,Low,State hub for Andhra Pradesh — Tirupati - Araku Valley - Gandikota,New
+Explore Telangana,/explore/telangana,3,Explore All States,State Hub,Low,State hub for Telangana — Hyderabad food walks - Golconda - Warangal,New
+Explore Arunachal Pradesh,/explore/arunachal-pradesh,3,Explore All States,State Hub,Low,State hub for Arunachal Pradesh — Tawang - Ziro Valley - tribal culture,New
+Explore Nagaland,/explore/nagaland,3,Explore All States,State Hub,Low,State hub for Nagaland — Hornbill Festival - Dzukou Valley - villages,New
+Explore Chhattisgarh,/explore/chhattisgarh,3,Explore All States,State Hub,Low,State hub for Chhattisgarh — waterfalls - tribal tours - caves,New
+Explore Jharkhand,/explore/jharkhand,3,Explore All States,State Hub,Low,State hub for Jharkhand — forests - waterfalls - temples,New
+Explore Bihar,/explore/bihar,3,Explore All States,State Hub,Low,State hub for Bihar — Bodh Gaya - Nalanda - Rajgir,New
+Explore Haryana,/explore/haryana,3,Explore All States,State Hub,Low,State hub for Haryana — Kurukshetra - bird sanctuary - Morni Hills,New
+Explore Manipur,/explore/manipur,3,Explore All States,State Hub,Low,State hub for Manipur — Loktak Lake - Ima Keithel - hills,New
+Explore Mizoram,/explore/mizoram,3,Explore All States,State Hub,Low,State hub for Mizoram — hills - bamboo forests - waterfalls,New
+Explore Tripura,/explore/tripura,3,Explore All States,State Hub,Low,State hub for Tripura — palaces - rock sculptures - hills,New
+Explore Andaman & Nicobar,/explore/andaman-nicobar,3,Explore All States,State Hub,Low,State hub for Andaman — Cellular Jail - diving - beaches,New
+Explore Lakshadweep,/explore/lakshadweep,3,Explore All States,State Hub,Low,State hub for Lakshadweep — coral islands - diving - lagoons,New
+HP Tourist Guides,/explore/himachal-pradesh/tourist-guides,4,Explore Himachal Pradesh,Category Landing,High,Tourist guides in Himachal Pradesh — city tours - day hikes - culinary tours,New
+HP Group Trips,/explore/himachal-pradesh/group-trips,4,Explore Himachal Pradesh,Category Landing,High,Group trips in Himachal Pradesh — trek departures - adventure groups,New
+HP Adventure Guides,/explore/himachal-pradesh/adventure-guides,4,Explore Himachal Pradesh,Category Landing,High,Adventure guides in Himachal Pradesh — trekking - paragliding - rafting,New
+HP Heritage Walks,/explore/himachal-pradesh/heritage-walks,4,Explore Himachal Pradesh,Category Landing,Medium,Heritage walks in Himachal Pradesh — temple trails - cultural walks,New
+HP Influencer Trips,/explore/himachal-pradesh/travel-with-influencers,4,Explore Himachal Pradesh,Category Landing,Medium,Influencer trips in Himachal Pradesh — photography - culinary - creator-led,New
+UK Tourist Guides,/explore/uttarakhand/tourist-guides,4,Explore Uttarakhand,Category Landing,High,Tourist guides in Uttarakhand — city tours - day hikes - temple visits,New
+UK Group Trips,/explore/uttarakhand/group-trips,4,Explore Uttarakhand,Category Landing,High,Group trips in Uttarakhand — Valley of Flowers - Kedarnath - Chopta groups,New
+UK Adventure Guides,/explore/uttarakhand/adventure-guides,4,Explore Uttarakhand,Category Landing,High,Adventure guides in Uttarakhand — trekking - rafting in Rishikesh,New
+UK Heritage Walks,/explore/uttarakhand/heritage-walks,4,Explore Uttarakhand,Category Landing,Medium,Heritage walks in Uttarakhand — temple trails - Haridwar - spiritual walks,New
+UK Influencer Trips,/explore/uttarakhand/travel-with-influencers,4,Explore Uttarakhand,Category Landing,Medium,Influencer trips in Uttarakhand — photography treks - creator-led,New
+RJ Tourist Guides,/explore/rajasthan/tourist-guides,4,Explore Rajasthan,Category Landing,High,Tourist guides in Rajasthan — Jaipur - Jodhpur - Udaipur city tours,New
+RJ Group Trips,/explore/rajasthan/group-trips,4,Explore Rajasthan,Category Landing,High,Group trips in Rajasthan — desert safaris - heritage group tours,New
+RJ Adventure Guides,/explore/rajasthan/adventure-guides,4,Explore Rajasthan,Category Landing,Medium,Adventure guides in Rajasthan — desert treks - camel safaris,New
+RJ Heritage Walks,/explore/rajasthan/heritage-walks,4,Explore Rajasthan,Category Landing,High,Heritage walks in Rajasthan — Jaipur pink city - Jodhpur blue city - forts,New
+RJ Influencer Trips,/explore/rajasthan/travel-with-influencers,4,Explore Rajasthan,Category Landing,Medium,Influencer trips in Rajasthan — photography - food - culture,New
+LA Tourist Guides,/explore/ladakh/tourist-guides,4,Explore Ladakh,Category Landing,High,Tourist guides in Ladakh — Leh tours - monastery visits - Pangong,New
+LA Group Trips,/explore/ladakh/group-trips,4,Explore Ladakh,Category Landing,High,Group trips in Ladakh — Chadar trek groups - bike trips,New
+LA Adventure Guides,/explore/ladakh/adventure-guides,4,Explore Ladakh,Category Landing,High,Adventure guides in Ladakh — Chadar trek - Markha Valley - mountaineering,New
+LA Heritage Walks,/explore/ladakh/heritage-walks,4,Explore Ladakh,Category Landing,Medium,Heritage walks in Ladakh — monastery trail - ancient Buddhist sites,New
+LA Influencer Trips,/explore/ladakh/travel-with-influencers,4,Explore Ladakh,Category Landing,Medium,Influencer trips in Ladakh — photography - road trip - creator-led,New
+JK Tourist Guides,/explore/kashmir/tourist-guides,4,Explore Jammu & Kashmir,Category Landing,High,Tourist guides in Kashmir — Dal Lake - Gulmarg - Pahalgam tours,New
+JK Group Trips,/explore/kashmir/group-trips,4,Explore Jammu & Kashmir,Category Landing,High,Group trips in Kashmir — Great Lakes trek - skiing groups,New
+JK Adventure Guides,/explore/kashmir/adventure-guides,4,Explore Jammu & Kashmir,Category Landing,High,Adventure guides in Kashmir — Great Lakes trek - skiing - mountaineering,New
+JK Heritage Walks,/explore/kashmir/heritage-walks,4,Explore Jammu & Kashmir,Category Landing,Medium,Heritage walks in Kashmir — Mughal gardens - old city walks,New
+JK Influencer Trips,/explore/kashmir/travel-with-influencers,4,Explore Jammu & Kashmir,Category Landing,Medium,Influencer trips in Kashmir — photography - houseboat - creator-led,New
+DL Tourist Guides,/explore/delhi/tourist-guides,4,Explore Delhi,Category Landing,High,Tourist guides in Delhi — Old Delhi - Mughal heritage - Lutyens,New
+DL Group Trips,/explore/delhi/group-trips,4,Explore Delhi,Category Landing,Medium,Group trips in Delhi — city tours - food crawls - heritage groups,New
+DL Adventure Guides,/explore/delhi/adventure-guides,4,Explore Delhi,Category Landing,Low,Adventure guides in Delhi — cycling tours - day hikes nearby,New
+DL Heritage Walks,/explore/delhi/heritage-walks,4,Explore Delhi,Category Landing,High,Heritage walks in Delhi — Chandni Chowk - Qutub - Mehrauli - Mughal trail,New
+DL Influencer Trips,/explore/delhi/travel-with-influencers,4,Explore Delhi,Category Landing,Medium,Influencer trips in Delhi — food walks - photography - creator-led,New
+UP Tourist Guides,/explore/uttar-pradesh/tourist-guides,4,Explore Uttar Pradesh,Category Landing,High,Tourist guides in UP — Taj Mahal - Varanasi - Lucknow - Vrindavan,New
+UP Group Trips,/explore/uttar-pradesh/group-trips,4,Explore Uttar Pradesh,Category Landing,Medium,Group trips in UP — spiritual tours - heritage groups,New
+UP Adventure Guides,/explore/uttar-pradesh/adventure-guides,4,Explore Uttar Pradesh,Category Landing,Low,Adventure guides in UP — day hikes - nature walks,New
+UP Heritage Walks,/explore/uttar-pradesh/heritage-walks,4,Explore Uttar Pradesh,Category Landing,High,Heritage walks in UP — Varanasi ghat walk - Lucknow nawabi trail,New
+UP Influencer Trips,/explore/uttar-pradesh/travel-with-influencers,4,Explore Uttar Pradesh,Category Landing,Medium,Influencer trips in UP — photography Taj Mahal - Varanasi - food,New
+GA Tourist Guides,/explore/goa/tourist-guides,4,Explore Goa,Category Landing,High,Tourist guides in Goa — Old Goa heritage - beaches - spice tours,New
+GA Group Trips,/explore/goa/group-trips,4,Explore Goa,Category Landing,High,Group trips in Goa — beach groups - backpacker tours,New
+GA Adventure Guides,/explore/goa/adventure-guides,4,Explore Goa,Category Landing,Medium,Adventure guides in Goa — Dudhsagar trek - water sports - kayaking,New
+GA Heritage Walks,/explore/goa/heritage-walks,4,Explore Goa,Category Landing,Medium,Heritage walks in Goa — Old Goa churches - Fontainhas Latin Quarter,New
+GA Influencer Trips,/explore/goa/travel-with-influencers,4,Explore Goa,Category Landing,Medium,Influencer trips in Goa — beach photography - food - creator-led,New
+KL Tourist Guides,/explore/kerala/tourist-guides,4,Explore Kerala,Category Landing,High,Tourist guides in Kerala — backwaters - tea plantations - temples,New
+KL Group Trips,/explore/kerala/group-trips,4,Explore Kerala,Category Landing,High,Group trips in Kerala — backwater groups - Munnar treks,New
+KL Adventure Guides,/explore/kerala/adventure-guides,4,Explore Kerala,Category Landing,Medium,Adventure guides in Kerala — Western Ghats treks - rafting,New
+KL Heritage Walks,/explore/kerala/heritage-walks,4,Explore Kerala,Category Landing,Medium,Heritage walks in Kerala — Fort Kochi - temple trails - spice routes,New
+KL Influencer Trips,/explore/kerala/travel-with-influencers,4,Explore Kerala,Category Landing,Medium,Influencer trips in Kerala — Ayurveda - houseboat - creator-led,New
+KA Tourist Guides,/explore/karnataka/tourist-guides,4,Explore Karnataka,Category Landing,High,Tourist guides in Karnataka — Bangalore - Mysore - Coorg,New
+KA Group Trips,/explore/karnataka/group-trips,4,Explore Karnataka,Category Landing,Medium,Group trips in Karnataka — Coorg groups - Hampi - Western Ghats,New
+KA Adventure Guides,/explore/karnataka/adventure-guides,4,Explore Karnataka,Category Landing,Medium,Adventure guides in Karnataka — Kudremukh trek - river rafting,New
+KA Heritage Walks,/explore/karnataka/heritage-walks,4,Explore Karnataka,Category Landing,High,Heritage walks in Karnataka — Hampi ruins - Mysore palace - temple trail,New
+KA Influencer Trips,/explore/karnataka/travel-with-influencers,4,Explore Karnataka,Category Landing,Medium,Influencer trips in Karnataka — food walks - coffee trail - creator-led,New
+Group Trips Index,/group-trips,2,Homepage,Category Landing,High,All fixed-departure group trips across India,New
+Group Trips HP,/group-trips/himachal-pradesh,3,Group Trips Index,State Category,High,Group trips in Himachal Pradesh — trek departures,New
+Group Trips UK,/group-trips/uttarakhand,3,Group Trips Index,State Category,High,Group trips in Uttarakhand — trekking groups,New
+Group Trips RJ,/group-trips/rajasthan,3,Group Trips Index,State Category,High,Group trips in Rajasthan — heritage & desert groups,New
+Group Trips LA,/group-trips/ladakh,3,Group Trips Index,State Category,High,Group trips in Ladakh — Chadar & high-altitude groups,New
+Group Trips JK,/group-trips/kashmir,3,Group Trips Index,State Category,High,Group trips in Kashmir — Great Lakes & skiing groups,New
+Group Trips DL,/group-trips/delhi,3,Group Trips Index,State Category,Medium,Group trips in Delhi — city tour groups,New
+Group Trips UP,/group-trips/uttar-pradesh,3,Group Trips Index,State Category,Medium,Group trips in Uttar Pradesh — heritage groups,New
+Group Trips GA,/group-trips/goa,3,Group Trips Index,State Category,High,Group trips in Goa — beach & adventure groups,New
+Group Trips KL,/group-trips/kerala,3,Group Trips Index,State Category,High,Group trips in Kerala — backwater & trek groups,New
+Group Trips KA,/group-trips/karnataka,3,Group Trips Index,State Category,Medium,Group trips in Karnataka — Coorg & Western Ghats groups,New
+Blog Index,/blog,2,Homepage,Content Hub,High,Travel blog — itineraries - guides - tips - stories from local experts,New
+Blog Himachal Pradesh,/blog/himachal-pradesh,3,Blog Index,State Blog Hub,High,Travel articles about Himachal Pradesh — treks - itineraries - tips,New
+Blog Uttarakhand,/blog/uttarakhand,3,Blog Index,State Blog Hub,High,Travel articles about Uttarakhand — treks - temples - adventure,New
+Blog Rajasthan,/blog/rajasthan,3,Blog Index,State Blog Hub,High,Travel articles about Rajasthan — heritage - culture - food,New
+Blog Ladakh,/blog/ladakh,3,Blog Index,State Blog Hub,High,Travel articles about Ladakh — extreme treks - road trips,New
+Blog Kashmir,/blog/kashmir,3,Blog Index,State Blog Hub,High,Travel articles about Kashmir — Kashmir Great Lakes - skiing - houseboats,New
+Blog Delhi,/blog/delhi,3,Blog Index,State Blog Hub,High,Travel articles about Delhi — food walks - heritage - museums,New
+Blog Uttar Pradesh,/blog/uttar-pradesh,3,Blog Index,State Blog Hub,Medium,Travel articles about Uttar Pradesh — Taj Mahal - Varanasi,New
+Blog Goa,/blog/goa,3,Blog Index,State Blog Hub,High,Travel articles about Goa — beaches - heritage - nightlife,New
+Blog Kerala,/blog/kerala,3,Blog Index,State Blog Hub,High,Travel articles about Kerala — backwaters - Ayurveda - tea gardens,New
+Blog Karnataka,/blog/karnataka,3,Blog Index,State Blog Hub,Medium,Travel articles about Karnataka — Hampi - Bangalore - Coorg,New
+Blog Article (Dynamic),/blog/[article-slug],4,Blog State Hub,Blog Article,High,Individual blog article page with content - related articles,New
+Experiences Index,/experiences,2,Homepage,Category Landing,High,All 5 experience categories — browse by type of travel experience,Existing
+Tourist Guides,/experiences/tourist-guides,3,Experiences Index,Category Landing,High,Tourist guides — city tours - day hikes - culinary tours across India,Existing
+Group Trips Experience,/experiences/group-trips,3,Experiences Index,Category Landing,High,Group trips — fixed departures - group treks - group safaris,Existing
+Adventure Guides,/experiences/adventure-guides,3,Experiences Index,Category Landing,High,Adventure guides — trekking - paragliding - rafting - skiing,Existing
+Heritage Walks,/experiences/heritage-walks,3,Experiences Index,Category Landing,High,Heritage walks — fort tours - temple trails - old city walks,Existing
+Travel with Influencers,/experiences/travel-with-influencers,3,Experiences Index,Category Landing,High,Influencer trips — travel with creators & photographers,Existing
+Destinations,/destinations,2,Homepage,Listing,High,All destinations across India — browse by state,Existing
+Destination / State Detail,/destinations/[id],3,Destinations,Detail,High,State destinations page or individual destination detail,Existing
+Guides Directory,/guides,2,Homepage,Listing,High,All verified guides — search by state - specialization - rating,Existing
+Guide Profile,/guides/[slug],3,Guides Directory,Profile,High,Individual guide profile — reviews - packages - availability,Existing
+Search Results,/search,2,Homepage,Listing,High,Search results with filters — state - category - activity - price - rating,Existing
+Trip / Product Detail,/trips/[slug],3,Search Results,Product Page,High,Individual trip detail — itinerary - pricing - departures - guide info,Existing
+Upcoming Trips,/upcoming-trips,2,Homepage,Listing,High,Upcoming fixed-departure trips with dates and availability,Existing
+Trending,/trending,2,Homepage,Listing,High,Trending and popular trips hand-picked by the BTG team,Existing
+Inspiration,/inspiration,2,Homepage,Content Hub,Medium,Curated travel inspiration — blog - videos - podcasts,Existing
+Book Fixed Departure,/book/fixed,3,Trip Detail,Booking Flow,High,Fixed departure booking form — seat selection and checkout,Existing
+Book Personal Trip,/book/personal,3,Trip Detail,Booking Flow,High,Personal booking request form — custom dates and group size,Existing
+About Us,/about,2,Homepage,Static,Medium,About Book The Guide — mission - story - team,Existing
+Contact Us,/contact,2,Homepage,Static,Medium,Contact form and office details,Existing
+Corporate Trip Inquiry,/corporate-trip,2,Homepage,Static,Medium,Corporate trip bulk inquiry form,Existing
+Wishlist,/wishlist,2,Homepage,User Feature,Medium,Saved / wishlisted trips and guides,Existing
+Privacy Policy,/privacy,2,Homepage,Legal,Low,Privacy policy and data handling,Existing
+Terms of Service,/terms,2,Homepage,Legal,Low,Terms and conditions,Existing
+Login,/login,2,Homepage,Auth,Medium,User login page,Existing
+Register,/register,2,Homepage,Auth,Medium,User registration — customer or guide,Existing
+Forgot Password,/forgot-password,2,Homepage,Auth,Low,Password reset request form,Existing
+Reset Password,/reset-password/[token],3,Forgot Password,Auth,Low,Password reset with token,Existing
+Super Admin Dashboard,/dashboard/super-admin,2,Homepage,Dashboard,Low,Super admin — all data - commission - analytics,Existing
+Admin Dashboard,/dashboard/admin,2,Homepage,Dashboard,Low,State admin — product review - departure approval,Existing
+Guide Dashboard,/dashboard/guide,2,Homepage,Dashboard,Low,Guide — profile - packages - departures - bookings,Existing
+Guide Manager Dashboard,/dashboard/guide-manager,2,Homepage,Dashboard,Low,Guide manager — cross-state guide verification,Existing
+Customer Dashboard,/dashboard/customer,2,Homepage,Dashboard,Low,Customer — bookings - reviews - profile,Existing

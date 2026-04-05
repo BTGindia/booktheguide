@@ -1,0 +1,614 @@
+﻿  Γû▓ Next.js 14.2.35
+  - Environments: .env
+
+   Creating an optimized production build ...
+ Γ£ô Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/347) ...
+node.exe : Error fetching analytics: n [Error]: Dynamic server usage: Route 
+/api/admin/analytics couldn't be rendered statically because it used 
+`headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Error fetching ...ic-server-error 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+    at l (C:\Users\arudh\BTG\.next\server\chunks\8948.js:1:37220)
+    at d (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:26595)
+    at s (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:19584)
+    at c 
+(C:\Users\arudh\BTG\.next\server\app\api\admin\analytics\route.js:1:1305)
+    at C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-route
+.runtime.prod.js:6:38417
+    at 
+C:\Users\arudh\BTG\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\arudh\BTG\node_modules\next\dist\compi
+led\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\arudh\BTG\node_modules\next\dist\compiled\@ope
+ntelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\co
+mpiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\c
+ompiled\@opentelemetry\api\index.js:1:18854) {
+  description: "Route /api/admin/analytics couldn't be rendered statically 
+because it used `headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Admin departures list error: n [Error]: Dynamic server usage: Route 
+/api/admin/departures couldn't be rendered statically because it used 
+`headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error
+    at l (C:\Users\arudh\BTG\.next\server\chunks\8948.js:1:37220)
+    at d (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:26595)
+    at s (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:19584)
+    at p 
+(C:\Users\arudh\BTG\.next\server\app\api\admin\departures\route.js:1:1306)
+    at C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-route
+.runtime.prod.js:6:38417
+    at 
+C:\Users\arudh\BTG\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\arudh\BTG\node_modules\next\dist\compi
+led\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\arudh\BTG\node_modules\next\dist\compiled\@ope
+ntelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\co
+mpiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\c
+ompiled\@opentelemetry\api\index.js:1:18854) {
+  description: "Route /api/admin/departures couldn't be rendered statically 
+because it used `headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Hierarchy fetch error: n [Error]: Dynamic server usage: Route 
+/api/admin/destinations/hierarchy couldn't be rendered statically because it 
+used `headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error
+    at l (C:\Users\arudh\BTG\.next\server\chunks\8948.js:1:37220)
+    at d (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:26595)
+    at s (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:19584)
+    at p (C:\Users\arudh\BTG\.next\server\app\api\admin\destinations\hierarchy\
+route.js:1:1304)
+    at C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-route
+.runtime.prod.js:6:38417
+    at 
+C:\Users\arudh\BTG\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\arudh\BTG\node_modules\next\dist\compi
+led\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\arudh\BTG\node_modules\next\dist\compiled\@ope
+ntelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\co
+mpiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\c
+ompiled\@opentelemetry\api\index.js:1:18854) {
+  description: "Route /api/admin/destinations/hierarchy couldn't be rendered 
+statically because it used `headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching inquiries: n [Error]: Dynamic server usage: Route 
+/api/admin/corporate-inquiries couldn't be rendered statically because it used 
+`headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error
+    at l (C:\Users\arudh\BTG\.next\server\chunks\8948.js:1:37220)
+    at d (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:26595)
+    at s (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:19584)
+    at d (C:\Users\arudh\BTG\.next\server\app\api\admin\corporate-inquiries\rou
+te.js:1:1316)
+    at C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-route
+.runtime.prod.js:6:38417
+    at 
+C:\Users\arudh\BTG\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\arudh\BTG\node_modules\next\dist\compi
+led\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\arudh\BTG\node_modules\next\dist\compiled\@ope
+ntelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\co
+mpiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\c
+ompiled\@opentelemetry\api\index.js:1:18854) {
+  description: "Route /api/admin/corporate-inquiries couldn't be rendered 
+statically because it used `headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching products: n [Error]: Dynamic server usage: Route 
+/api/admin/products couldn't be rendered statically because it used `headers`. 
+See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at l (C:\Users\arudh\BTG\.next\server\chunks\8948.js:1:37220)
+    at u (C:\Users\arudh\BTG\.next\server\app\api\preview\route.js:1:3203)
+    at s (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:19584)
+    at p 
+(C:\Users\arudh\BTG\.next\server\app\api\admin\products\route.js:1:1305)
+    at C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-route
+.runtime.prod.js:6:38417
+    at 
+C:\Users\arudh\BTG\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\arudh\BTG\node_modules\next\dist\compi
+led\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\arudh\BTG\node_modules\next\dist\compiled\@ope
+ntelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\co
+mpiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\c
+ompiled\@opentelemetry\api\index.js:1:18854) {
+  description: "Route /api/admin/products couldn't be rendered statically 
+because it used `headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching guides: n [Error]: Dynamic server usage: Route 
+/api/admin/guides couldn't be rendered statically because it used `headers`. 
+See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at l (C:\Users\arudh\BTG\.next\server\chunks\8948.js:1:37220)
+    at d (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:26595)
+    at s (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:19584)
+    at p (C:\Users\arudh\BTG\.next\server\app\api\admin\guides\route.js:1:1303)
+    at C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-route
+.runtime.prod.js:6:38417
+    at 
+C:\Users\arudh\BTG\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\arudh\BTG\node_modules\next\dist\compi
+led\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\arudh\BTG\node_modules\next\dist\compiled\@ope
+ntelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\co
+mpiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\c
+ompiled\@opentelemetry\api\index.js:1:18854) {
+  description: "Route /api/admin/guides couldn't be rendered statically 
+because it used `headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching settings: n [Error]: Dynamic server usage: Route 
+/api/admin/settings couldn't be rendered statically because it used `headers`. 
+See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at l (C:\Users\arudh\BTG\.next\server\chunks\8948.js:1:37220)
+    at d (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:26595)
+    at s (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:19584)
+    at d 
+(C:\Users\arudh\BTG\.next\server\app\api\admin\settings\route.js:1:1305)
+    at C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-route
+.runtime.prod.js:6:38417
+    at 
+C:\Users\arudh\BTG\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\arudh\BTG\node_modules\next\dist\compi
+led\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\arudh\BTG\node_modules\next\dist\compiled\@ope
+ntelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\co
+mpiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\c
+ompiled\@opentelemetry\api\index.js:1:18854) {
+  description: "Route /api/admin/settings couldn't be rendered statically 
+because it used `headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching profile: n [Error]: Dynamic server usage: Route 
+/api/customer/profile couldn't be rendered statically because it used 
+`headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error
+    at l (C:\Users\arudh\BTG\.next\server\chunks\8948.js:1:37220)
+    at d (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:26595)
+    at s (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:19584)
+    at c 
+(C:\Users\arudh\BTG\.next\server\app\api\customer\profile\route.js:1:1315)
+    at C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-route
+.runtime.prod.js:6:38417
+    at 
+C:\Users\arudh\BTG\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\arudh\BTG\node_modules\next\dist\compi
+led\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\arudh\BTG\node_modules\next\dist\compiled\@ope
+ntelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\co
+mpiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\c
+ompiled\@opentelemetry\api\index.js:1:18854) {
+  description: "Route /api/customer/profile couldn't be rendered statically 
+because it used `headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching regions: n [Error]: Dynamic server usage: Route 
+/api/admin/regions couldn't be rendered statically because it used `headers`. 
+See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at l (C:\Users\arudh\BTG\.next\server\chunks\8948.js:1:37220)
+    at d (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:26595)
+    at s (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:19584)
+    at d 
+(C:\Users\arudh\BTG\.next\server\app\api\admin\regions\route.js:1:1305)
+    at C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-route
+.runtime.prod.js:6:38417
+    at 
+C:\Users\arudh\BTG\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\arudh\BTG\node_modules\next\dist\compi
+led\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\arudh\BTG\node_modules\next\dist\compiled\@ope
+ntelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\co
+mpiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\c
+ompiled\@opentelemetry\api\index.js:1:18854) {
+  description: "Route /api/admin/regions couldn't be rendered statically 
+because it used `headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching destinations: B [Error]: Dynamic server usage: Route 
+/api/geography/destinations couldn't be rendered statically because it used 
+`request.url`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error
+    at V (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-ro
+ute.runtime.prod.js:6:21778)
+    at Object.get (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-serv
+er\app-route.runtime.prod.js:6:29465)
+    at d 
+(C:\Users\arudh\BTG\.next\server\app\api\geography\destinations\route.js:1:603)
+    at C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-route
+.runtime.prod.js:6:38417
+    at 
+C:\Users\arudh\BTG\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\arudh\BTG\node_modules\next\dist\compi
+led\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\arudh\BTG\node_modules\next\dist\compiled\@ope
+ntelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\co
+mpiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\c
+ompiled\@opentelemetry\api\index.js:1:18854)
+    at 
+C:\Users\arudh\BTG\node_modules\next\dist\server\lib\trace\tracer.js:122:103 {
+  description: "Route /api/geography/destinations couldn't be rendered 
+statically because it used `request.url`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching bookings: n [Error]: Dynamic server usage: Route 
+/api/customer/bookings couldn't be rendered statically because it used 
+`headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error
+    at l (C:\Users\arudh\BTG\.next\server\chunks\8948.js:1:37220)
+    at u (C:\Users\arudh\BTG\.next\server\app\api\preview\route.js:1:3203)
+    at s (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:19584)
+    at c 
+(C:\Users\arudh\BTG\.next\server\app\api\customer\bookings\route.js:1:1305)
+    at C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-route
+.runtime.prod.js:6:38417
+    at 
+C:\Users\arudh\BTG\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\arudh\BTG\node_modules\next\dist\compi
+led\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\arudh\BTG\node_modules\next\dist\compiled\@ope
+ntelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\co
+mpiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\c
+ompiled\@opentelemetry\api\index.js:1:18854) {
+  description: "Route /api/customer/bookings couldn't be rendered statically 
+because it used `headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error checking availability: B [Error]: Dynamic server usage: Route 
+/api/guide/availability/check couldn't be rendered statically because it used 
+`request.url`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error
+    at V (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-ro
+ute.runtime.prod.js:6:21778)
+    at Object.get (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-serv
+er\app-route.runtime.prod.js:6:29465)
+    at l (C:\Users\arudh\BTG\.next\server\app\api\guide\availability\check\rout
+e.js:1:604)
+    at C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-route
+.runtime.prod.js:6:38417
+    at 
+C:\Users\arudh\BTG\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\arudh\BTG\node_modules\next\dist\compi
+led\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\arudh\BTG\node_modules\next\dist\compiled\@ope
+ntelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\co
+mpiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\c
+ompiled\@opentelemetry\api\index.js:1:18854)
+    at 
+C:\Users\arudh\BTG\node_modules\next\dist\server\lib\trace\tracer.js:122:103 {
+  description: "Route /api/guide/availability/check couldn't be rendered 
+statically because it used `request.url`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching bookings: n [Error]: Dynamic server usage: Route 
+/api/guide/bookings couldn't be rendered statically because it used `headers`. 
+See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at l (C:\Users\arudh\BTG\.next\server\chunks\8948.js:1:37220)
+    at u (C:\Users\arudh\BTG\.next\server\app\api\preview\route.js:1:3203)
+    at s (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:19584)
+    at d 
+(C:\Users\arudh\BTG\.next\server\app\api\guide\bookings\route.js:1:1305)
+    at C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-route
+.runtime.prod.js:6:38417
+    at 
+C:\Users\arudh\BTG\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\arudh\BTG\node_modules\next\dist\compi
+led\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\arudh\BTG\node_modules\next\dist\compiled\@ope
+ntelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\co
+mpiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\c
+ompiled\@opentelemetry\api\index.js:1:18854) {
+  description: "Route /api/guide/bookings couldn't be rendered statically 
+because it used `headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Admin bookings error: n [Error]: Dynamic server usage: Route 
+/api/admin/bookings couldn't be rendered statically because it used `headers`. 
+See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at l (C:\Users\arudh\BTG\.next\server\chunks\8948.js:1:37220)
+    at d (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:26595)
+    at s (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:19584)
+    at c 
+(C:\Users\arudh\BTG\.next\server\app\api\admin\bookings\route.js:1:1305)
+    at C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-route
+.runtime.prod.js:6:38417
+    at 
+C:\Users\arudh\BTG\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\arudh\BTG\node_modules\next\dist\compi
+led\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\arudh\BTG\node_modules\next\dist\compiled\@ope
+ntelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\co
+mpiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\c
+ompiled\@opentelemetry\api\index.js:1:18854) {
+  description: "Route /api/admin/bookings couldn't be rendered statically 
+because it used `headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching AI analytics: n [Error]: Dynamic server usage: Route 
+/api/super-admin/ai-analytics couldn't be rendered statically because it used 
+`headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error
+    at l (C:\Users\arudh\BTG\.next\server\chunks\8948.js:1:37220)
+    at d (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:26595)
+    at s (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:19584)
+    at d (C:\Users\arudh\BTG\.next\server\app\api\super-admin\ai-analytics\rout
+e.js:1:1306)
+    at C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-route
+.runtime.prod.js:6:38417
+    at 
+C:\Users\arudh\BTG\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\arudh\BTG\node_modules\next\dist\compi
+led\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\arudh\BTG\node_modules\next\dist\compiled\@ope
+ntelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\co
+mpiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\c
+ompiled\@opentelemetry\api\index.js:1:18854) {
+  description: "Route /api/super-admin/ai-analytics couldn't be rendered 
+statically because it used `headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching best sellers: n [Error]: Dynamic server usage: Route 
+/api/super-admin/best-sellers couldn't be rendered statically because it used 
+`headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error
+    at l (C:\Users\arudh\BTG\.next\server\chunks\8948.js:1:37220)
+    at d (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:26595)
+    at s (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:19584)
+    at c (C:\Users\arudh\BTG\.next\server\app\api\super-admin\best-sellers\rout
+e.js:1:1306)
+    at C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-route
+.runtime.prod.js:6:38417
+    at 
+C:\Users\arudh\BTG\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\arudh\BTG\node_modules\next\dist\compi
+led\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\arudh\BTG\node_modules\next\dist\compiled\@ope
+ntelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\co
+mpiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\c
+ompiled\@opentelemetry\api\index.js:1:18854) {
+  description: "Route /api/super-admin/best-sellers couldn't be rendered 
+statically because it used `headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching super admin dashboard: n [Error]: Dynamic server usage: Route 
+/api/super-admin/dashboard couldn't be rendered statically because it used 
+`headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error
+    at l (C:\Users\arudh\BTG\.next\server\chunks\8948.js:1:37220)
+    at u (C:\Users\arudh\BTG\.next\server\app\api\preview\route.js:1:3203)
+    at s (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:19584)
+    at l 
+(C:\Users\arudh\BTG\.next\server\app\api\super-admin\dashboard\route.js:1:1304)
+    at C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-route
+.runtime.prod.js:6:38417
+    at 
+C:\Users\arudh\BTG\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\arudh\BTG\node_modules\next\dist\compi
+led\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\arudh\BTG\node_modules\next\dist\compiled\@ope
+ntelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\co
+mpiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\c
+ompiled\@opentelemetry\api\index.js:1:18854) {
+  description: "Route /api/super-admin/dashboard couldn't be rendered 
+statically because it used `headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching guides: n [Error]: Dynamic server usage: Route 
+/api/super-admin/guides couldn't be rendered statically because it used 
+`headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error
+    at l (C:\Users\arudh\BTG\.next\server\chunks\8948.js:1:37220)
+    at d (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:26595)
+    at s (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:19584)
+    at d 
+(C:\Users\arudh\BTG\.next\server\app\api\super-admin\guides\route.js:1:1305)
+    at C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-route
+.runtime.prod.js:6:38417
+    at 
+C:\Users\arudh\BTG\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\arudh\BTG\node_modules\next\dist\compi
+led\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\arudh\BTG\node_modules\next\dist\compiled\@ope
+ntelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\co
+mpiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\c
+ompiled\@opentelemetry\api\index.js:1:18854) {
+  description: "Route /api/super-admin/guides couldn't be rendered statically 
+because it used `headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching super admin analytics: n [Error]: Dynamic server usage: Route 
+/api/super-admin/analytics couldn't be rendered statically because it used 
+`headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error
+    at l (C:\Users\arudh\BTG\.next\server\chunks\8948.js:1:37220)
+    at d (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:26595)
+    at s (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:19584)
+    at d 
+(C:\Users\arudh\BTG\.next\server\app\api\super-admin\analytics\route.js:1:1305)
+    at C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-route
+.runtime.prod.js:6:38417
+    at 
+C:\Users\arudh\BTG\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\arudh\BTG\node_modules\next\dist\compi
+led\@opentelemetry\api\index.js:1:7062)
+    at ContextAPI.with (C:\Users\arudh\BTG\node_modules\next\dist\compiled\@ope
+ntelemetry\api\index.js:1:518)
+    at NoopTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\co
+mpiled\@opentelemetry\api\index.js:1:18093)
+    at ProxyTracer.startActiveSpan (C:\Users\arudh\BTG\node_modules\next\dist\c
+ompiled\@opentelemetry\api\index.js:1:18854) {
+  description: "Route /api/super-admin/analytics couldn't be rendered 
+statically because it used `headers`. See more info here: 
+https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Static generation failed due to dynamic usage on /dashboard/admin, reason: 
+headers
+    at l (C:\Users\arudh\BTG\.next\server\chunks\8948.js:1:37220)
+    at d (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:26595)
+    at s (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:19584)
+    at f (C:\Users\arudh\BTG\.next\server\app\dashboard\admin\page.js:1:10940)
+    at em (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-p
+age.runtime.prod.js:12:134808)
+    at e (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-pa
+ge.runtime.prod.js:12:137693)
+    at e_ (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-p
+age.runtime.prod.js:12:138168)
+    at Array.toJSON (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-se
+rver\app-page.runtime.prod.js:12:135777)
+    at stringify (<anonymous>)
+    at eE (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-p
+age.runtime.prod.js:12:142242)
+Static generation failed due to dynamic usage on /dashboard/customer, reason: 
+headers
+    at l (C:\Users\arudh\BTG\.next\server\chunks\8948.js:1:37220)
+    at d (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:26595)
+    at s (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:19584)
+    at w 
+(C:\Users\arudh\BTG\.next\server\app\dashboard\customer\page.js:1:9439)
+    at em (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-p
+age.runtime.prod.js:12:134808)
+    at e (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-pa
+ge.runtime.prod.js:12:137693)
+    at e_ (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-p
+age.runtime.prod.js:12:138168)
+    at Array.toJSON (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-se
+rver\app-page.runtime.prod.js:12:135777)
+    at stringify (<anonymous>)
+    at eE (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-p
+age.runtime.prod.js:12:142242)
+Static generation failed due to dynamic usage on /dashboard/guide, reason: 
+headers
+    at l (C:\Users\arudh\BTG\.next\server\chunks\8948.js:1:37220)
+    at d (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:26595)
+    at s (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:19584)
+    at v (C:\Users\arudh\BTG\.next\server\app\dashboard\guide\page.js:1:12015)
+    at em (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-p
+age.runtime.prod.js:12:134808)
+    at e (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-pa
+ge.runtime.prod.js:12:137693)
+    at e_ (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-p
+age.runtime.prod.js:12:138168)
+    at Array.toJSON (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-se
+rver\app-page.runtime.prod.js:12:135777)
+    at stringify (<anonymous>)
+    at eE (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-p
+age.runtime.prod.js:12:142242)
+   Generating static pages (86/347) 
+Static generation failed due to dynamic usage on /wishlist, reason: headers
+    at l (C:\Users\arudh\BTG\.next\server\chunks\8948.js:1:37220)
+    at d (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:26595)
+    at s (C:\Users\arudh\BTG\.next\server\chunks\1184.js:25:19584)
+    at m (C:\Users\arudh\BTG\.next\server\app\wishlist\page.js:1:14992)
+    at em (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-p
+age.runtime.prod.js:12:134808)
+    at e (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-pa
+ge.runtime.prod.js:12:137693)
+    at e_ (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-p
+age.runtime.prod.js:12:138168)
+    at Array.toJSON (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-se
+rver\app-page.runtime.prod.js:12:135777)
+    at stringify (<anonymous>)
+    at eE (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-p
+age.runtime.prod.js:12:142242)
+Static generation failed due to dynamic usage on /search, reason: 
+searchParams.destination
+    at l (C:\Users\arudh\BTG\.next\server\chunks\8948.js:1:37220)
+    at Object.get (C:\Users\arudh\BTG\.next\server\chunks\1808.js:2:23329)
+    at d (C:\Users\arudh\BTG\.next\server\app\search\page.js:1:14769)
+    at em (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-p
+age.runtime.prod.js:12:134808)
+    at e (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-pa
+ge.runtime.prod.js:12:137693)
+    at e_ (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-p
+age.runtime.prod.js:12:138168)
+    at Array.toJSON (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-se
+rver\app-page.runtime.prod.js:12:135777)
+    at stringify (<anonymous>)
+    at eE (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-p
+age.runtime.prod.js:12:142242)
+    at eT (C:\Users\arudh\BTG\node_modules\next\dist\compiled\next-server\app-p
+age.runtime.prod.js:12:142721)
+   Generating static pages (173/347) 
+   Generating static pages (260/347) 
+[WordPress] GraphQL errors: Cannot query field "stateHubFields" on type 
+"StateHub". Did you mean "stateHubId"?
+[WordPress] Query failed (safe mode): [WordPress] GraphQL errors: Cannot query 
+field "stateHubFields" on type "StateHub". Did you mean "stateHubId"?
+[WordPress] GraphQL errors: Cannot query field "stateHubFields" on type 
+"StateHub". Did you mean "stateHubId"?
+[WordPress] GraphQL errors: Cannot query field "stateHubFields" on type 
+"StateHub". Did you mean "stateHubId"?
+[WordPress] GraphQL errors: Cannot query field "stateHubFields" on type 
+"StateHub". Did you mean "stateHubId"?
+[WordPress] Query failed (safe mode): [WordPress] GraphQL errors: Cannot query 
+field "stateHubFields" on type "StateHub". Did you mean "stateHubId"?
+[WordPress] Query failed (safe mode): [WordPress] GraphQL errors: Cannot query 
+field "stateHubFields" on type "StateHub". Did you mean "stateHubId"?
+[WordPress] Query failed (safe mode): [WordPress] GraphQL errors: Cannot query 
+field "stateHubFields" on type "StateHub". Did you mean "stateHubId"?

@@ -1,0 +1,102 @@
+Section,Field Name,Character Limit,Content Type,SEO Importance,Instructions,Example
+=== ABOUT PAGE ===,,,,,,
+META,Page Title,60,Text,Critical,"Format: About Book The Guide — India's Trusted Travel Platform",About Book The Guide — India's Trusted Travel Platform
+META,Meta Description,155,Text,Critical,"Brand story + value prop + trust signals","Learn about Book The Guide — India's platform connecting travellers with verified local guides. Treks, heritage walks, group trips & more."
+META,Keywords,200,Comma-separated,High,"Include: about book the guide, book the guide india, local guides india","about book the guide, book the guide india, local guides india, verified travel guides"
+META,Canonical URL,-,URL,Critical,About page URL,https://www.booktheguide.com/about
+HERO,H1 Heading,50,Text,Critical,Page heading,About Book The Guide
+HERO,Tagline,120,Text,Medium,Brand tagline or mission statement,"Connecting travellers with verified local guides across India."
+HERO,Hero Image,-,Image URL,Medium,Team photo or brand hero image,Team/brand hero image
+OUR_STORY,Section H2,40,Text,High,Story heading,Our Story
+OUR_STORY,Paragraph 1,250,Text,High,"Origin story — why BTG was founded. Personal + authentic.","Book The Guide was born from a simple idea: the best way to experience India is through the eyes of a local..."
+OUR_STORY,Paragraph 2,250,Text,Medium,Growth & mission,"Today we connect thousands of travellers with verified guides across 25+ states..."
+OUR_STORY,Paragraph 3,200,Text,Medium,Vision for the future,"Our vision is to make every journey in India personal, safe, and unforgettable."
+OUR_MISSION,Section H2,40,Text,High,Mission heading,Our Mission
+OUR_MISSION,Mission Statement,200,Text,High,"Clear mission statement in 1-2 sentences","To make authentic local travel experiences accessible to everyone — while empowering guides with a sustainable livelihood."
+VALUES,Section H2,40,Text,Medium,Values heading,What We Believe In
+VALUES,Value 1 Title,30,Text,Medium,Core value name,Trust & Verification
+VALUES,Value 1 Description,120,Text,Medium,Value explanation,"Every guide is ID-verified, background-checked, and reviewed by real travellers."
+VALUES,Value 2 Title,30,Text,Medium,Core value name,Local Expertise
+VALUES,Value 2 Description,120,Text,Medium,Value explanation,"Our guides are born and raised locals who know their region inside out."
+VALUES,Value 3 Title,30,Text,Medium,Core value name,Fair Pricing
+VALUES,Value 3 Description,120,Text,Medium,Value explanation,"Transparent pricing with no hidden fees. Guides earn a fair commission."
+VALUES,Value 4 Title,30,Text,Medium,Core value name,Safety First
+VALUES,Value 4 Description,120,Text,Medium,Value explanation,"Certified guides, emergency protocols, and 24/7 support for every trip."
+STATS,Stat 1,20,Number + label,Medium,Company metric,25+ States Covered
+STATS,Stat 2,20,Number + label,Medium,Company metric,"500+ Verified Guides"
+STATS,Stat 3,20,Number + label,Medium,Company metric,"10,000+ Happy Travellers"
+STATS,Stat 4,20,Number + label,Medium,Company metric,4.8★ Average Rating
+TEAM,Section H2,40,Text,Low,Team heading,Meet the Team
+TEAM,Member: Name,40,Text,Low,Team member name,Founder Name
+TEAM,Member: Title,40,Text,Low,Designation,Co-Founder & CEO
+TEAM,Member: Bio,150,Text,Low,Short bio,"Passionate traveller and entrepreneur building India's largest guide marketplace."
+TEAM,Member: Photo,-,Image URL,Low,Square 1:1 professional headshot,Team member photo
+CTA,H2 Heading,60,Text,Medium,About page CTA,Join the BTG Community
+CTA,Subtitle,160,Text,Low,Call to action,"Whether you're a traveller or a guide — there's a place for you."
+CTA,Primary Button,25,Text,Medium,Traveller CTA,Find a Guide
+CTA,Secondary Button,25,Text,Medium,Guide CTA,Become a Guide
+JSON_LD,Organization Schema,-,Structured Data,Critical,"name, url, logo, contactPoint, sameAs (social links)",Auto-generated
+JSON_LD,BreadcrumbList,-,Structured Data,High,"Home > About",Auto-generated
+,,,,,,
+=== TERMS PAGE ===,,,,,,
+META,Page Title,60,Text,Critical,"Format: Terms of Service — Book The Guide",Terms of Service — Book The Guide
+META,Meta Description,155,Text,Medium,"Brief summary of TOS + last updated date","Read the Terms of Service for Book The Guide. Last updated January 2026."
+META,Canonical URL,-,URL,Critical,Terms page URL,https://www.booktheguide.com/terms
+CONTENT,H1 Heading,50,Text,High,Page heading,Terms of Service
+CONTENT,Last Updated,20,Date,Medium,Last revision date,January 1 2026
+CONTENT,Section 1: Acceptance,500,Legal text,Medium,"Standard acceptance of terms clause","By using Book The Guide you agree to these terms..."
+CONTENT,Section 2: Definitions,500,Legal text,Medium,"Define Platform, User, Guide, Booking, Content","'Platform' refers to the Book The Guide website and mobile apps..."
+CONTENT,Section 3: User Accounts,500,Legal text,Medium,Account creation & responsibilities,Users must provide accurate information...
+CONTENT,Section 4: Bookings & Payments,500,Legal text,High,"Booking process, payment terms, pricing","All prices are in INR. Payment is processed securely..."
+CONTENT,Section 5: Cancellations & Refunds,500,Legal text,Critical,"Clear cancellation policy. Most-read section.","Cancellation 7+ days before: full refund. 3-7 days: 50%. Under 3 days: no refund."
+CONTENT,Section 6: Guide Responsibilities,500,Legal text,Medium,What guides must provide,Guides must be verified, provide accurate descriptions...
+CONTENT,Section 7: User Conduct,500,Legal text,Medium,Prohibited behaviour,Users shall not misuse the platform...
+CONTENT,Section 8: Intellectual Property,300,Legal text,Low,Copyright & trademark,All content on Book The Guide is protected...
+CONTENT,Section 9: Limitation of Liability,500,Legal text,Medium,Liability limits,"Book The Guide acts as a marketplace..."
+CONTENT,Section 10: Dispute Resolution,300,Legal text,Medium,How disputes are handled,"Disputes shall be resolved through mediation..."
+CONTENT,Section 11: Changes to Terms,200,Legal text,Low,How users are notified of changes,"We may update these terms. Continued use constitutes acceptance."
+CONTENT,Section 12: Contact,200,Legal text,Low,How to reach legal/support,"For questions about these terms contact legal@booktheguide.com"
+,,,,,,
+=== PRIVACY POLICY PAGE ===,,,,,,
+META,Page Title,60,Text,Critical,"Format: Privacy Policy — Book The Guide",Privacy Policy — Book The Guide
+META,Meta Description,155,Text,Medium,"Summary of data practices + last updated","Read Book The Guide's Privacy Policy. Learn how we collect use and protect your data."
+META,Canonical URL,-,URL,Critical,Privacy page URL,https://www.booktheguide.com/privacy
+CONTENT,H1 Heading,50,Text,High,Page heading,Privacy Policy
+CONTENT,Last Updated,20,Date,Medium,Last revision date,January 1 2026
+CONTENT,Section 1: Data We Collect,500,Legal text,Medium,"Types of personal data collected","We collect name, email, phone, payment info, location data..."
+CONTENT,Section 2: How We Use Data,500,Legal text,Medium,"Purpose of data collection","We use your data to process bookings, send confirmations, improve our services..."
+CONTENT,Section 3: Data Sharing,500,Legal text,High,"Who has access to user data","We share necessary data with guides to fulfil bookings. We do not sell personal data."
+CONTENT,Section 4: Cookies & Tracking,300,Legal text,Medium,Cookie policy + analytics,"We use cookies for analytics and personalization. You can manage cookie preferences."
+CONTENT,Section 5: Data Security,300,Legal text,Medium,"How data is protected","We use industry-standard encryption (SSL/TLS) and secure servers."
+CONTENT,Section 6: User Rights,500,Legal text,High,"Rights under data protection laws","You have the right to access, correct, delete your data. Contact privacy@booktheguide.com"
+CONTENT,Section 7: Third-Party Services,300,Legal text,Medium,"Payment gateways, analytics, etc.",We use Razorpay for payments and Google Analytics for site analytics.
+CONTENT,Section 8: Children's Privacy,200,Legal text,Low,Age restrictions,Book The Guide is not intended for users under 18.
+CONTENT,Section 9: Changes & Contact,200,Legal text,Low,Update notification,We may update this policy. Contact privacy@booktheguide.com for questions.
+,,,,,,
+=== CONTACT PAGE ===,,,,,,
+META,Page Title,60,Text,Critical,"Format: Contact Us — Book The Guide",Contact Us — Book The Guide
+META,Meta Description,155,Text,High,"Contact methods + response time","Get in touch with Book The Guide. Email phone or form. Average response time under 2 hours."
+META,Keywords,200,Comma-separated,Medium,"Include: contact book the guide, book the guide email, book the guide phone","contact book the guide, book the guide support, book the guide email"
+META,Canonical URL,-,URL,Critical,Contact page URL,https://www.booktheguide.com/contact
+HERO,H1 Heading,40,Text,Critical,Page heading,Contact Us
+HERO,Tagline,120,Text,Medium,Welcoming subtitle,"Have a question or need help with a booking? We're here to help."
+FORM,Name Field,50,Text input,Low,Full name label,Your Name
+FORM,Email Field,80,Email input,Low,Email label,Email Address
+FORM,Phone Field,15,Phone input,Low,Phone label,Phone Number
+FORM,Subject Dropdown,5-8 options,Select,Low,"Dropdown options","General Inquiry, Booking Help, Become a Guide, Partnership, Report an Issue, Other"
+FORM,Message Field,1000,Textarea,Low,Message label,Your Message
+FORM,Submit Button,20,Text,Low,CTA text,Send Message
+CONTACT_INFO,Email,50,Email,High,Support email,hello@booktheguide.com
+CONTACT_INFO,Phone,15,Phone,High,Support phone,+91-XXXXXXXXXX
+CONTACT_INFO,WhatsApp,15,Phone,Medium,WhatsApp for quick queries,+91-XXXXXXXXXX
+CONTACT_INFO,Response Time,30,Text,Medium,Average response time,We typically respond within 2 hours.
+CONTACT_INFO,Office Hours,40,Text,Low,Operating hours,Mon–Sat 9 AM – 8 PM IST
+CONTACT_INFO,Office Address,200,Text,Low,Physical address (if applicable),Company address
+SOCIAL,Instagram,-,URL,Medium,Instagram profile URL,https://instagram.com/booktheguide
+SOCIAL,Twitter/X,-,URL,Low,Twitter profile URL,https://twitter.com/booktheguide
+SOCIAL,Facebook,-,URL,Low,Facebook page URL,https://facebook.com/booktheguide
+SOCIAL,LinkedIn,-,URL,Low,LinkedIn page URL,https://linkedin.com/company/booktheguide
+COMMON_QUERIES,Section H2,40,Text,Medium,FAQ-style section,Common Questions
+COMMON_QUERIES,Q1: Booking Issues,200,Text,Medium,Common booking question + answer,How do I modify or cancel a booking? — Log in to your dashboard or email us.
+COMMON_QUERIES,Q2: Become a Guide,200,Text,Medium,Guide onboarding info,How do I list as a guide? — Register at /register and complete verification.
+COMMON_QUERIES,Q3: Refund Policy,200,Text,Medium,Refund info + link to terms,What is the refund policy? — See our Terms of Service for full details.

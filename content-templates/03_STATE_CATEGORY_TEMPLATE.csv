@@ -1,0 +1,45 @@
+Section,Field Name,Character Limit,Content Type,SEO Importance,Instructions,Example (Uttarakhand + Adventure Guides)
+META,Page Title,60,Text,Critical,"Format: {Category} in {State} 2026 — Verified Experts | Book The Guide",Adventure Guides in Uttarakhand 2026 — Verified Experts | Book The Guide
+META,Meta Description,155,Text,Critical,"Include state + category + trust signals (✓ Verified ✓ Reviewed ✓ Instant Booking)","Find verified Adventure Guides in Uttarakhand. Compare treks, rafting & climbing. ✓ Verified ✓ Reviewed ✓ Instant Booking"
+META,Keywords,200,Comma-separated,High,"Include: {category} {state}, {category} in {state}, best {category} {state}, book {category} {state}","adventure guides Uttarakhand, adventure guides in Uttarakhand, best adventure guides Uttarakhand"
+META,Canonical URL,-,URL,Critical,Format: https://www.booktheguide.com/explore/{state-slug}/{category-slug},https://www.booktheguide.com/explore/uttarakhand/adventure-guides
+META,OG Image,1200x630,Image URL,High,State+category specific image,/images/btg/optimized/uk-adventure.webp
+BREADCRUMB,Level 1,-,Link,High,Home → Explore,Home
+BREADCRUMB,Level 2,-,Link,High,"Explore → State",Uttarakhand
+BREADCRUMB,Level 3,-,Text,High,"Current page: State + Category",Adventure Guides in Uttarakhand
+HERO,Hero Image,-,Image URL,Medium,"16:9 landscape. State-specific category action shot. Min 1920x1080",/images/btg/optimized/uk-adventure.webp
+HERO,H1 Heading,60,Text,Critical,"Format: {Category} in {State}",Adventure Guides in Uttarakhand
+HERO,Tagline,120,Text,Medium,State-specific category tagline,"Conquer Himalayan peaks, raft the Ganges & trek through alpine meadows with verified local guides."
+HERO,Results Count Badge,20,Number,Low,Total results for this combo,12 adventures found
+ABOUT,H2 Section Title,80,Text,High,"Format: {Category} in {State}",Adventure Guides in Uttarakhand
+ABOUT,Description,350,Text,Critical,"2 paragraphs. State-specific category info. What makes this state great for this category.","Uttarakhand is India's adventure capital. From Roopkund and Kedarnath treks to Rishikesh rafting..."
+ABOUT,State Highlights for Category,4-6 items,Pill tags,Medium,"Activities/places specific to this state+category combo","Kedarnath Trek, Roopkund Trek, Rishikesh Rafting, Chopta Tungnath, Valley of Flowers, Auli Skiing"
+LISTINGS,Section H2,60,Text,High,"Format: Browse {Category} in {State}",Browse Adventure Guides in Uttarakhand
+LISTINGS,Card: Title,60,Text,High,Trip/guide title,Kedarnath Trek — 5 Day Guided Expedition
+LISTINGS,Card: Guide Name,40,Text,Medium,Guide's display name,Rajesh Sharma
+LISTINGS,Card: Location,40,Text,High,City within the state,Rishikesh
+LISTINGS,Card: Price,15,Currency,High,"Format: ₹X,XXX/person","₹4,999/person"
+LISTINGS,Card: Rating,5,Stars + count,High,"Format: 4.9 (85)","4.9 (85)"
+LISTINGS,Card: Duration,20,Text,Medium,Trip length,5 Days · 4 Nights
+LISTINGS,Card: Difficulty,20,Text,Medium,"Easy / Moderate / Challenging / Expert",Moderate
+LISTINGS,Card: Image,-,Image URL,High,Landscape 16:9,Product hero image
+LISTINGS,Card: Badge,20,Text,Medium,"Bestseller / New / Top Rated / Limited Spots",Bestseller
+POPULAR_DESTINATIONS,Section H2,60,Text,High,"Format: Popular Destinations for {Category} in {State}",Popular Destinations for Adventures in Uttarakhand
+POPULAR_DESTINATIONS,Destination Cards,6-8 max,Link cards,High,"Each card: City Name + Count. Links to destination page.","Rishikesh (15), Chopta (8), Auli (5), Kedarnath (12)"
+SIMILAR_CATEGORIES,Section H2,60,Text,High,"Format: More Experiences in {State}",More Experiences in Uttarakhand
+SIMILAR_CATEGORIES,Category Links,4 max,Link cards,High,"Other categories available in this state. Links to /explore/{state}/{category-slug}","Tourist Guides (10), Group Trips (8), Heritage Walks (4), Travel with Influencers (3)"
+FAQ,FAQ 1 Question,100,Text,Critical,"Format: What {category} are available in {State}?",What adventure activities are available in Uttarakhand?
+FAQ,FAQ 1 Answer,250,Text,Critical,List specific activities in this state,"Uttarakhand offers trekking (Kedarnath, Roopkund), rafting (Rishikesh), skiing (Auli), and more."
+FAQ,FAQ 2 Question,100,Text,Critical,"Format: How much do {category} cost in {State}?",How much do adventure guides cost in Uttarakhand?
+FAQ,FAQ 2 Answer,250,Text,Critical,State-specific price range,"Prices range from ₹2,000 for day trips to ₹15,000+ for multi-day treks."
+FAQ,FAQ 3 Question,100,Text,High,"Format: Best time for {category} in {State}?",What is the best time for adventure activities in Uttarakhand?
+FAQ,FAQ 3 Answer,250,Text,High,Season-specific category advice,"March–June for trekking, September–November for rafting, January–March for skiing."
+FAQ,FAQ 4 Question,100,Text,High,Safety/verification question,"Are adventure guides in Uttarakhand verified?",
+FAQ,FAQ 4 Answer,250,Text,High,Verification assurance,Yes. All guides are verified with certification checks and experience validation.
+CTA,H2 Heading,60,Text,Medium,"Format: Book {Category} in {State}",Book an Adventure Guide in Uttarakhand
+CTA,Subtitle,160,Text,Low,Urgency + trust,"12 verified adventure guides ready to take you on your next expedition. Book securely."
+CTA,Primary Button,25,Text,Medium,Action text,Browse All Adventures
+CTA,Secondary Button,25,Text,Low,Custom option,Request Custom Trip
+INTERNAL_LINKS,Back to State Hub,-,Link,High,"Link to parent state hub page",← Explore Uttarakhand
+INTERNAL_LINKS,Back to Category,-,Link,High,"Link to parent category page",← All Adventure Guides
+JSON_LD,Schema Type,-,Structured Data,Critical,"CollectionPage + FAQPage + BreadcrumbList",Auto-generated from content above

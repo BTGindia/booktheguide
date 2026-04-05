@@ -1,0 +1,60 @@
+Section,Field Name,Character Limit,Content Type,SEO Importance,Instructions,Example (Uttarakhand)
+META,Page Title,60,Text,Critical,"Format: Explore {State} 2026 — Best Guides Treks Heritage Walks & Group Trips | Book The Guide",Explore Uttarakhand 2026 — Best Guides Treks Heritage Walks & Group Trips | Book The Guide
+META,Meta Description,155,Text,Critical,"Include state name + key activities + trust signals (✓ Verified ✓ Reviewed ✓ Instant Booking)","Discover Uttarakhand with verified local guides. Treks, heritage walks, group trips & adventure guides. ✓ Verified ✓ Reviewed ✓ Instant Booking"
+META,Keywords,200,Comma-separated,High,"Include: {state} tours, {state} guides, {state} treks, travel {state}, best time to visit {state}","Uttarakhand tours, Uttarakhand guides, Uttarakhand treks, travel Uttarakhand, best time to visit Uttarakhand"
+META,Canonical URL,-,URL,Critical,Format: https://www.booktheguide.com/explore/{state-slug},https://www.booktheguide.com/explore/uttarakhand
+META,OG Image,1200x630,Image URL,High,Hero image or state-specific banner image,/images/btg/optimized/frame-7.webp
+HERO,Hero Image,-,Image URL,Medium,16:9 landscape. High-res state landscape photo. Min 1920x1080,/images/btg/optimized/frame-7.webp
+HERO,Region Label,30,Text,Low,"Format: {North India/South India/East India/West India} · {State Code}",North India · UK
+HERO,H1 Heading,40,Text,Critical,"Format: Explore {State Name}",Explore Uttarakhand
+HERO,Tagline,80,Text,Medium,State tagline — evocative and concise,Land of the Gods — Where the Himalayas Begin
+HERO,Best Time Badge,30,Text,Medium,Format: Month – Month,March – June | September – November
+HERO,Cities Count Badge,10,Number,Low,Count of popular cities in the state,5+ Cities
+ABOUT,H2 Section Title,60,Text,High,"Format: About {State Name}",About Uttarakhand
+ABOUT,Description,400,Text,Critical,"2-3 paragraphs. Mention key attractions + activities + geography. Keywords-rich.","Uttarakhand is the spiritual heartland of India and a trekker's paradise. From the Valley of Flowers to Kedarnath..."
+ABOUT,Top Highlights,5-8 items,Pill tags,Medium,"Key attractions/activities as pill tags","Valley of Flowers, Kedarnath Trek, Rishikesh Rafting, Chopta Tungnath, Jim Corbett"
+SIDEBAR,Best Time to Visit,40,Text,High,Season range with months,March – June | September – November
+SIDEBAR,Popular Cities,5-8 items,Comma list,High,Cities where BTG operates,"Rishikesh, Mussoorie, Nainital, Haridwar, Auli"
+SIDEBAR,Available Count,30,Text,Medium,"Format: {X} Experiences · {Y} Guides",12 Experiences · 6 Guides
+CATEGORIES,Section H2,60,Text,High,"Format: Experiences in {State Name}",Experiences in Uttarakhand
+CATEGORIES,Section Subtitle,100,Text,Low,Guide user to pick a category,Choose a category to find the perfect guide or trip.
+DESTINATIONS,Section H2,60,Text,High,"Format: Top Destinations in {State Name}",Top Destinations in Uttarakhand
+DESTINATIONS,Destination Cards,8 max,Card data,Medium,Each card: Name + product count,Rishikesh (15 experiences)
+EXPERIENCES,Section H2,60,Text,High,Format: Popular Experiences,Popular Experiences
+EXPERIENCES,Section Subtitle,100,Text,Low,Social proof text,"Top-rated trips and guides in Uttarakhand."
+GUIDES,Section H2,60,Text,High,"Format: Top Guides in {State Name}",Top Guides in Uttarakhand
+GUIDES,Section Subtitle,120,Text,Low,Trust-building text,"Verified local experts ready to show you the best of Uttarakhand."
+BLOG,Section H2,60,Text,Medium,"Format: {State Name} Travel Blog",Uttarakhand Travel Blog
+BLOG,Section Subtitle,120,Text,Low,Content types mentioned,"Itineraries, best time to visit, packing tips, and insider guides for Uttarakhand."
+HOW_IT_WORKS,Step 1 Title,30,Text,Medium,Action-oriented,Search & Compare
+HOW_IT_WORKS,Step 1 Description,150,Text,Medium,Include state name,"Browse verified guides and trips in Uttarakhand. Filter by activity, duration, price, and ratings."
+HOW_IT_WORKS,Step 2 Title,30,Text,Medium,Action-oriented,Book Instantly
+HOW_IT_WORKS,Step 2 Description,150,Text,Medium,Trust signals,Choose a fixed departure or request a custom trip. Pay securely online — no hidden fees.
+HOW_IT_WORKS,Step 3 Title,30,Text,Medium,Action-oriented,Adventure Awaits
+HOW_IT_WORKS,Step 3 Description,150,Text,Medium,Include state name,"Meet your verified local guide and experience the best of Uttarakhand."
+TRUST,Stat 1,20,Text,Medium,Verification stat,100% Verified Guides
+TRUST,Stat 2,20,Text,Medium,Rating stat,4.8★ Average Rating
+TRUST,Stat 3,20,Text,Medium,Volume stat,10000+ Happy Travellers
+TRUST,Stat 4,20,Text,Medium,Response stat,< 2 hrs Avg Response Time
+TESTIMONIALS,Testimonial 1 Quote,200,Text,Medium,"Include state name. Authentic voice.","{State} was absolutely magical. Our guide knew every hidden trail. Worth every rupee!"
+TESTIMONIALS,Testimonial 1 Name,50,Text,Low,Customer name or placeholder,Traveller Review
+TESTIMONIALS,Testimonial 2 Quote,200,Text,Medium,"Include state name. Different angle.",The best way to explore {State} is with a local guide from BTG.
+TESTIMONIALS,Testimonial 3 Quote,200,Text,Medium,"Include state name. Booking focus.",Booking was seamless and our guide went above and beyond.
+FAQ,FAQ 1 Question,80,Text,Critical,"Format: What is the best time to visit {State}?",What is the best time to visit Uttarakhand?
+FAQ,FAQ 1 Answer,250,Text,Critical,Include season months + activities,"The best time to visit Uttarakhand is March–June and September–November."
+FAQ,FAQ 2 Question,80,Text,Critical,"Format: How do I book a guide in {State}?",How do I book a guide in Uttarakhand?
+FAQ,FAQ 2 Answer,250,Text,Critical,Step-by-step booking process,"Search for Uttarakhand on Book The Guide, browse verified guides, and book instantly online."
+FAQ,FAQ 3 Question,80,Text,High,"Format: Are the guides in {State} verified?",Are the guides in Uttarakhand verified?
+FAQ,FAQ 3 Answer,250,Text,High,Verification process explanation,Yes! Every guide on Book The Guide is verified with ID checks and experience validation.
+FAQ,FAQ 4 Question,80,Text,High,"Format: What types of experiences are available in {State}?",What types of experiences are available in Uttarakhand?
+FAQ,FAQ 4 Answer,250,Text,High,List all 5 categories + top highlights,"Uttarakhand offers Tourist Guides, Group Trips, Adventure Guides, Heritage Walks..."
+FAQ,FAQ 5 Question,80,Text,High,"Format: What are the popular destinations in {State}?",What are the popular destinations in Uttarakhand?
+FAQ,FAQ 5 Answer,250,Text,High,List popular cities,"Popular destinations include Rishikesh, Mussoorie, Nainital, Haridwar, Auli."
+FAQ,FAQ 6 Question,80,Text,Medium,Cancellation policy question,Can I cancel my booking in Uttarakhand?
+FAQ,FAQ 6 Answer,250,Text,Medium,Cancellation details,Yes. 7+ days before = full refund. Check specific terms on each listing.
+CTA,H2 Heading,60,Text,Medium,"Format: Ready to Explore {State}?",Ready to Explore Uttarakhand?
+CTA,Subtitle,160,Text,Low,Aspirational + action-oriented,"Book a verified local guide and experience Uttarakhand like never before."
+CTA,Primary Button,25,Text,Medium,Action text,Find Experiences
+CTA,Secondary Button,25,Text,Low,Secondary action,Plan a Custom Trip
+INTERNAL_LINKS,Other States,10 max,Link list,High,"Link to other primary state hub pages","Himachal Pradesh, Ladakh, Kashmir, Rajasthan, Delhi..."
+JSON_LD,Schema Type,-,Structured Data,Critical,"TouristDestination + FAQPage + BreadcrumbList",Auto-generated from content above

@@ -1,0 +1,63 @@
+Section,Field Name,Character Limit,Content Type,SEO Importance,Instructions,Example
+--- BLOG INDEX PAGE ---,,,,,,
+META,Page Title,60,Text,Critical,"Format: Travel Blog — Tips Guides & Inspiration {Year} | Book The Guide",Travel Blog — Tips Guides & Inspiration 2026 | Book The Guide
+META,Meta Description,155,Text,Critical,"Include blog purpose + content types + brand name","Explore travel tips, destination guides, packing lists & insider stories from Book The Guide. Plan your next adventure with expert advice."
+META,Keywords,200,Comma-separated,High,"Include: travel blog india, travel tips, travel guides, destination guides","travel blog india, travel tips, travel guides, destination guides, packing tips"
+META,Canonical URL,-,URL,Critical,Blog index URL,https://www.booktheguide.com/blog
+HERO,H1 Heading,50,Text,Critical,Blog index heading,Travel Blog
+HERO,Tagline,120,Text,Medium,What readers will find,"Expert travel tips, destination guides, and insider stories to help you plan your next adventure."
+HERO,Featured Post,-,Blog card (large),High,Latest or editor's pick blog post — full-width card,Featured blog post
+CATEGORIES,Filter Tags,6-10,Tags,Medium,"Clickable filter tags for blog categories","All, Destinations, Trekking, Heritage, Tips, Packing, Food, Budget"
+LISTING,Blog Card: Title,80,Text,Critical,Blog post headline,10 Must-Do Treks in Uttarakhand for 2026
+LISTING,Blog Card: Excerpt,160,Text,High,First 1-2 sentences or custom excerpt,"From easy day hikes to challenging high-altitude treks, here are the 10 best treks in Uttarakhand..."
+LISTING,Blog Card: Thumbnail,-,Image URL,High,16:9 landscape thumbnail. Relevant to article topic.,Blog thumbnail image
+LISTING,Blog Card: Author,40,Text,Medium,Author name,BTG Editorial Team
+LISTING,Blog Card: Date,20,Date,Medium,Published date,15 Mar 2026
+LISTING,Blog Card: Read Time,10,Text,Low,"Format: X min read",8 min read
+LISTING,Blog Card: Category Tag,20,Text,Medium,Primary category,Destinations
+NEWSLETTER,Section H2,40,Text,Low,Newsletter CTA heading,Stay Updated
+NEWSLETTER,Subtitle,120,Text,Low,What subscribers get,"Get weekly travel tips, new destination guides, and exclusive offers straight to your inbox."
+NEWSLETTER,CTA Button,20,Text,Low,Subscribe action,Subscribe
+,,,,,,
+--- BLOG ARTICLE PAGE ---,,,,,,
+META,Page Title,60,Text,Critical,"Format: {Article Title} | Book The Guide Blog",10 Must-Do Treks in Uttarakhand for 2026 | Book The Guide Blog
+META,Meta Description,155,Text,Critical,"Summarize the article in 1-2 sentences. Include primary keyword.","Discover the 10 best treks in Uttarakhand for 2026 — from easy day hikes to challenging expeditions. Expert tips, difficulty ratings & costs."
+META,Keywords,200,Comma-separated,High,"Primary keyword + related terms + long-tail keywords","Uttarakhand treks, best treks Uttarakhand, trekking in Uttarakhand 2026, Kedarnath trek"
+META,Canonical URL,-,URL,Critical,Article URL,https://www.booktheguide.com/blog/10-must-do-treks-uttarakhand-2026
+META,OG Image,1200x630,Image URL,Critical,Article hero image — compelling + relevant,Article hero image
+META,OG Type,-,Text,Critical,Always article,article
+BREADCRUMB,Level 1,-,Link,High,Home,Home
+BREADCRUMB,Level 2,-,Link,High,Blog,Blog
+BREADCRUMB,Level 3,-,Text,High,Current article title,10 Must-Do Treks in Uttarakhand
+ARTICLE_HEADER,H1 Title,100,Text,Critical,"Compelling, keyword-rich headline. Numbers work well.",10 Must-Do Treks in Uttarakhand for 2026
+ARTICLE_HEADER,Author Name,40,Text,Medium,Author byline,Rajesh from BTG
+ARTICLE_HEADER,Author Photo,-,Image URL,Low,"Square 1:1 headshot",Author avatar
+ARTICLE_HEADER,Published Date,20,Date,High,Publication date,March 15 2026
+ARTICLE_HEADER,Updated Date,20,Date,High,"Last updated date (if revised)",March 20 2026
+ARTICLE_HEADER,Read Time,10,Text,Low,Estimated reading time,8 min read
+ARTICLE_HEADER,Category Tag,20,Text,Medium,Primary category,Destinations
+ARTICLE_HEADER,Hero Image,-,Image URL,Critical,"Full-width hero. 16:9 landscape. High-res.",Article hero image
+ARTICLE_HEADER,Hero Image Alt Text,100,Text,High,"Descriptive alt text for accessibility & SEO",Panoramic view of Kedarnath temple surrounded by snow-capped Himalayan peaks
+TABLE_OF_CONTENTS,TOC Items,10 max,Anchor links,Medium,"Auto-generated from H2 headings. Helps with Featured Snippets.","1. Kedarnath Trek, 2. Roopkund Trek, 3. Valley of Flowers..."
+ARTICLE_BODY,H2 Subheadings,80 each,Text,Critical,"Each main section should have keyword-rich H2. Use 5-10 H2s per article.","Kedarnath Trek — The Sacred Journey"
+ARTICLE_BODY,H3 Subheadings,60 each,Text,High,"Sub-sections under H2. Use when breaking down a topic further.","Difficulty Level, Best Time to Go, Cost Breakdown"
+ARTICLE_BODY,Body Paragraphs,150-200 words each,Text,Critical,"Well-structured paragraphs. Short sentences. Include keywords naturally. First paragraph should answer the main query.","The Kedarnath Trek is one of India's most popular pilgrimages..."
+ARTICLE_BODY,Lists/Bullets,5-10 items,List,High,"Use for tips, checklists, comparisons. Helps with Featured Snippets.","What to pack: Trekking shoes, Rain jacket, Sunscreen..."
+ARTICLE_BODY,Internal Links,3-5 per article,Links,Critical,"Link to: relevant state hubs, category pages, guide products, other blog posts.","Book a [verified adventure guide in Uttarakhand](/explore/uttarakhand/adventure-guides)"
+ARTICLE_BODY,External Links,1-3 per article,Links,Medium,"Link to authoritative sources (tourism boards, wikipedia)",Uttarakhand Tourism Official Website
+ARTICLE_BODY,Inline Images,3-5 per article,Image + alt text,High,"Contextual images within the article. Include descriptive alt text.",Each image with descriptive alt text
+ARTICLE_BODY,Image Captions,80 each,Text,Low,"Descriptive caption below each image","View of Tungnath Temple at 3680m — the highest Shiva temple in the world"
+ARTICLE_BODY,Word Count,1500-2500,Target,Critical,"Optimal for SEO ranking. Min 1500 words for pillar content.",1800 words total
+CTA_INLINE,Mid-Article CTA,60 + 120,Heading + text,Medium,"Placed after 3rd or 4th section. Contextual to article topic.","Ready to trek Kedarnath? Book a verified guide and leave the planning to experts."
+CTA_INLINE,CTA Button,25,Text,Medium,Action button,Find Guides
+CTA_END,End CTA Heading,60,Text,Medium,Post-article CTA,Plan Your Uttarakhand Adventure
+CTA_END,End CTA Text,160,Text,Low,Wrap-up conversion push,"Loved these treks? Book a verified local guide on BTG and make it happen."
+CTA_END,End CTA Button,25,Text,Medium,Action button,Explore Uttarakhand
+RELATED_POSTS,Section H2,40,Text,Medium,Related articles heading,Related Articles
+RELATED_POSTS,Related Cards,3-4 max,Blog cards,High,"Topically related articles — same state or same category","Best Time to Visit Uttarakhand, Packing List for Himalayan Treks"
+AUTHOR_BIO,Author Name,40,Text,Low,Full name,Rajesh Kumar
+AUTHOR_BIO,Author Bio,200,Text,Low,"1-2 lines about the author","Travel writer and trekking enthusiast who has explored 15+ Indian states."
+AUTHOR_BIO,Author Photo,-,Image URL,Low,Square 1:1 headshot,Author photo
+SOCIAL_SHARE,Share Buttons,4-5,Buttons,Low,"Social sharing buttons","WhatsApp, Twitter/X, Facebook, LinkedIn, Copy Link"
+JSON_LD,BlogPosting Schema,-,Structured Data,Critical,"headline, datePublished, dateModified, author, image, publisher, mainEntityOfPage",Auto-generated from content above
+JSON_LD,BreadcrumbList,-,Structured Data,Critical,"Home > Blog > Article Title",Auto-generated from breadcrumb

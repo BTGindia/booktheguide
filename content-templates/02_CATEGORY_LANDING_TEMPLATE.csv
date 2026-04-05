@@ -1,0 +1,46 @@
+Section,Field Name,Character Limit,Content Type,SEO Importance,Instructions,Example (Adventure Guides)
+META,Page Title,60,Text,Critical,"Format: {Category} in India 2026 — Verified Experts | Book The Guide",Adventure Guides in India 2026 — Verified Experts | Book The Guide
+META,Meta Description,155,Text,Critical,"Include category + trust signals (✓ Verified ✓ Reviewed ✓ Instant Booking)","Find verified Adventure Guides across India. Compare prices, read reviews & book instantly. ✓ Verified ✓ Reviewed ✓ Instant Booking"
+META,Keywords,200,Comma-separated,High,"Include: {category} India, best {category}, {category} near me, book {category}","adventure guides India, best adventure guides, adventure guides near me, book adventure guide"
+META,Canonical URL,-,URL,Critical,Format: https://www.booktheguide.com/experiences/{category-slug},https://www.booktheguide.com/experiences/adventure-guides
+META,OG Image,1200x630,Image URL,High,Category-specific hero image,/images/btg/optimized/adventure-hero.webp
+HERO,Hero Image,-,Image URL,Medium,16:9 landscape. Action shot representing the category. Min 1920x1080,/images/btg/optimized/adventure-hero.webp
+HERO,H1 Heading,50,Text,Critical,"Format: {Category Name}",Adventure Guides
+HERO,Tagline,100,Text,Medium,"Category description — what the traveller gets","Conquer peaks, rapids & trails with certified adventure guides across India."
+HERO,CTA Button,25,Text,Medium,Primary action text,Explore Adventures
+HERO,Total Count Badge,30,Number + Text,Low,"Format: {X} adventures available",42 adventures available
+ABOUT,H2 Section Title,60,Text,High,"Format: What Are {Category}?",What Are Adventure Guides?
+ABOUT,Description,400,Text,Critical,"2-3 paragraphs. Explain the category. Keywords-rich. Include what traveller can expect.","Adventure Guides on Book The Guide are certified experts in trekking, mountaineering, rafting, and more. Every guide is verified..."
+ABOUT,Key Benefits,4-6 items,List items,Medium,"Benefits of booking this category","Certified & verified experts, Personalized adventure difficulty levels, Safety equipment included, Local terrain expertise"
+FILTER_BAR,Sort Options,4 options,Dropdown values,Low,"Sorting options for listings","Recommended, Price: Low to High, Price: High to Low, Highest Rated"
+FILTER_BAR,Duration Options,4-5 options,Filter values,Low,"Duration filters","Half Day, Full Day, 2-3 Days, 4-7 Days, 7+ Days"
+LISTINGS,Card: Title,60,Text,High,Trip/guide title,Kedarnath Trek with Expert Guide
+LISTINGS,Card: Location,40,Text,High,City + State,Rishikesh · Uttarakhand
+LISTINGS,Card: Price,15,Currency,High,"Format: ₹X,XXX/person","₹3,499/person"
+LISTINGS,Card: Rating,5,Stars + count,High,"Format: 4.8 (120)","4.8 (120)"
+LISTINGS,Card: Duration,20,Text,Medium,Trip length,4 Days · 3 Nights
+LISTINGS,Card: Image,-,Image URL,High,Landscape 16:9,Product hero image
+LISTINGS,Card: Badge,20,Text,Medium,"Optional: Bestseller / New / Top Rated / Limited Spots",Bestseller
+TRUST,Stat 1,20,Text,Medium,Category-specific stat,500+ Adventures Completed
+TRUST,Stat 2,20,Text,Medium,Rating stat,4.8★ Average Rating
+TRUST,Stat 3,20,Text,Medium,Safety stat,100% Safety Record
+TRUST,Stat 4,20,Text,Medium,Verification stat,All Guides Verified
+BROWSE_BY_STATE,Section H2,60,Text,High,"Format: Find {Category} by State",Find Adventure Guides by State
+BROWSE_BY_STATE,Section Subtitle,120,Text,Low,Guide user intent,"Explore {category} in your favourite state — each one curated and verified."
+BROWSE_BY_STATE,State Cards,10-15 max,Link cards,Critical,"Each card: State Name + Product Count. Links to /explore/{state}/{category-slug}","Uttarakhand (12), Himachal Pradesh (8), Ladakh (6), Rajasthan (10)..."
+FAQ,FAQ 1 Question,80,Text,Critical,"Format: What are {Category}?",What are Adventure Guides?
+FAQ,FAQ 1 Answer,250,Text,Critical,Category explanation,Adventure Guides are certified experts who lead treks rafting and climbing experiences across India.
+FAQ,FAQ 2 Question,80,Text,Critical,"Format: How do I book {Category}?",How do I book an Adventure Guide?
+FAQ,FAQ 2 Answer,250,Text,Critical,Step-by-step booking process,"Browse our adventure listings, pick your preferred date, and book instantly online."
+FAQ,FAQ 3 Question,80,Text,High,"Format: Are {Category} safe?",Are Adventure Guides safe?
+FAQ,FAQ 3 Answer,250,Text,High,Safety & verification assurance,"Yes. All adventure guides are verified certified and carry safety equipment."
+FAQ,FAQ 4 Question,80,Text,High,Pricing question,"How much do Adventure Guides cost?",
+FAQ,FAQ 4 Answer,250,Text,High,Price range + what's included,"Prices range from ₹1,500 to ₹15,000+ depending on destination, duration, and group size."
+FAQ,FAQ 5 Question,80,Text,Medium,Customization question,Can I customize my adventure trip?
+FAQ,FAQ 5 Answer,250,Text,Medium,Custom trip option,"Yes! Contact the guide directly to plan a custom itinerary based on your fitness level and interests."
+CTA,H2 Heading,60,Text,Medium,"Format: Ready to Book {Category}?",Ready to Book an Adventure Guide?
+CTA,Subtitle,160,Text,Low,Aspirational + urgency,"Join 10,000+ travellers who've found their perfect adventure guide. Book securely today."
+CTA,Primary Button,25,Text,Medium,Action text,Browse Adventures
+CTA,Secondary Button,25,Text,Low,Custom trip CTA,Request Custom Trip
+INTERNAL_LINKS,Related Categories,4 max,Link list,High,"Other category landing pages","Tourist Guides, Group Trips, Heritage Walks, Travel with Influencers"
+JSON_LD,Schema Type,-,Structured Data,Critical,"CollectionPage + FAQPage + BreadcrumbList",Auto-generated from content above
