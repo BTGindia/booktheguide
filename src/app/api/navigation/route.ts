@@ -1,7 +1,9 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getAllStates } from '@/lib/states';
 import { getNavCategories, getDisabledCategorySlugs } from '@/lib/active-packages';
+
+export const dynamic = 'force-dynamic';
 
 // GET /api/navigation - Get navigation menu data with dynamic subcategories
 // Only returns states/categories that have at least one approved, active package

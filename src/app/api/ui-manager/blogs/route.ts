@@ -1,7 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+
+export const dynamic = 'force-dynamic';
 
 function generateSlug(title: string): string {
   return title
@@ -12,7 +14,7 @@ function generateSlug(title: string): string {
     .trim();
 }
 
-// GET /api/ui-manager/blogs — List all blogs
+// GET /api/ui-manager/blogs â€” List all blogs
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -35,7 +37,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/ui-manager/blogs — Create a new blog
+// POST /api/ui-manager/blogs â€” Create a new blog
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -87,7 +89,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PUT /api/ui-manager/blogs — Update an existing blog
+// PUT /api/ui-manager/blogs â€” Update an existing blog
 export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -135,7 +137,7 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// DELETE /api/ui-manager/blogs — Delete a blog
+// DELETE /api/ui-manager/blogs â€” Delete a blog
 export async function DELETE(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

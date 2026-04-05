@@ -1,5 +1,7 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import {
+
+export const dynamic = 'force-dynamic';
   CERTIFICATION_TYPES,
   ISSUING_AUTHORITIES,
   LANGUAGES,
@@ -12,8 +14,8 @@ import {
   ID_PROOF_TYPES,
 } from '@/lib/taxonomy';
 
-// GET /api/taxonomy — returns all controlled vocabularies
-// No auth required — used by forms
+// GET /api/taxonomy â€” returns all controlled vocabularies
+// No auth required â€” used by forms
 
 export async function GET() {
   return NextResponse.json({

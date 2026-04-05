@@ -1,8 +1,10 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import slugify from 'slugify';
+
+export const dynamic = 'force-dynamic';
 
 // GET /api/guide/products - List guide's products
 export async function GET() {
@@ -91,7 +93,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'This experience category is currently disabled by admin' }, { status: 400 });
           }
         } catch {
-          // Table might not exist — allow
+          // Table might not exist â€” allow
         }
       }
     }

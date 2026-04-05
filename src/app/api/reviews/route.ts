@@ -1,8 +1,10 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { recalculateSingleGuideScore } from '@/lib/guide-score';
+
+export const dynamic = 'force-dynamic';
 
 // GET /api/reviews - Get reviews (for customer: their reviews, for guide: reviews of them)
 export async function GET(request: Request) {

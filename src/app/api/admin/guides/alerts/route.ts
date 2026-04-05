@@ -1,10 +1,12 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { REVERIFICATION_TRIGGERS } from '@/lib/taxonomy';
 
-// POST /api/admin/guides/alerts — Run automated alert checks
+export const dynamic = 'force-dynamic';
+
+// POST /api/admin/guides/alerts â€” Run automated alert checks
 // This should be called by a cron job (daily) or manually by admin
 export async function POST(request: Request) {
   try {
@@ -130,7 +132,7 @@ export async function POST(request: Request) {
   }
 }
 
-// GET /api/admin/guides/alerts — Get current alert status
+// GET /api/admin/guides/alerts â€” Get current alert status
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);

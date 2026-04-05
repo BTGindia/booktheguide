@@ -1,9 +1,11 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
-// POST /api/admin/manage/cities — Create a new city
+export const dynamic = 'force-dynamic';
+
+// POST /api/admin/manage/cities â€” Create a new city
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -40,7 +42,7 @@ export async function POST(request: Request) {
   }
 }
 
-// PUT /api/admin/manage/cities — Update a city
+// PUT /api/admin/manage/cities â€” Update a city
 export async function PUT(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -68,7 +70,7 @@ export async function PUT(request: Request) {
   }
 }
 
-// DELETE /api/admin/manage/cities — Delete a city (only if no children)
+// DELETE /api/admin/manage/cities â€” Delete a city (only if no children)
 export async function DELETE(request: Request) {
   try {
     const session = await getServerSession(authOptions);

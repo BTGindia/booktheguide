@@ -1,9 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
-// GET /api/ui-manager/faqs — List FAQs with optional filters
+export const dynamic = 'force-dynamic';
+
+// GET /api/ui-manager/faqs â€” List FAQs with optional filters
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -34,7 +36,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/ui-manager/faqs — Create a new FAQ
+// POST /api/ui-manager/faqs â€” Create a new FAQ
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -73,7 +75,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PUT /api/ui-manager/faqs — Update an existing FAQ
+// PUT /api/ui-manager/faqs â€” Update an existing FAQ
 export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -111,7 +113,7 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// DELETE /api/ui-manager/faqs — Delete a FAQ
+// DELETE /api/ui-manager/faqs â€” Delete a FAQ
 export async function DELETE(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

@@ -1,9 +1,11 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { createAuditLog } from '@/lib/audit';
 import { certificationReviewSchema } from '@/lib/validations';
+
+export const dynamic = 'force-dynamic';
 
 // Helper: check admin role
 async function requireAdmin(session: any) {
@@ -13,7 +15,7 @@ async function requireAdmin(session: any) {
   return { userId: (session.user as any).id, name: session.user.name || 'Admin', role };
 }
 
-// POST /api/admin/certifications/review — Review a certification
+// POST /api/admin/certifications/review â€” Review a certification
 // SEPARATE WRITE PATH: Only admin can write to certification verification status
 export async function POST(request: Request) {
   try {
@@ -80,7 +82,7 @@ export async function POST(request: Request) {
   }
 }
 
-// GET /api/admin/certifications/review — List pending certifications for review
+// GET /api/admin/certifications/review â€” List pending certifications for review
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);

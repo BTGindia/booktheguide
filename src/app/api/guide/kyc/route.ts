@@ -1,10 +1,12 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { kycSchema } from '@/lib/validations';
 import { recalculateProfileCompleteness } from '@/lib/profile-completeness';
 import crypto from 'crypto';
+
+export const dynamic = 'force-dynamic';
 
 // Simple AES-256-CBC encryption for bank details
 // In production, use a proper KMS (AWS KMS, Vault, etc.)
@@ -29,7 +31,7 @@ function decrypt(text: string): string {
   return decrypted;
 }
 
-// GET /api/guide/kyc — get KYC status (masked data)
+// GET /api/guide/kyc â€” get KYC status (masked data)
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -59,7 +61,7 @@ export async function GET() {
       });
     }
 
-    // Return masked data — never expose full Aadhaar, PAN, or bank details to client
+    // Return masked data â€” never expose full Aadhaar, PAN, or bank details to client
     let bankInfo = null;
     if (kyc.bankAccountEncrypted) {
       try {
@@ -95,7 +97,7 @@ export async function GET() {
   }
 }
 
-// POST /api/guide/kyc — submit/update KYC details
+// POST /api/guide/kyc â€” submit/update KYC details
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);

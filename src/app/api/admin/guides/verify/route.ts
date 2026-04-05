@@ -1,9 +1,11 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { createAuditLog } from '@/lib/audit';
 import { verificationActionSchema } from '@/lib/validations';
+
+export const dynamic = 'force-dynamic';
 
 // Helper: check admin role
 async function requireAdmin(session: any) {
@@ -13,7 +15,7 @@ async function requireAdmin(session: any) {
   return { userId: (session.user as any).id, name: session.user.name || 'Admin', role };
 }
 
-// GET /api/admin/guides/verify — List guides by verification status
+// GET /api/admin/guides/verify â€” List guides by verification status
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -66,7 +68,7 @@ export async function GET(request: Request) {
   }
 }
 
-// POST /api/admin/guides/verify — Change guide verification status
+// POST /api/admin/guides/verify â€” Change guide verification status
 // SEPARATE WRITE PATH: Only admin can write to verification status
 export async function POST(request: Request) {
   try {

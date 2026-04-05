@@ -1,8 +1,10 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { CATEGORY_MAP } from '@/lib/categories';
 
-// GET /api/categories — public endpoint, returns enabled categories with their subcategories
+export const dynamic = 'force-dynamic';
+
+// GET /api/categories â€” public endpoint, returns enabled categories with their subcategories
 // Falls back to categories.ts static data if DB is empty
 export async function GET() {
   try {

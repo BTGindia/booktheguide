@@ -1,10 +1,12 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { calculateProfileCompleteness, recalculateProfileCompleteness } from '@/lib/profile-completeness';
 
-// GET /api/guide/completeness — Get profile completeness breakdown
+export const dynamic = 'force-dynamic';
+
+// GET /api/guide/completeness â€” Get profile completeness breakdown
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -64,7 +66,7 @@ export async function GET() {
   }
 }
 
-// POST /api/guide/completeness — Force recalculate
+// POST /api/guide/completeness â€” Force recalculate
 export async function POST() {
   try {
     const session = await getServerSession(authOptions);

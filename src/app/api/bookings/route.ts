@@ -1,9 +1,11 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { generateBookingNumber } from '@/lib/utils';
 import { recalculateSingleGuideScore } from '@/lib/guide-score';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
@@ -17,7 +19,7 @@ export async function POST(request: Request) {
       guestEmail, guestName, guestPhone,
     } = body;
 
-    // Determine customer userId — logged-in user or guest checkout via email
+    // Determine customer userId â€” logged-in user or guest checkout via email
     let userId: string;
 
     if (session?.user) {
@@ -40,7 +42,7 @@ export async function POST(request: Request) {
             name: guestName,
             phone: guestPhone || null,
             role: 'CUSTOMER',
-            // No password — guest account; will use verification code later
+            // No password â€” guest account; will use verification code later
           },
         });
       }
@@ -109,7 +111,7 @@ export async function POST(request: Request) {
       });
 
     } else {
-      // Personal booking — new flow: customer submits request, guide will create a quote
+      // Personal booking â€” new flow: customer submits request, guide will create a quote
       if (!startDate || !endDate) {
         return NextResponse.json({ error: 'Start and end dates required' }, { status: 400 });
       }

@@ -1,9 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
-// GET /api/ui-manager/content — List all page content entries
+export const dynamic = 'force-dynamic';
+
+// GET /api/ui-manager/content â€” List all page content entries
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -32,7 +34,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/ui-manager/content — Create or update page content
+// POST /api/ui-manager/content â€” Create or update page content
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

@@ -1,13 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
-// ────────────────────────────────────────────────────────────────
-// NEEV — BookTheGuide's AI Travel Planner
+export const dynamic = 'force-dynamic';
+
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// NEEV â€” BookTheGuide's AI Travel Planner
 // POST /api/neev   { sessionId, messages: [{role,content}] }
-// ────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -19,7 +21,7 @@ interface NeevRequest {
   messages: ChatMessage[];
 }
 
-/* ── Fetch available packages from DB for context ── */
+/* â”€â”€ Fetch available packages from DB for context â”€â”€ */
 async function getAvailablePackages() {
   const products = await prisma.product.findMany({
     where: { status: 'APPROVED', isActive: true },
@@ -73,36 +75,36 @@ async function getAvailablePackages() {
   }));
 }
 
-/* ── Build the NEEV system prompt ── */
+/* â”€â”€ Build the NEEV system prompt â”€â”€ */
 function buildSystemPrompt(packagesJson: string): string {
-  return `You are NEEV, BookTheGuide's AI Travel Planner. You are warm, witty, and genuinely curious — like a well-travelled friend who happens to know every trail, every hidden cafe, every guide worth their salt in India.
+  return `You are NEEV, BookTheGuide's AI Travel Planner. You are warm, witty, and genuinely curious â€” like a well-travelled friend who happens to know every trail, every hidden cafe, every guide worth their salt in India.
 
 ## YOUR PERSONALITY
 - You're casual but never sloppy. Friendly but never cringy.
-- You use humour naturally — a light touch, not forced.
-- You're perceptive — you read between the lines of what people say.
+- You use humour naturally â€” a light touch, not forced.
+- You're perceptive â€” you read between the lines of what people say.
 - You NEVER sound like a corporate chatbot. No "I'd be happy to assist you!" energy.
 - You ask thoughtful questions that make people go "huh, good question."
-- You adapt your tone to the user — playful if they're playful, gentle if they're stressed, energetic if they're excited.
-- Keep responses concise — 2-4 sentences per turn usually. Never write essays unless presenting a trip plan.
+- You adapt your tone to the user â€” playful if they're playful, gentle if they're stressed, energetic if they're excited.
+- Keep responses concise â€” 2-4 sentences per turn usually. Never write essays unless presenting a trip plan.
 - Use simple, conversational language. No jargon.
 
-## YOUR GREETING (first message only — DON'T repeat this)
-"Hey! I'm NEEV, your travel planner. Not a search engine, I promise — more like that friend who always knows the best spots. What's pulling you towards a journey right now?"
+## YOUR GREETING (first message only â€” DON'T repeat this)
+"Hey! I'm NEEV, your travel planner. Not a search engine, I promise â€” more like that friend who always knows the best spots. What's pulling you towards a journey right now?"
 
 ## HOW YOU THINK
 You uncover what the traveller truly needs through natural conversation, NOT a questionnaire.
 
-Layer 1 — Surface (practical): days, dates, budget, group size. Weave these in naturally, don't list them.
-Layer 2 — Emotional (the why): Are they escaping burnout? Celebrating? Reconnecting? Listen for emotional cues.
-Layer 3 — Style: Do they want structure or spontaneity? Crowds or solitude? Challenge or comfort?
+Layer 1 â€” Surface (practical): days, dates, budget, group size. Weave these in naturally, don't list them.
+Layer 2 â€” Emotional (the why): Are they escaping burnout? Celebrating? Reconnecting? Listen for emotional cues.
+Layer 3 â€” Style: Do they want structure or spontaneity? Crowds or solitude? Challenge or comfort?
 
-IMPORTANT: Don't ask all questions at once. One question per turn. Let the conversation flow naturally. Pick up on what they've already told you. If someone says "I'm exhausted and need to disappear" — you already know their emotional state. Don't ask "how are you feeling?" again.
+IMPORTANT: Don't ask all questions at once. One question per turn. Let the conversation flow naturally. Pick up on what they've already told you. If someone says "I'm exhausted and need to disappear" â€” you already know their emotional state. Don't ask "how are you feeling?" again.
 
 ## WHEN SUGGESTING TRIPS
 - ONLY suggest packages that exist in the catalog below. NEVER invent packages.
 - When you have enough context (usually after 3-5 exchanges), present 1-3 matching packages.
-- Present each package warmly — connect it to what they told you. Explain WHY this package fits their mood/needs.
+- Present each package warmly â€” connect it to what they told you. Explain WHY this package fits their mood/needs.
 - Use this exact format for each package card (the frontend will parse this):
 
 :::package
@@ -111,7 +113,7 @@ title: [package_title]
 destination: [destination], [state]
 duration: [X days / Y nights]
 price: [price or "On request"]
-why: [1-2 sentences connecting this package to their emotional needs — make it personal]
+why: [1-2 sentences connecting this package to their emotional needs â€” make it personal]
 :::
 
 - After presenting packages, ask if any of these resonate or if they want something different.
@@ -123,20 +125,20 @@ why: [1-2 sentences connecting this package to their emotional needs — make it
 - Never ask more than one question per message.
 - Never dump a wall of text. Keep it punchy.
 - Never use emojis excessively. One or two max per message, and only when natural.
-- Never say "As an AI..." — you're NEEV, a travel planner.
+- Never say "As an AI..." â€” you're NEEV, a travel planner.
 - Never give medical, legal, or financial advice.
 
 ## AVAILABLE PACKAGES CATALOG
 ${packagesJson}
 
-If the catalog is empty, let the user know you're freshly set up and packages are being added — ask them to check back soon or browse the website.
+If the catalog is empty, let the user know you're freshly set up and packages are being added â€” ask them to check back soon or browse the website.
 
 ## CONVERSATION INTELLIGENCE
 At the end of each response, add a hidden metadata line (the user won't see this, it's for our system):
 <!--NEEV_META:{"emotion":"[detected emotion]","style":"[travel style]","intent":"[high/medium/low/browsing]","suggestedIds":[list of suggested product ids or empty]}-->`;
 }
 
-/* ── Call Gemini API ── */
+/* â”€â”€ Call Gemini API â”€â”€ */
 async function callGemini(
   systemPrompt: string,
   messages: ChatMessage[],
@@ -180,14 +182,14 @@ async function callGemini(
   }
 }
 
-/* ── Smart fallback when no API key is configured ── */
+/* â”€â”€ Smart fallback when no API key is configured â”€â”€ */
 function generateFallbackResponse(messages: ChatMessage[]): string {
   const lastMsg = messages[messages.length - 1]?.content.toLowerCase() || '';
   const msgCount = messages.filter((m) => m.role === 'user').length;
 
-  // First message — greeting
+  // First message â€” greeting
   if (msgCount <= 1) {
-    return `Hey! I'm NEEV, your travel planner. Not a search engine, I promise — more like that friend who always knows the best spots.\n\nWhat's pulling you towards a journey right now?\n\n<!--NEEV_META:{"emotion":"neutral","style":"unknown","intent":"browsing","suggestedIds":[]}-->`;
+    return `Hey! I'm NEEV, your travel planner. Not a search engine, I promise â€” more like that friend who always knows the best spots.\n\nWhat's pulling you towards a journey right now?\n\n<!--NEEV_META:{"emotion":"neutral","style":"unknown","intent":"browsing","suggestedIds":[]}-->`;
   }
 
   // Detect emotional cues
@@ -198,7 +200,7 @@ function generateFallbackResponse(messages: ChatMessage[]): string {
   const groupWords = ['friends', 'group', 'solo', 'couple', 'family', 'alone'];
 
   if (exhaustedWords.some((w) => lastMsg.includes(w))) {
-    return `I hear you. Sometimes the best trips aren't about doing everything — they're about doing almost nothing, just somewhere beautiful.\n\nWhen you imagine your perfect escape, what do you see? Mountains with mist? A quiet lake? Or maybe a little village where nobody knows your name?\n\n<!--NEEV_META:{"emotion":"exhausted","style":"solo","intent":"medium","suggestedIds":[]}-->`;
+    return `I hear you. Sometimes the best trips aren't about doing everything â€” they're about doing almost nothing, just somewhere beautiful.\n\nWhen you imagine your perfect escape, what do you see? Mountains with mist? A quiet lake? Or maybe a little village where nobody knows your name?\n\n<!--NEEV_META:{"emotion":"exhausted","style":"solo","intent":"medium","suggestedIds":[]}-->`;
   }
 
   if (adventureWords.some((w) => lastMsg.includes(w))) {
@@ -206,37 +208,37 @@ function generateFallbackResponse(messages: ChatMessage[]): string {
   }
 
   if (cultureWords.some((w) => lastMsg.includes(w))) {
-    return `Ah, a fellow depth-seeker! India's got layers on layers when it comes to history and culture — the kind of stories that don't make it to Wikipedia.\n\nAny particular era or region calling to you? Or should I surprise you?\n\n<!--NEEV_META:{"emotion":"curious","style":"cultural","intent":"medium","suggestedIds":[]}-->`;
+    return `Ah, a fellow depth-seeker! India's got layers on layers when it comes to history and culture â€” the kind of stories that don't make it to Wikipedia.\n\nAny particular era or region calling to you? Or should I surprise you?\n\n<!--NEEV_META:{"emotion":"curious","style":"cultural","intent":"medium","suggestedIds":[]}-->`;
   }
 
   if (budgetWords.some((w) => lastMsg.includes(w))) {
-    return `Smart move — some of the most incredible experiences in India don't need a fat wallet. I've seen people have life-changing trips for under 10K.\n\nWhat's your ballpark budget per person? And how many days are you thinking?\n\n<!--NEEV_META:{"emotion":"practical","style":"budget","intent":"medium","suggestedIds":[]}-->`;
+    return `Smart move â€” some of the most incredible experiences in India don't need a fat wallet. I've seen people have life-changing trips for under 10K.\n\nWhat's your ballpark budget per person? And how many days are you thinking?\n\n<!--NEEV_META:{"emotion":"practical","style":"budget","intent":"medium","suggestedIds":[]}-->`;
   }
 
   if (groupWords.some((w) => lastMsg.includes(w))) {
-    return `Got it! That changes things in the best way. Different crews need different vibes.\n\nWhat kind of trip does your crew gravitate towards — chill and scenic, or packed with activities?\n\n<!--NEEV_META:{"emotion":"social","style":"group","intent":"medium","suggestedIds":[]}-->`;
+    return `Got it! That changes things in the best way. Different crews need different vibes.\n\nWhat kind of trip does your crew gravitate towards â€” chill and scenic, or packed with activities?\n\n<!--NEEV_META:{"emotion":"social","style":"group","intent":"medium","suggestedIds":[]}-->`;
   }
 
   // Location-based
   const locations = ['himachal', 'uttarakhand', 'kashmir', 'ladakh', 'goa', 'rajasthan', 'kerala', 'meghalaya', 'manali', 'rishikesh', 'mcleodganj', 'sikkim'];
   const mentioned = locations.find((loc) => lastMsg.includes(loc));
   if (mentioned) {
-    return `${mentioned.charAt(0).toUpperCase() + mentioned.slice(1)} — great taste! There's so much more to it than what shows up on Instagram.\n\nAre you flexible on dates, or do you have a specific window in mind? That'll help me find what's actually available.\n\n<!--NEEV_META:{"emotion":"interested","style":"exploring","intent":"high","suggestedIds":[]}-->`;
+    return `${mentioned.charAt(0).toUpperCase() + mentioned.slice(1)} â€” great taste! There's so much more to it than what shows up on Instagram.\n\nAre you flexible on dates, or do you have a specific window in mind? That'll help me find what's actually available.\n\n<!--NEEV_META:{"emotion":"interested","style":"exploring","intent":"high","suggestedIds":[]}-->`;
   }
 
   // Generic follow-ups based on conversation depth
   if (msgCount === 2) {
-    return `That's helpful! Tell me a bit more — how many days can you carve out? And is this a solo mission or are you dragging friends along?\n\n<!--NEEV_META:{"emotion":"neutral","style":"unknown","intent":"medium","suggestedIds":[]}-->`;
+    return `That's helpful! Tell me a bit more â€” how many days can you carve out? And is this a solo mission or are you dragging friends along?\n\n<!--NEEV_META:{"emotion":"neutral","style":"unknown","intent":"medium","suggestedIds":[]}-->`;
   }
 
   if (msgCount === 3) {
-    return `I'm getting a picture here. One more thing — what matters more to you: a packed itinerary where you see everything, or a relaxed pace where you actually soak it in?\n\n<!--NEEV_META:{"emotion":"neutral","style":"unknown","intent":"medium","suggestedIds":[]}-->`;
+    return `I'm getting a picture here. One more thing â€” what matters more to you: a packed itinerary where you see everything, or a relaxed pace where you actually soak it in?\n\n<!--NEEV_META:{"emotion":"neutral","style":"unknown","intent":"medium","suggestedIds":[]}-->`;
   }
 
-  return `I love that energy. Let me think about what would be perfect for you.\n\nWhile I'm putting something together — browse our packages at booktheguide.com to see what catches your eye. Sometimes the right trip just jumps out at you!\n\n<!--NEEV_META:{"emotion":"neutral","style":"unknown","intent":"medium","suggestedIds":[]}-->`;
+  return `I love that energy. Let me think about what would be perfect for you.\n\nWhile I'm putting something together â€” browse our packages at booktheguide.com to see what catches your eye. Sometimes the right trip just jumps out at you!\n\n<!--NEEV_META:{"emotion":"neutral","style":"unknown","intent":"medium","suggestedIds":[]}-->`;
 }
 
-/* ── Parse metadata from NEEV's response ── */
+/* â”€â”€ Parse metadata from NEEV's response â”€â”€ */
 function parseNeevMeta(response: string) {
   const metaMatch = response.match(/<!--NEEV_META:(.*?)-->/);
   let meta = { emotion: 'neutral', style: 'unknown', intent: 'browsing', suggestedIds: [] as string[] };
@@ -264,7 +266,7 @@ function parseNeevMeta(response: string) {
   return { cleanResponse, meta };
 }
 
-/* ── Main POST handler ── */
+/* â”€â”€ Main POST handler â”€â”€ */
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
 

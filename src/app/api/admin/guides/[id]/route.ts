@@ -1,9 +1,11 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
-// GET /api/admin/guides/[id] — fetch full guide details
+export const dynamic = 'force-dynamic';
+
+// GET /api/admin/guides/[id] â€” fetch full guide details
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
@@ -50,7 +52,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
   }
 }
 
-// PUT /api/admin/guides/[id] — update guide profile fields
+// PUT /api/admin/guides/[id] â€” update guide profile fields
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);

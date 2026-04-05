@@ -1,6 +1,6 @@
-// ─────────────────────────────────────────────────────────────
-//  WordPress Webhook → Next.js On-Demand ISR Revalidation
-// ─────────────────────────────────────────────────────────────
+﻿// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+//  WordPress Webhook â†’ Next.js On-Demand ISR Revalidation
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 //
 //  When content is published/updated/deleted in WordPress,
 //  a webhook hits this endpoint to purge the cached page.
@@ -21,14 +21,16 @@
 //      ]);
 //    });
 //
-// ─────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidateTag, revalidatePath } from 'next/cache';
 
+export const dynamic = 'force-dynamic';
+
 const REVALIDATION_SECRET = process.env.REVALIDATION_SECRET || '';
 
-/** Map WordPress post type → Next.js cache tags to purge + paths to revalidate. */
+/** Map WordPress post type â†’ Next.js cache tags to purge + paths to revalidate. */
 function getRevalidationTargets(
   postType: string,
   slug: string,
@@ -77,7 +79,7 @@ function getRevalidationTargets(
         paths: [`/experiences/${slug}`],
       };
     case 'state_category': {
-      // slug format: "{state}-{category}" — revalidate the combo page
+      // slug format: "{state}-{category}" â€” revalidate the combo page
       const parts = slug.split('-');
       // Try to parse state and category from the slug
       const paths: string[] = [];

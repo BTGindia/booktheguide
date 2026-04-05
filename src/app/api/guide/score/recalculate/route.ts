@@ -1,7 +1,9 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { recalculateAllGuideScores, recalculateSingleGuideScore } from '@/lib/guide-score';
+
+export const dynamic = 'force-dynamic';
 
 // POST /api/guide/score/recalculate
 // Bulk recalculate all scores (super admin) or single guide score

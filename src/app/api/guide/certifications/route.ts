@@ -1,11 +1,13 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { certificationSchema } from '@/lib/validations';
 import { recalculateProfileCompleteness } from '@/lib/profile-completeness';
 
-// GET /api/guide/certifications — list guide's certifications
+export const dynamic = 'force-dynamic';
+
+// GET /api/guide/certifications â€” list guide's certifications
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -35,7 +37,7 @@ export async function GET() {
   }
 }
 
-// POST /api/guide/certifications — add a new certification
+// POST /api/guide/certifications â€” add a new certification
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -103,7 +105,7 @@ export async function POST(request: Request) {
   }
 }
 
-// PUT /api/guide/certifications — update an existing certification
+// PUT /api/guide/certifications â€” update an existing certification
 export async function PUT(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -166,7 +168,7 @@ export async function PUT(request: Request) {
   }
 }
 
-// DELETE /api/guide/certifications — soft-delete (just remove)
+// DELETE /api/guide/certifications â€” soft-delete (just remove)
 export async function DELETE(request: Request) {
   try {
     const session = await getServerSession(authOptions);
