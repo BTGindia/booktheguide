@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import prisma from '@/lib/prisma';
 import type { Metadata } from 'next';
+
+export const revalidate = 300;
 import { getPageBySlug, wpSeoToMetadata } from '@/lib/wordpress';
 
 export async function generateMetadata(): Promise<Metadata> {

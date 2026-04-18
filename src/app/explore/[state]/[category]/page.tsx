@@ -57,15 +57,31 @@ function toCard(p: any): PackageCardData {
 }
 
 export async function generateStaticParams() {
-  const stateSlugs = getAllStateSlugs();
-  const categorySlugs = CATEGORIES_ORDERED.map((c) => c.urlSlug);
-  const params: { state: string; category: string }[] = [];
-  for (const state of stateSlugs) {
-    for (const category of categorySlugs) {
-      params.push({ state, category });
+  try {
+    const stateSlugs = getAllStateSlugs();
+    const disabledSlugs = await getDisabledCategorySlugs();
+    const categorySlugs = CATEGORIES_ORDERED
+      .filter((c) => !disabledSlugs.has(c.slug))
+      .map((c) => c.urlSlug);
+    const params: { state: string; category: string }[] = [];
+    for (const state of stateSlugs) {
+      for (const category of categorySlugs) {
+        params.push({ state, category });
+      }
     }
+    return params;
+  } catch {
+    // Fallback if DB unavailable during build
+    const stateSlugs = getAllStateSlugs();
+    const categorySlugs = CATEGORIES_ORDERED.map((c) => c.urlSlug);
+    const params: { state: string; category: string }[] = [];
+    for (const state of stateSlugs) {
+      for (const category of categorySlugs) {
+        params.push({ state, category });
+      }
+    }
+    return params;
   }
-  return params;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

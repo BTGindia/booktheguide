@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   MapPin,
   Star,
@@ -23,8 +24,13 @@ import {
 import { formatCurrency, ACTIVITY_LABELS, DIFFICULTY_LABELS } from '@/lib/utils';
 import { CATEGORY_MAP } from '@/lib/categories';
 import { PackageCard, type PackageCardData } from '@/components/PackageCard';
-import { AiTravelAssistant } from '@/components/ai/AiTravelAssistant';
+import dynamic from 'next/dynamic';
 import { getTrip, wpSeoToMetadata, getTripContent } from '@/lib/wordpress';
+
+const AiTravelAssistant = dynamic(
+  () => import('@/components/ai/AiTravelAssistant').then(m => m.AiTravelAssistant),
+  { ssr: false, loading: () => <div className="h-32 flex items-center justify-center"><p className="text-white/50">Loading AI Assistant...</p></div> }
+);
 import { WPFaqSection, WPSeoContentBlock, WPInternalLinksGrid } from '@/components/wordpress/WPContentBlocks';
 
 function toCard(p: any): PackageCardData {
@@ -224,7 +230,7 @@ export default async function TripDetailPage({ params }: TripDetailProps) {
       <section className="relative h-[65vh] min-h-[460px] flex items-end overflow-hidden">
         <div className="absolute inset-0">
           {product.coverImage ? (
-            <img src={product.coverImage} alt={destName} className="w-full h-full object-cover" />
+            <Image src={product.coverImage} alt={destName} fill sizes="100vw" className="object-cover" priority />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-btg-dark to-btg-sage" />
           )}
@@ -345,7 +351,7 @@ export default async function TripDetailPage({ params }: TripDetailProps) {
               <h3 className="font-heading text-2xl font-bold text-btg-dark mb-5">Your Guide</h3>
               <div className="flex items-start gap-4">
                 {product.guide.user.image ? (
-                  <img src={product.guide.user.image} alt={product.guide.user.name || ''} className="w-16 h-16 rounded-full object-cover border-2 border-btg-primary" />
+                  <Image src={product.guide.user.image} alt={product.guide.user.name || ''} width={64} height={64} className="w-16 h-16 rounded-full object-cover border-2 border-btg-primary" />
                 ) : (
                   <div className="w-16 h-16 rounded-full bg-btg-primary/15 flex items-center justify-center text-btg-primary font-heading font-bold text-lg">
                     {(product.guide.user.name || 'G').charAt(0)}
@@ -418,8 +424,8 @@ export default async function TripDetailPage({ params }: TripDetailProps) {
                 <h3 className="font-heading text-2xl font-bold text-btg-dark mb-4">Gallery</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {allImages.slice(0, 6).map((img, i) => (
-                    <div key={i} className="aspect-[4/3] rounded-xl overflow-hidden shadow-sm">
-                      <img src={img} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
+                    <div key={i} className="aspect-[4/3] rounded-xl overflow-hidden shadow-sm relative">
+                      <Image src={img} alt={`Gallery ${i + 1}`} fill sizes="(max-width: 640px) 50vw, 33vw" className="object-cover" loading="lazy" />
                     </div>
                   ))}
                 </div>

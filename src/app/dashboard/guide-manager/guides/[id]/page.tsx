@@ -222,7 +222,7 @@ export default function GuideManagerGuideDetailPage() {
                 <div className="grid grid-cols-3 gap-2">
                   {profile.portfolioImages.slice(0, 6).map((img, i) => (
                     <div key={i} className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                      <img src={img} alt="" className="w-full h-full object-cover" />
+                      <img src={img} alt={`Portfolio image`} className="w-full h-full object-cover" />
                     </div>
                   ))}
                 </div>

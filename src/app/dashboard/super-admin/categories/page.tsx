@@ -386,6 +386,38 @@ export default function SuperAdminCategoriesPage() {
       {/* ═══════ Categories Tab ═══════ */}
       {activeTab === 'categories' && (
         <div className="space-y-4">
+          {/* Sync subcategories from code definitions */}
+          <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-xl px-5 py-3">
+            <div className="text-sm text-blue-800">
+              <span className="font-semibold">Sync Subcategories</span>
+              <span className="ml-2 text-blue-600">— adds missing subcategories from code definitions to existing categories</span>
+            </div>
+            <button
+              onClick={async () => {
+                setSaving('sync');
+                try {
+                  const res = await fetch('/api/admin/categories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'seed' }),
+                  });
+                  const data = await res.json();
+                  toast.success(data.message || 'Synced');
+                  fetchCategories();
+                } catch {
+                  toast.error('Sync failed');
+                } finally {
+                  setSaving(null);
+                }
+              }}
+              disabled={saving === 'sync'}
+              className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            >
+              {saving === 'sync' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Settings2 className="w-4 h-4" />}
+              Sync
+            </button>
+          </div>
+
           {categories.map((cat) => (
             <div
               key={cat.id}
@@ -872,7 +904,7 @@ export default function SuperAdminCategoriesPage() {
           {/* Preview */}
           <div className="bg-[#1A1A18] rounded-xl p-4">
             <div className="flex items-center gap-4">
-              <img src={logoUrl || '/images/btg-logo-cropped.png'} alt="Logo" className="h-10 object-contain" />
+              <img src={logoUrl || '/images/btg-logo-cropped.webp'} alt="Logo" className="h-10 object-contain" />
               <span className="text-white/40 text-xs">← Header preview</span>
             </div>
           </div>

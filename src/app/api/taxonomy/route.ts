@@ -1,7 +1,5 @@
 ﻿import { NextResponse } from 'next/server';
 import {
-
-export const dynamic = 'force-dynamic';
   CERTIFICATION_TYPES,
   ISSUING_AUTHORITIES,
   LANGUAGES,
@@ -13,6 +11,8 @@ export const dynamic = 'force-dynamic';
   GENDER_OPTIONS,
   ID_PROOF_TYPES,
 } from '@/lib/taxonomy';
+
+export const dynamic = 'force-dynamic';
 
 // GET /api/taxonomy â€” returns all controlled vocabularies
 // No auth required â€” used by forms

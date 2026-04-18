@@ -45,10 +45,14 @@ export async function POST(request: Request) {
       const { CATEGORY_MAP } = await import('@/lib/categories');
       const entries = Object.entries(CATEGORY_MAP);
       let created = 0;
+      let synced = 0;
 
       for (let i = 0; i < entries.length; i++) {
         const [slug, def] = entries[i];
-        const existing = await prisma.experienceCategory.findUnique({ where: { slug } });
+        const existing = await prisma.experienceCategory.findUnique({
+          where: { slug },
+          include: { subCategories: true },
+        });
         if (!existing) {
           await prisma.experienceCategory.create({
             data: {
@@ -63,7 +67,7 @@ export async function POST(request: Request) {
               subCategories: {
                 create: def.activityTypes.map((name: string, j: number) => ({
                   name,
-                  slug: name.toLowerCase().replace(/[\s\/]+/g, '-'),
+                  slug: name.toLowerCase().replace(/[\s\/&()]+/g, '-').replace(/-+/g, '-').replace(/(^-|-$)/g, ''),
                   isEnabled: true,
                   sortOrder: j,
                 })),
@@ -71,10 +75,28 @@ export async function POST(request: Request) {
             },
           });
           created++;
+        } else {
+          // REPLACE all subcategories with current code definitions
+          // Preserve enabled state for subs that still exist by name
+          const enabledMap = new Map(existing.subCategories.map((s: any) => [s.name, s.isEnabled]));
+          await prisma.subCategory.deleteMany({ where: { categoryId: existing.id } });
+          for (let j = 0; j < def.activityTypes.length; j++) {
+            const name = def.activityTypes[j];
+            await prisma.subCategory.create({
+              data: {
+                categoryId: existing.id,
+                name,
+                slug: name.toLowerCase().replace(/[\s\/&()]+/g, '-').replace(/-+/g, '-').replace(/(^-|-$)/g, ''),
+                isEnabled: enabledMap.has(name) ? (enabledMap.get(name) ?? true) : true,
+                sortOrder: j,
+              },
+            });
+          }
+          synced++;
         }
       }
 
-      return NextResponse.json({ message: `Seeded ${created} categories` });
+      return NextResponse.json({ message: `Seeded ${created} new categories, replaced subcategories for ${synced} existing categories` });
     }
 
     // Create a new category

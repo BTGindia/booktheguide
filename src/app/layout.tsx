@@ -1,11 +1,18 @@
 import type { Metadata } from 'next';
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
+import dynamic from 'next/dynamic';
 import { Providers } from './providers';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { AiTravelAssistant } from '@/components/ai/AiTravelAssistant';
+import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
 import './globals.css';
+
+// Lazy load the AI assistant — only loaded when user interacts
+const AiTravelAssistant = dynamic(
+  () => import('@/components/ai/AiTravelAssistant').then(m => m.AiTravelAssistant),
+  { ssr: false }
+);
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.booktheguide.com'),
@@ -79,8 +86,11 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link rel="preload" href="https://fonts.googleapis.com/css2?family=ADLaM+Display&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" as="style" />
         <link href="https://fonts.googleapis.com/css2?family=ADLaM+Display&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet" />
         <script
           type="application/ld+json"
@@ -91,7 +101,7 @@ export default function RootLayout({
               name: 'Book The Guide',
               description: 'India\'s premier guide booking platform for treks, tours, and adventures.',
               url: 'https://www.booktheguide.com',
-              logo: 'https://www.booktheguide.com/images/btg-logo.png',
+              logo: 'https://www.booktheguide.com/images/btg-logo.webp',
               address: {
                 '@type': 'PostalAddress',
                 addressLocality: 'New Delhi',
@@ -112,6 +122,8 @@ export default function RootLayout({
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
+          <div className="mobile-nav-spacer" />
+          <MobileBottomNav />
           <AiTravelAssistant />
         </Providers>
       </body>

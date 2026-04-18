@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
@@ -75,25 +75,25 @@ async function getAvailablePackages() {
   }));
 }
 
-/* â”€â”€ Build the NEEV system prompt â”€â”€ */
+/* ── Build the Pablo system prompt ── */
 function buildSystemPrompt(packagesJson: string): string {
-  return `You are NEEV, BookTheGuide's AI Travel Planner. You are warm, witty, and genuinely curious â€” like a well-travelled friend who happens to know every trail, every hidden cafe, every guide worth their salt in India.
+  return `You are Pablo, BookTheGuide's AI Travel Buddy. You're witty, resourceful, and genuinely understanding — like that one friend who's been everywhere, remembers all the good stuff, and always knows exactly what you need before you do.
 
 ## YOUR PERSONALITY
-- You're casual but never sloppy. Friendly but never cringy.
-- You use humour naturally â€” a light touch, not forced.
-- You're perceptive â€” you read between the lines of what people say.
-- You NEVER sound like a corporate chatbot. No "I'd be happy to assist you!" energy.
-- You ask thoughtful questions that make people go "huh, good question."
-- You adapt your tone to the user â€” playful if they're playful, gentle if they're stressed, energetic if they're excited.
-- Keep responses concise â€” 2-4 sentences per turn usually. Never write essays unless presenting a trip plan.
-- Use simple, conversational language. No jargon.
+- You're sharp, warm, and a little cheeky. Never robotic, never try-hard.
+- You crack jokes when the moment's right — dry humour, not dad jokes.
+- You're perceptive — you pick up on what people aren't saying.
+- You NEVER sound like a corporate chatbot. No "I'd be happy to assist you!" vibes.
+- You ask one killer question that makes people go "damn, good point."
+- You match energy — playful with playful, calm with stressed, hyped with excited.
+- Keep it tight — 2-3 sentences per turn. No essays unless you're laying out a plan.
+- Talk like a real person. Simple words, natural rhythm.
 
-## YOUR GREETING (first message only â€” DON'T repeat this)
-"Hey! I'm NEEV, your travel planner. Not a search engine, I promise â€” more like that friend who always knows the best spots. What's pulling you towards a journey right now?"
+## YOUR GREETING (first message only — DON'T repeat this)
+"Hey there! I'm Pablo — think of me as that friend who's been everywhere and remembers all the good stuff. So, what's on your mind — mountains, chaos, peace, or just 'get me out of here'?"
 
 ## HOW YOU THINK
-You uncover what the traveller truly needs through natural conversation, NOT a questionnaire.
+You figure out what someone actually needs through conversation, not a checklist.
 
 Layer 1 â€” Surface (practical): days, dates, budget, group size. Weave these in naturally, don't list them.
 Layer 2 â€” Emotional (the why): Are they escaping burnout? Celebrating? Reconnecting? Listen for emotional cues.
@@ -125,17 +125,18 @@ why: [1-2 sentences connecting this package to their emotional needs â€” ma
 - Never ask more than one question per message.
 - Never dump a wall of text. Keep it punchy.
 - Never use emojis excessively. One or two max per message, and only when natural.
-- Never say "As an AI..." â€” you're NEEV, a travel planner.
+- Never say "As an AI..." — you're Pablo, a travel buddy.
 - Never give medical, legal, or financial advice.
+- Never sound like you're reading from a script.
 
 ## AVAILABLE PACKAGES CATALOG
 ${packagesJson}
 
-If the catalog is empty, let the user know you're freshly set up and packages are being added â€” ask them to check back soon or browse the website.
+If the catalog is empty, tell them you're just getting set up and to check back soon or browse booktheguide.com.
 
 ## CONVERSATION INTELLIGENCE
 At the end of each response, add a hidden metadata line (the user won't see this, it's for our system):
-<!--NEEV_META:{"emotion":"[detected emotion]","style":"[travel style]","intent":"[high/medium/low/browsing]","suggestedIds":[list of suggested product ids or empty]}-->`;
+<!--PABLO_META:{"emotion":"[detected emotion]","style":"[travel style]","intent":"[high/medium/low/browsing]","suggestedIds":[list of suggested product ids or empty]}-->`;
 }
 
 /* â”€â”€ Call Gemini API â”€â”€ */
@@ -189,7 +190,7 @@ function generateFallbackResponse(messages: ChatMessage[]): string {
 
   // First message â€” greeting
   if (msgCount <= 1) {
-    return `Hey! I'm NEEV, your travel planner. Not a search engine, I promise â€” more like that friend who always knows the best spots.\n\nWhat's pulling you towards a journey right now?\n\n<!--NEEV_META:{"emotion":"neutral","style":"unknown","intent":"browsing","suggestedIds":[]}-->`;
+    return `Hey there! I'm Pablo — think of me as that friend who's been everywhere and remembers all the good stuff â€” more like that friend who always knows the best spots.\n\nSo, what's on your mind - mountains, chaos, peace, or just get me out of here?\n\n<!--PABLO_META:{"emotion":"neutral","style":"unknown","intent":"browsing","suggestedIds":[]}-->`;
   }
 
   // Detect emotional cues
@@ -200,47 +201,47 @@ function generateFallbackResponse(messages: ChatMessage[]): string {
   const groupWords = ['friends', 'group', 'solo', 'couple', 'family', 'alone'];
 
   if (exhaustedWords.some((w) => lastMsg.includes(w))) {
-    return `I hear you. Sometimes the best trips aren't about doing everything â€” they're about doing almost nothing, just somewhere beautiful.\n\nWhen you imagine your perfect escape, what do you see? Mountains with mist? A quiet lake? Or maybe a little village where nobody knows your name?\n\n<!--NEEV_META:{"emotion":"exhausted","style":"solo","intent":"medium","suggestedIds":[]}-->`;
+    return `I get it. Sometimes the best plan is no plan â€” just you, somewhere beautiful, doing absolutely nothing.\n\nClose your eyes for a sec - what do you see? Misty mountains? A quiet lake? A village where nobody knows you?\n\n<!--PABLO_META:{"emotion":"exhausted","style":"solo","intent":"medium","suggestedIds":[]}-->`;
   }
 
   if (adventureWords.some((w) => lastMsg.includes(w))) {
-    return `Now we're talking! There's nothing like that moment when your heart's racing and you're completely present.\n\nAre you looking for something that pushes your limits, or more of a "beautiful scenery with a dash of adrenaline" situation?\n\n<!--NEEV_META:{"emotion":"excited","style":"adventure","intent":"medium","suggestedIds":[]}-->`;
+    return `Now we're talking! Nothing beats that heart-pounding, fully-alive feeling.\n\nAre we going full send or more stunning views with a side of adrenaline?\n\n<!--PABLO_META:{"emotion":"excited","style":"adventure","intent":"medium","suggestedIds":[]}-->`;
   }
 
   if (cultureWords.some((w) => lastMsg.includes(w))) {
-    return `Ah, a fellow depth-seeker! India's got layers on layers when it comes to history and culture â€” the kind of stories that don't make it to Wikipedia.\n\nAny particular era or region calling to you? Or should I surprise you?\n\n<!--NEEV_META:{"emotion":"curious","style":"cultural","intent":"medium","suggestedIds":[]}-->`;
+    return `Ah, a fellow depth-seeker! India's got layers on layers when it comes to history and culture â€” the kind of stories that don't make it to Wikipedia.\n\nAny particular era or region calling to you? Or should I surprise you?\n\n<!--PABLO_META:{"emotion":"curious","style":"cultural","intent":"medium","suggestedIds":[]}-->`;
   }
 
   if (budgetWords.some((w) => lastMsg.includes(w))) {
-    return `Smart move â€” some of the most incredible experiences in India don't need a fat wallet. I've seen people have life-changing trips for under 10K.\n\nWhat's your ballpark budget per person? And how many days are you thinking?\n\n<!--NEEV_META:{"emotion":"practical","style":"budget","intent":"medium","suggestedIds":[]}-->`;
+    return `Smart move â€” some of the most incredible experiences in India don't need a fat wallet. I've seen people have life-changing trips for under 10K.\n\nWhat's your ballpark budget per person? And how many days are you thinking?\n\n<!--PABLO_META:{"emotion":"practical","style":"budget","intent":"medium","suggestedIds":[]}-->`;
   }
 
   if (groupWords.some((w) => lastMsg.includes(w))) {
-    return `Got it! That changes things in the best way. Different crews need different vibes.\n\nWhat kind of trip does your crew gravitate towards â€” chill and scenic, or packed with activities?\n\n<!--NEEV_META:{"emotion":"social","style":"group","intent":"medium","suggestedIds":[]}-->`;
+    return `Got it! That changes things in the best way. Different crews need different vibes.\n\nWhat kind of trip does your crew gravitate towards â€” chill and scenic, or packed with activities?\n\n<!--PABLO_META:{"emotion":"social","style":"group","intent":"medium","suggestedIds":[]}-->`;
   }
 
   // Location-based
   const locations = ['himachal', 'uttarakhand', 'kashmir', 'ladakh', 'goa', 'rajasthan', 'kerala', 'meghalaya', 'manali', 'rishikesh', 'mcleodganj', 'sikkim'];
   const mentioned = locations.find((loc) => lastMsg.includes(loc));
   if (mentioned) {
-    return `${mentioned.charAt(0).toUpperCase() + mentioned.slice(1)} â€” great taste! There's so much more to it than what shows up on Instagram.\n\nAre you flexible on dates, or do you have a specific window in mind? That'll help me find what's actually available.\n\n<!--NEEV_META:{"emotion":"interested","style":"exploring","intent":"high","suggestedIds":[]}-->`;
+    return `${mentioned.charAt(0).toUpperCase() + mentioned.slice(1)} â€” great taste! There's so much more to it than what shows up on Instagram.\n\nAre you flexible on dates, or do you have a specific window in mind? That'll help me find what's actually available.\n\n<!--PABLO_META:{"emotion":"interested","style":"exploring","intent":"high","suggestedIds":[]}-->`;
   }
 
   // Generic follow-ups based on conversation depth
   if (msgCount === 2) {
-    return `That's helpful! Tell me a bit more â€” how many days can you carve out? And is this a solo mission or are you dragging friends along?\n\n<!--NEEV_META:{"emotion":"neutral","style":"unknown","intent":"medium","suggestedIds":[]}-->`;
+    return `That's helpful! Tell me a bit more â€” how many days can you carve out? And is this a solo mission or are you dragging friends along?\n\n<!--PABLO_META:{"emotion":"neutral","style":"unknown","intent":"medium","suggestedIds":[]}-->`;
   }
 
   if (msgCount === 3) {
-    return `I'm getting a picture here. One more thing â€” what matters more to you: a packed itinerary where you see everything, or a relaxed pace where you actually soak it in?\n\n<!--NEEV_META:{"emotion":"neutral","style":"unknown","intent":"medium","suggestedIds":[]}-->`;
+    return `I'm getting a picture here. One more thing â€” what matters more to you: a packed itinerary where you see everything, or a relaxed pace where you actually soak it in?\n\n<!--PABLO_META:{"emotion":"neutral","style":"unknown","intent":"medium","suggestedIds":[]}-->`;
   }
 
-  return `I love that energy. Let me think about what would be perfect for you.\n\nWhile I'm putting something together â€” browse our packages at booktheguide.com to see what catches your eye. Sometimes the right trip just jumps out at you!\n\n<!--NEEV_META:{"emotion":"neutral","style":"unknown","intent":"medium","suggestedIds":[]}-->`;
+  return `I love that energy. Let me think about what would be perfect for you.\n\nWhile I'm putting something together â€” browse our packages at booktheguide.com to see what catches your eye. Sometimes the right trip just jumps out at you!\n\n<!--PABLO_META:{"emotion":"neutral","style":"unknown","intent":"medium","suggestedIds":[]}-->`;
 }
 
 /* â”€â”€ Parse metadata from NEEV's response â”€â”€ */
 function parseNeevMeta(response: string) {
-  const metaMatch = response.match(/<!--NEEV_META:(.*?)-->/);
+  const metaMatch = response.match(/<!--PABLO_META:(.*?)-->/);
   let meta = { emotion: 'neutral', style: 'unknown', intent: 'browsing', suggestedIds: [] as string[] };
 
   if (metaMatch) {
@@ -261,7 +262,7 @@ function parseNeevMeta(response: string) {
   if (ids.length > 0) meta.suggestedIds = ids;
 
   // Clean the meta tag from the visible response
-  const cleanResponse = response.replace(/<!--NEEV_META:.*?-->/g, '').trim();
+  const cleanResponse = response.replace(/<!--PABLO_META:.*?-->/g, '').trim();
 
   return { cleanResponse, meta };
 }
@@ -332,7 +333,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('NEEV API error:', error);
+    console.error('Pablo API error:', error);
     return NextResponse.json(
       { error: 'Something went wrong. Please try again.' },
       { status: 500 },

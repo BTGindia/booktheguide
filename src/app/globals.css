@@ -2,11 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ADLaM Display for brand/logo */
-@import url('https://fonts.googleapis.com/css2?family=ADLaM+Display&display=swap');
-
-/* TT Norms Pro – headings, prices, buttons */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+/* Fonts are loaded via <link> in layout.tsx to avoid render-blocking @import */
 
 :root {
   --font-heading: 'TT Norms Pro', 'Plus Jakarta Sans', system-ui, sans-serif;
@@ -46,7 +42,7 @@ html {
 body {
   font-family: var(--font-body);
   color: var(--btg-dark);
-  background: var(--btg-cream);
+  background: #ffffff;
   overflow-x: hidden;
 }
 
@@ -135,8 +131,8 @@ h1, h2, h3, h4, h5, h6 {
 /* Search box styling */
 .search-container {
   backdrop-filter: blur(24px) saturate(1.4);
-  background: rgba(255, 255, 255, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.18),
     0 0 0 1px rgba(88, 189, 174, 0.08),
@@ -178,6 +174,105 @@ h1, h2, h3, h4, h5, h6 {
   background: #e5673e;
   box-shadow: 0 6px 20px rgba(255, 127, 80, 0.5);
   transform: translateY(-2px);
+}
+
+/* Date input placeholder style */
+input[type="date"].date-placeholder:not(:focus):invalid,
+input[type="date"].date-placeholder:not(:focus)[value=""] {
+  color: rgba(107, 101, 96, 0.6);
+}
+input[type="date"].date-placeholder::-webkit-datetime-edit-text,
+input[type="date"].date-placeholder::-webkit-datetime-edit-month-field,
+input[type="date"].date-placeholder::-webkit-datetime-edit-day-field,
+input[type="date"].date-placeholder::-webkit-datetime-edit-year-field {
+  color: inherit;
+}
+input[type="date"].date-placeholder[value=""]::before {
+  content: 'Select Date';
+  color: rgba(107, 101, 96, 0.6);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ---- Mobile-first enhancements ---- */
+
+/* Smooth horizontal scroll indicator */
+.scroll-hint {
+  position: relative;
+}
+.scroll-hint::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 48px;
+  background: linear-gradient(to right, transparent, white);
+  pointer-events: none;
+  z-index: 2;
+}
+.scroll-hint-dark::after {
+  background: linear-gradient(to right, transparent, #1A1A18);
+}
+.scroll-hint-cream::after {
+  background: linear-gradient(to right, transparent, #FAF7F2);
+}
+
+/* Hide scrollbar but keep scrollable */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Tap highlight removal for interactive elements */
+@media (max-width: 768px) {
+  a, button, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Ensure minimum touch target sizes */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Bottom nav safe area for iOS */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Mobile bottom nav spacer */
+.mobile-nav-spacer {
+  height: 0;
+}
+@media (max-width: 1023px) {
+  .mobile-nav-spacer {
+    height: 72px;
+  }
+}
+
+/* Active tap state for cards */
+@media (hover: none) {
+  .card-tap:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fadeInUp,
+  .animate-slideIn,
+  .animate-marquee {
+    animation: none !important;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+  }
 }
 
 @keyframes btn-shimmer {

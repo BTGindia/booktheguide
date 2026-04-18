@@ -3,6 +3,7 @@
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Eye, EyeOff } from 'lucide-react';
@@ -76,7 +77,7 @@ function RegisterForm() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-block mb-6">
-            <img src="/images/btg-logo.png" alt="Book The Guide" className="h-10 object-contain" />
+            <Image src="/images/btg-logo.webp" alt="Book The Guide" width={120} height={40} className="h-10 w-auto object-contain" />
           </Link>
           <h1 className="font-heading text-2xl font-normal text-btg-dark">
             {form.role === 'GUIDE' ? 'Register as Guide' : 'Create Account'}

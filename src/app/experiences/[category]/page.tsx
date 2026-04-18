@@ -21,14 +21,10 @@ const SLUG_TO_CATEGORY: Record<string, PackageCategorySlug> = {
   'trekking': 'TREKKING',
 };
 
-const ACTIVITY_TYPES_BY_CATEGORY: Record<string, string[]> = {
-  'TOURIST_GUIDES': ['City Tours', 'Food Tours', 'Photography Walks', 'Street Art Tours', 'Night Tours', 'Market Tours'],
-  'HERITAGE_WALKS': ['Archeological Walks', 'Fort Trails', 'Holy Sites', 'Haveli Tours', 'Museum Walks', 'Temple Trails'],
-  'GROUP_TRIPS': ['Weekend Getaways', 'Yoga Retreats', 'Women-only Trips', 'Bachelor Trips', 'Corporate Team Outing'],
-  'ADVENTURE_GUIDES': ['Rafting', 'Paragliding', 'Rock Climbing', 'Bungee Jumping', 'Skiing', 'Wildlife Safaris'],
-  'TRAVEL_WITH_INFLUENCERS': ['Content Creation', 'Photography Tours', 'Social Media Trips'],
-  'OFFBEAT_TRAVEL': ['Offbeat Destinations', 'Hidden Gems', 'Village Stays', 'Unexplored Trails', 'Slow Travel'],
-  'TREKKING': ['High Altitude Treks', 'Day Treks', 'Multi-day Treks', 'Snow Treks', 'Himalayan Treks'],
+const CATEGORY_HERO_BADGES: Record<string, string[]> = {
+  'TREKKING': ['Certified Mountaineers', 'Verified Reviews', 'Secure Payments', 'Flexible Cancellations'],
+  'ADVENTURE_GUIDES': ['Government Licensed Operators', 'International Safety Standards', 'Equipment Safety Checked', 'Flexible Cancellations'],
+  'OFFBEAT_TRAVEL': ['Community-Rooted Experiences', 'Permit Area Access', 'Certified Local Guides', 'Flexible Cancellations'],
 };
 
 /**
@@ -161,7 +157,15 @@ export async function generateMetadata({ params }: { params: { category: string 
 }
 
 export async function generateStaticParams() {
-  return Object.keys(SLUG_TO_CATEGORY).map((category) => ({ category }));
+  try {
+    const disabledSlugs = await getDisabledCategorySlugs();
+    return Object.entries(SLUG_TO_CATEGORY)
+      .filter(([, catSlug]) => !disabledSlugs.has(catSlug))
+      .map(([category]) => ({ category }));
+  } catch {
+    // Fallback if DB unavailable during build
+    return Object.keys(SLUG_TO_CATEGORY).map((category) => ({ category }));
+  }
 }
 
 export default async function ExperienceCategoryPage({ params }: { params: { category: string } }) {
@@ -169,7 +173,6 @@ export default async function ExperienceCategoryPage({ params }: { params: { cat
   if (!slug) notFound();
 
   const cat = CATEGORY_MAP[slug];
-  const activityTypes = ACTIVITY_TYPES_BY_CATEGORY[slug] || [];
   const activeStates = await getActiveStates();
 
   // Fetch all data in parallel (including WordPress category landing)
@@ -177,7 +180,7 @@ export default async function ExperienceCategoryPage({ params }: { params: { cat
   const disabledSlugs = await getDisabledCategorySlugs();
   if (disabledSlugs.has(slug)) notFound();
 
-  const [productsRaw, topGuides, wpCategoryLanding, wp, statesWithProducts, uiConfig] = await Promise.all([
+  const [productsRaw, topGuides, wpCategoryLanding, wp, statesWithProducts, uiConfig, dbSubCategories] = await Promise.all([
     prisma.product.findMany({
       where: {
         packageCategory: slug,
@@ -231,8 +234,14 @@ export default async function ExperienceCategoryPage({ params }: { params: { cat
       select: { name: true },
     }),
     getUIConfig('experiences-default'),
+    prisma.subCategory.findMany({
+      where: { isEnabled: true, category: { urlSlug: params.category } },
+      orderBy: { sortOrder: 'asc' },
+      select: { name: true },
+    }),
   ]);
 
+  const activityTypes = dbSubCategories.map((s: { name: string }) => s.name);
   const products = productsRaw as any[];
   const sortedProducts = applyFeaturedPinning(
     applySorting(products, getSectionSort(uiConfig, 'all_experiences')),
@@ -250,15 +259,15 @@ export default async function ExperienceCategoryPage({ params }: { params: { cat
   const sectionLabels = CATEGORY_SECTION_LABELS[slug];
 
   const stateImages: Record<string, string> = {
-    'himachal-pradesh': 'https://images.unsplash.com/photo-1626621330414-3de75a9f3909?w=400&q=80',
-    'uttarakhand': 'https://images.unsplash.com/photo-1585464231875-d9ef1f5ad396?w=400&q=80',
-    'rajasthan': 'https://images.unsplash.com/photo-1548013146-72479768bada?w=400&q=80',
-    'ladakh': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80',
-    'kashmir': 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=400&q=80',
-    'delhi': 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=400&q=80',
-    'karnataka': 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=400&q=80',
-    'goa': 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=400&q=80',
-    'kerala': 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=400&q=80',
+    'himachal-pradesh': 'https://images.unsplash.com/photo-1626621330414-3de75a9f3909?w=400&q=80&fm=webp',
+    'uttarakhand': 'https://images.unsplash.com/photo-1585464231875-d9ef1f5ad396?w=400&q=80&fm=webp',
+    'rajasthan': 'https://images.unsplash.com/photo-1548013146-72479768bada?w=400&q=80&fm=webp',
+    'ladakh': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80&fm=webp',
+    'kashmir': 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=400&q=80&fm=webp',
+    'delhi': 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=400&q=80&fm=webp',
+    'karnataka': 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=400&q=80&fm=webp',
+    'goa': 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=400&q=80&fm=webp',
+    'kerala': 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=400&q=80&fm=webp',
   };
 
   return (
@@ -285,10 +294,21 @@ export default async function ExperienceCategoryPage({ params }: { params: { cat
             <p className="text-white/70 text-lg md:text-xl max-w-2xl mb-8 font-body leading-relaxed">
               {cat.description}
             </p>
-            <div className="flex flex-wrap gap-5 text-white/80 text-sm font-body">
-              <span className="bg-white/10 backdrop-blur-sm px-5 py-2.5 rounded-full">{products.length} Experiences</span>
-              <span className="bg-white/10 backdrop-blur-sm px-5 py-2.5 rounded-full">{topGuides.length}+ Expert Guides</span>
-              <span className="bg-white/10 backdrop-blur-sm px-5 py-2.5 rounded-full">{statesWithProducts.length} States</span>
+            <div className="flex flex-wrap gap-3 text-sm font-body">
+              {CATEGORY_HERO_BADGES[slug] ? (
+                CATEGORY_HERO_BADGES[slug].map((badge) => (
+                  <span key={badge} className="inline-flex items-center gap-2 bg-white text-[#1A1A18] font-semibold text-[13px] px-5 py-2.5 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.25)]">
+                    <svg className="w-4 h-4 text-[#58bdae] flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                    {badge}
+                  </span>
+                ))
+              ) : (
+                <>
+                  <span className="bg-white/10 backdrop-blur-sm px-5 py-2.5 rounded-full text-white/80">{products.length} Experiences</span>
+                  <span className="bg-white/10 backdrop-blur-sm px-5 py-2.5 rounded-full text-white/80">{topGuides.length}+ Expert Guides</span>
+                  <span className="bg-white/10 backdrop-blur-sm px-5 py-2.5 rounded-full text-white/80">{statesWithProducts.length} States</span>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -588,12 +608,12 @@ export default async function ExperienceCategoryPage({ params }: { params: { cat
             {[
               {
                 title: `The Ultimate Guide to ${cat.label} in India — Everything You Need to Know`,
-                image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80',
+                image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80&fm=webp',
                 slug: params.category,
               },
               {
                 title: `Top 10 ${cat.label} Experiences That Will Change How You Travel`,
-                image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&q=80',
+                image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&q=80&fm=webp',
                 slug: params.category,
               },
             ].map((blog, idx) => (

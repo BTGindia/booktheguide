@@ -7,6 +7,7 @@ import { getAllStateSlugs } from '@/lib/states';
 import { CATEGORIES_ORDERED } from '@/lib/categories';
 import { getDisabledCategorySlugs } from '@/lib/active-packages';
 import { getAllContentForSitemap } from '@/lib/wordpress';
+import { LANDING_PAGES } from '@/lib/landing-pages';
 
 const SITE_URL = 'https://www.booktheguide.com';
 
@@ -69,6 +70,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // ── WordPress content (blog posts, pages managed in CMS) ──
   const wpContent = await getAllContentForSitemap();
+
+  // ── SEO Landing Pages ──
+  for (const lp of LANDING_PAGES) {
+    entries.push({
+      url: `${SITE_URL}/${lp.region}/${lp.slug}`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    });
+  }
 
   // Blog posts from WordPress
   for (const post of wpContent.posts) {

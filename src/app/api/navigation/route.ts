@@ -3,7 +3,8 @@ import prisma from '@/lib/prisma';
 import { getAllStates } from '@/lib/states';
 import { getNavCategories, getDisabledCategorySlugs } from '@/lib/active-packages';
 
-export const dynamic = 'force-dynamic';
+// Cache navigation for 5 minutes — nav data rarely changes
+export const revalidate = 300;
 
 // GET /api/navigation - Get navigation menu data with dynamic subcategories
 // Only returns states/categories that have at least one approved, active package
@@ -156,12 +157,14 @@ export async function GET() {
       if (setting) logoUrl = setting.value;
     } catch {}
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       destinations,
       experiences,
       navCategories,
       logoUrl,
     });
+    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+    return response;
   } catch (error) {
     console.error('Navigation API error:', error);
     return NextResponse.json({ error: 'Failed to fetch navigation data' }, { status: 500 });

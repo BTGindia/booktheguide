@@ -248,7 +248,7 @@ export default function BlogsPage() {
             <div key={blog.id} className="bg-white rounded-xl border border-gray-100 p-4 hover:shadow-md transition-shadow">
               <div className="flex items-start gap-4">
                 {blog.thumbnail && (
-                  <img src={blog.thumbnail} alt="" className="w-20 h-14 object-cover rounded-lg flex-shrink-0" />
+                  <img src={blog.thumbnail} alt={blog.title} className="w-20 h-14 object-cover rounded-lg flex-shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">

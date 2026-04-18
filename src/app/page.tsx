@@ -1,25 +1,27 @@
 ﻿import Link from 'next/link';
+import Image from 'next/image';
 import type { Metadata } from 'next';
-import { Search, MapPin, Clock, Star, Sparkles, MessageCircle } from 'lucide-react';
+import { Search, MapPin, Clock, Star, Sparkles, MessageCircle, Mountain, ArrowLeftRight, Users, Wallet, BookOpen } from 'lucide-react';
 import prisma from '@/lib/prisma';
 import { CATEGORIES_ORDERED } from '@/lib/categories';
 
-// Revalidate homepage every 60 seconds (ISR)
-export const revalidate = 60;
+// Revalidate homepage every 5 minutes (ISR) — reduces server load
+export const revalidate = 300;
 import { getActiveCategories, getActiveStateSlugs, getActiveStates } from '@/lib/active-packages';
 import { type PackageCardData } from '@/components/PackageCard';
 import { HeroSearch } from '@/components/search/HeroSearch';
-import { getPageBySlug, wpSeoToMetadata, getPageContent } from '@/lib/wordpress';
+import { getPageBySlug, wpSeoToMetadata, getPageContent, getPosts } from '@/lib/wordpress';
 import { WPFaqSection, WPSeoContentBlock, WPInternalLinksGrid } from '@/components/wordpress/WPContentBlocks';
 import { getUIConfig, isSectionVisible, getSectionSort, getSectionLimit, getFeaturedIds, applySorting, applyFeaturedPinning } from '@/lib/ui-config';
+import TalkToPabloButton from '@/components/ai/TalkToPabloButton';
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'Book The Guide � India\'s Premier Guide Booking Platform',
+    title: 'Book The Guide - India\'s Premier Guide Booking Platform',
     description: 'Book verified local guides for treks, heritage walks, group trips, and adventure experiences across India. 500+ guides, 50+ destinations.',
     keywords: 'book guide India, local guides, trek guide, heritage walk, group trips India, adventure guide, travel India',
     openGraph: {
-      title: 'Book The Guide � India\'s Premier Guide Booking Platform',
+      title: 'Book The Guide - India\'s Premier Guide Booking Platform',
       description: 'Book verified local guides for treks, heritage walks, group trips, and adventures across India.',
       url: 'https://www.booktheguide.com',
       siteName: 'Book The Guide',
@@ -55,13 +57,24 @@ function toCard(p: any): PackageCardData {
 
 const productInclude = {
   destination: { include: { city: { include: { state: { select: { name: true } } } } } },
-  guide: { include: { user: { select: { name: true, image: true } } } },
+  guide: { include: { user: { select: { name: true } } } },
   fixedDepartures: {
     where: { isActive: true, approvalStatus: 'APPROVED', startDate: { gte: new Date() } },
     orderBy: { pricePerPerson: 'asc' as const },
     take: 1,
     select: { pricePerPerson: true, meetingPoint: true, totalSeats: true, bookedSeats: true },
   },
+} as any;
+
+const productSelect = {
+  id: true,
+  title: true,
+  slug: true,
+  coverImage: true,
+  durationDays: true,
+  durationNights: true,
+  activityType: true,
+  packageCategory: true,
 } as any;
 
 export default async function HomePage() {
@@ -96,6 +109,7 @@ export default async function HomePage() {
     activeStateNames,
     stateCities,
     activeStatesFromDB,
+    stateProductCounts,
   ] = await Promise.all([
     prisma.destination.findMany({
       where: { isActive: true, products: { some: { status: 'APPROVED', isActive: true } } },
@@ -172,11 +186,11 @@ export default async function HomePage() {
       orderBy: { createdAt: 'desc' },
       take: 6,
     }) as any,
-    // Featured Guides � highest scoring from each category (include unscored too)
+    // Featured Guides — highest scoring from each category (include unscored too)
     prisma.guideProfile.findMany({
       where: { isActive: true, isVerified: true },
       orderBy: [{ guideScore: 'desc' }, { averageRating: 'desc' }, { totalReviews: 'desc' }],
-      take: 30,
+      take: 12,
       select: {
         id: true,
         slug: true,
@@ -206,9 +220,31 @@ export default async function HomePage() {
       orderBy: { name: 'asc' },
     }),
     getActiveStates().catch(() => []),
+    // Product counts per state for Himalayan Destinations
+    prisma.indianState.findMany({
+      where: { isActive: true },
+      select: {
+        name: true,
+        _count: {
+          select: {
+            cities: {
+              where: {
+                destinations: {
+                  some: { products: { some: { status: 'APPROVED', isActive: true } } }
+                }
+              }
+            }
+          }
+        }
+      }
+    }).catch(() => []),
   ]);
 
-  // Build state ? active cities map
+  // Fetch latest blog posts (optional — graceful fallback if WP not configured)
+  const blogResult = await getPosts({ first: 3 }).catch(() => null);
+  const latestPosts = blogResult?.posts ?? [];
+
+  // Build state → active cities map
   const cityByState: Record<string, string[]> = {};
   (stateCities as any[]).forEach((c: any) => {
     const sn = c.state?.name;
@@ -216,6 +252,12 @@ export default async function HomePage() {
       if (!cityByState[sn]) cityByState[sn] = [];
       if (!cityByState[sn].includes(c.name)) cityByState[sn].push(c.name);
     }
+  });
+
+  // Build state product count map for Himalayan Destinations
+  const stateExpCount: Record<string, number> = {};
+  (stateProductCounts as any[]).forEach((s: any) => {
+    stateExpCount[s.name] = s._count?.cities || 0;
   });
 
   // Determine which categories to show (hide empty + disabled categories)
@@ -266,7 +308,7 @@ export default async function HomePage() {
 
   const offbeatCards = isCategoryActive('OFFBEAT_TRAVEL') ? offbeatProducts.map(toCard) : [];
 
-  // Build featured guides � pick highest scoring per category type
+  // Build featured guides — pick highest scoring per category type
   const categoryTypeLabels: Record<string, string> = {
     TREK_GUIDE: 'Trekking',
     ADVENTURE_SPORTS_GUIDE: 'Adventure Sports',
@@ -299,16 +341,16 @@ export default async function HomePage() {
   /* Reusable horizontal card scroller */
   const PackageScroller = ({ cards, emptyMsg }: { cards: PackageCardData[]; emptyMsg: string }) =>
     cards.length > 0 ? (
-      <div className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+      <div className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-1 px-1">
         {cards.map((pkg) => (
           <Link
             key={pkg.id}
             href={`/trips/${pkg.slug}`}
-            className="flex-shrink-0 w-[320px] rounded-[20px] overflow-hidden bg-white shadow-[0_2px_16px_rgba(28,26,23,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(28,26,23,0.12)] transition-all duration-300 snap-start group"
+            className="flex-shrink-0 w-[280px] sm:w-[320px] rounded-[20px] overflow-hidden bg-white shadow-[0_2px_16px_rgba(28,26,23,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(28,26,23,0.12)] transition-all duration-300 snap-start group card-tap"
           >
-            <div className="relative w-full h-[210px] overflow-hidden">
+            <div className="relative w-full h-[180px] sm:h-[210px] overflow-hidden">
               {pkg.coverImage ? (
-                <img src={pkg.coverImage} alt={pkg.title} className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500" />
+                <Image src={pkg.coverImage} alt={pkg.title} fill sizes="320px" className="object-cover group-hover:scale-[1.04] transition-transform duration-500" />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-btg-terracotta/10 to-btg-sage/10 flex items-center justify-center"><span className="text-4xl">???</span></div>
               )}
@@ -318,21 +360,21 @@ export default async function HomePage() {
                 </span>
               )}
             </div>
-            <div className="p-5">
-              <div className="text-[11px] font-semibold tracking-[0.14em] uppercase text-[#58bdae] mb-1.5 font-body">
+            <div className="p-4 sm:p-5">
+              <div className="text-[10px] sm:text-[11px] font-semibold tracking-[0.14em] uppercase text-[#58bdae] mb-1 sm:mb-1.5 font-body">
                 {pkg.activityType.replace(/_/g, ' ')}
               </div>
-              <h3 className="font-heading text-[20px] font-bold text-[#1A1A18] mb-2 leading-snug line-clamp-2 group-hover:text-[#58bdae] transition-colors">{pkg.title}</h3>
-              <div className="flex gap-3.5 mb-4">
-                <span className="text-[13px] text-btg-light-text flex items-center gap-1.5 font-body"><MapPin className="w-3.5 h-3.5" /> {pkg.stateName}</span>
-                <span className="text-[13px] text-btg-light-text flex items-center gap-1.5 font-body"><Clock className="w-3.5 h-3.5" /> {pkg.durationDays}D{pkg.durationNights > 0 && `/${pkg.durationNights}N`}</span>
-                <span className="text-[13px] text-btg-light-text flex items-center gap-1.5 font-body"><Star className="w-3.5 h-3.5 fill-[#E8943A] text-[#E8943A]" /> {pkg.guideRating.toFixed(1)}</span>
+              <h3 className="font-heading text-[17px] sm:text-[20px] font-bold text-[#1A1A18] mb-2 leading-snug line-clamp-2 group-hover:text-[#58bdae] transition-colors">{pkg.title}</h3>
+              <div className="flex gap-2 sm:gap-3.5 mb-3 sm:mb-4 flex-wrap">
+                <span className="text-[12px] sm:text-[13px] text-btg-light-text flex items-center gap-1 sm:gap-1.5 font-body"><MapPin className="w-3 sm:w-3.5 h-3 sm:h-3.5" /> {pkg.stateName}</span>
+                <span className="text-[12px] sm:text-[13px] text-btg-light-text flex items-center gap-1 sm:gap-1.5 font-body"><Clock className="w-3 sm:w-3.5 h-3 sm:h-3.5" /> {pkg.durationDays}D{pkg.durationNights > 0 && `/${pkg.durationNights}N`}</span>
+                <span className="text-[12px] sm:text-[13px] text-btg-light-text flex items-center gap-1 sm:gap-1.5 font-body"><Star className="w-3 sm:w-3.5 h-3 sm:h-3.5 fill-[#E8943A] text-[#E8943A]" /> {pkg.guideRating.toFixed(1)}</span>
               </div>
               <div className="flex items-center justify-between">
-                <div className="text-[20px] font-semibold text-btg-dark font-heading">
-                  {pkg.price ? `?${pkg.price.toLocaleString('en-IN')}` : 'On Request'} <small className="text-[12px] text-btg-light-text font-light font-body">/person</small>
+                <div className="text-[17px] sm:text-[20px] font-semibold text-btg-dark font-heading">
+                  {pkg.price ? `\u20B9${pkg.price.toLocaleString('en-IN')}` : 'On Request'} <small className="text-[11px] sm:text-[12px] text-btg-light-text font-light font-body">/person</small>
                 </div>
-                <span className="text-[13px] font-semibold text-btg-cta bg-btg-cta/10 px-4 py-2 rounded-full hover:bg-btg-cta-hover hover:text-white transition-colors font-heading">
+                <span className="text-[12px] sm:text-[13px] font-semibold text-btg-cta bg-btg-cta/10 px-3 sm:px-4 py-2 rounded-full hover:bg-btg-cta-hover hover:text-white transition-colors font-heading">
                   Book Now
                 </span>
               </div>
@@ -345,114 +387,189 @@ export default async function HomePage() {
     );
 
   return (
-    <div className="bg-btg-cream">
+    <div className="bg-white">
       {/* --------------- HERO --------------- */}
-      <section className="relative h-[85vh] min-h-[600px] flex flex-col justify-end pb-[60px]">
+      <section className="relative h-[70vh] sm:h-[80vh] md:h-[85vh] min-h-[480px] sm:min-h-[600px] flex flex-col justify-center items-start">
         <div className="absolute inset-0 overflow-hidden">
-          <img
-            src="/images/btg/hero-banner.png"
-            alt="India travel"
-            className="w-full h-full object-cover scale-[1.04] animate-subtle-zoom"
+          <Image
+            src="/images/btg/optimized/hero-banner.webp"
+            alt="Scenic mountain landscape with trekking trails in India — Book The Guide"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover scale-[1.04] animate-subtle-zoom"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-[rgba(28,26,23,0.15)] to-[rgba(28,26,23,0.55)]" />
         </div>
-        <div className="relative z-10 px-6 md:px-12">
-          <p className="text-[15px] font-bold tracking-[0.12em] text-[#58bdae] mb-4 flex items-center gap-2.5">
-            <span className="w-8 h-px bg-[#58bdae] inline-block" />
-            India's most trusted Guide Booking website vetted by Experts & Locals
+        <div className="relative z-10 px-4 sm:px-6 md:px-12 w-full">
+          <p className="text-[13px] sm:text-[15px] font-bold tracking-[0.12em] text-white mb-3 sm:mb-4 flex items-center gap-2.5">
+            <span className="w-6 sm:w-8 h-px bg-white inline-block" />
+            Adventure &nbsp;|&nbsp; Treks &nbsp;|&nbsp; Offbeat Experiences
           </p>
-          <h1 className="font-heading text-[clamp(32px,5vw,60px)] font-bold leading-[1.1] text-white tracking-tight mb-9">
-            Treks, Adventure Sports or<br /><span className="uppercase text-[#58bdae] text-[clamp(22px,3.5vw,42px)]">Offbeat Travel Packages combining all</span>
+          <h1 className="font-heading text-[clamp(22px,5vw,42px)] font-bold leading-[1.2] text-white tracking-tight mb-5 sm:mb-9 max-w-lg sm:max-w-none">
+            Great adventures need great guides.
           </h1>
 
           {/* Search Bar */}
-          <HeroSearch variant="hero" />
+          <HeroSearch variant="hero" categories={displayCategories.map(c => ({ slug: c.slug, label: c.label }))} />
         </div>
       </section>
 
-      {/* --------------- TRAVEL SIMPLIFIED � Feature Grid --------------- */}
-      {isSectionVisible(uiConfig, 'how_it_works') && (
-      <section className="py-8 px-6 md:px-12">
-        <div className="text-center mb-6">
-          <p className="text-[10.5px] font-semibold tracking-[0.2em] uppercase text-[#58bdae] mb-1.5">{content.plainText('how_it_works_label', 'How It Works')}</p>
-          <h2 className="font-heading text-[clamp(24px,3vw,34px)] font-bold leading-[1.15] text-[#1A1A18]"
-              dangerouslySetInnerHTML={{ __html: content.text('how_it_works_title', 'Travel <em class="italic text-[#58bdae]">Simplified</em>') }} />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-6xl mx-auto">
-          {[
-            { icon: '??', kw: content.plainText('feature_1_label', 'Search'), title: content.plainText('feature_1_title', 'Find Your Perfect Journey'), desc: content.plainText('feature_1_desc', 'Choose your preferred destination, experience type and when you wish to travel. Hundreds of curated experiences await.') },
-            { icon: '??', kw: content.plainText('feature_2_label', 'Compare & Choose'), title: content.plainText('feature_2_title', 'Pick Your Ideal Guide'), desc: content.plainText('feature_2_desc', 'Browse verified guides and trip leaders with detailed profiles, ratings, transparent pricing, and full itineraries.') },
-            { icon: '??', kw: content.plainText('feature_3_label', 'Book & Go!'), title: content.plainText('feature_3_title', 'Start Your Adventure'), desc: content.plainText('feature_3_desc', 'Join fixed departures with fellow travellers or book a private guide for your own dates. It\'s that simple.') },
-          ].map((step) => (
-            <div key={step.kw} className="bg-white rounded-xl px-6 py-5 border border-btg-dark/[0.06] hover:border-[#58bdae] hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(88,189,174,0.12)] transition-all duration-300 flex items-center gap-5">
-              <div className="w-12 h-12 rounded-xl bg-[#58bdae]/10 flex items-center justify-center flex-shrink-0 text-[24px]">{step.icon}</div>
-              <div>
-                <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#58bdae] mb-1 font-body">{step.kw}</div>
-                <h3 className="font-heading text-base font-bold text-[#1A1A18] mb-1">{step.title}</h3>
-                <p className="text-[13px] leading-[1.5] text-[#6B6560] font-light font-body">{step.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-      )}
-
-      {/* --------------- SEO DESCRIPTION --------------- */}
-      <section className="py-12 px-6 md:px-12">
-        <h1 className="font-heading text-[clamp(28px,4vw,42px)] font-bold leading-[1.15] text-[#1A1A18] mb-3">
-          Book Verified Local Guides for Treks, Adventure Sports &amp; Offbeat Trips Across India
-        </h1>
-        <h2 className="font-heading text-[clamp(18px,2.5vw,24px)] font-semibold text-[#58bdae] mb-5">
-          Your One-Stop Platform to Discover Certified Trek Leaders, Adventure Specialists &amp; Curated Local Experiences
-        </h2>
-        <p className="text-[15px] leading-[1.85] text-[#6B6560] font-body">
-          Book The Guide is India&apos;s most trusted guide booking platform, purpose-built for travellers who seek authentic, expert-led experiences beyond the ordinary. Whether you&apos;re planning a Himalayan trek through Uttarakhand and Himachal Pradesh, an adrenaline-pumping adventure sports session in Rishikesh or Manali, or an offbeat journey into hidden villages and unexplored valleys of Ladakh and Kashmir � we connect you directly with verified, locally-rooted guides who know every trail, every shortcut, and every hidden gem. Our platform hosts 50+ certified trek leaders, experienced adventure sports instructors, heritage walk storytellers, group trip organisers, and local experience curators � all vetted through rigorous background checks, certification verification, and community ratings. Every guide on Book The Guide has been handpicked by our regional admin teams to ensure quality, safety, and authenticity. From fixed-date group departures that let you travel with like-minded strangers to fully customised private itineraries, from weekend escapes near Delhi and Bangalore to multi-day expeditions in Spiti and Zanskar � we cover it all. Our transparent pricing model means no hidden fees; guides set their own rates and you see exactly what you pay for. Read real reviews from verified travellers, compare guides side-by-side, check live availability, and book securely � all in one place. Whether you&apos;re a solo backpacker, a couple seeking a romantic getaway, a family looking for safe curated holidays, or a corporate team planning an offsite, Book The Guide makes the entire journey seamless � from discovery to booking to the summit.
-        </p>
-      </section>
-
-      {/* --------------- TRUST SIGNALS --------------- */}
-      <section className="py-10 px-6 md:px-12 bg-[#EDE8DF]">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      {/* --------------- TRUST BADGES --------------- */}
+      <section className="py-10 sm:py-14 px-4 sm:px-6 md:px-12 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
             {[
-              { icon: '???', number: '50+', label: 'Certified Trek Leaders', desc: 'Expert-led summit expeditions and high-altitude trails' },
-              { icon: '??', number: '50+', label: 'Adventure Sports Guides', desc: 'Rafting, paragliding, skiing & more with certified pros' },
-              { icon: '???', number: '20+', label: 'Local-Curated Experiences in Hidden Spots', desc: 'Offbeat destinations handpicked by locals who live there' },
+              {
+                Icon: Mountain,
+                gradient: 'from-[#58bdae] to-[#3d9b8e]',
+                glow: 'rgba(88,189,174,0.15)',
+                title: 'Local Expertise',
+                desc: 'Certified local guides with years of experience navigating the trails they were born to.',
+              },
+              {
+                Icon: ArrowLeftRight,
+                gradient: 'from-[#E8943A] to-[#c97e2a]',
+                glow: 'rgba(232,148,58,0.15)',
+                title: 'No Middleman',
+                desc: 'Direct booking — local guides earn the full reward of showing you their home region.',
+              },
+              {
+                Icon: Users,
+                gradient: 'from-[#7A9E7E] to-[#5c8060]',
+                glow: 'rgba(122,158,126,0.15)',
+                title: 'For Everyone',
+                desc: 'Tick off popular bucket list adventures or discover offbeat trails. Packages for all.',
+              },
+              {
+                Icon: Wallet,
+                gradient: 'from-[#8B6DB5] to-[#7058a0]',
+                glow: 'rgba(139,109,181,0.15)',
+                title: 'Flexible Pricing',
+                desc: 'Diverse prices and flexible refund & cancellation policies. Choose what fits your budget.',
+              },
             ].map((badge) => (
-              <div key={badge.label} className="bg-white rounded-2xl p-6 text-center border border-btg-dark/[0.06] hover:border-[#58bdae] hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(88,189,174,0.12)] transition-all duration-300">
-                <div className="text-4xl mb-3">{badge.icon}</div>
-                <div className="font-heading text-[36px] font-bold text-[#58bdae] leading-none mb-1">{badge.number}</div>
-                <h3 className="font-heading text-[16px] font-bold text-[#1A1A18] mb-1">{badge.label}</h3>
-                <p className="text-[13px] text-[#6B6560] font-body">{badge.desc}</p>
+              <div key={badge.title} className="relative group text-center px-6 py-8 rounded-3xl overflow-hidden hover:-translate-y-1 transition-all duration-300 cursor-default">
+                {/* Soft gradient blob background */}
+                <div
+                  className="absolute inset-0 opacity-70 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ background: `radial-gradient(ellipse 80% 80% at 50% 60%, ${badge.glow} 0%, transparent 70%)` }}
+                />
+              <div className="relative">
+                  {/* Icon */}
+                  <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br ${badge.gradient} flex items-center justify-center mx-auto mb-3 sm:mb-5 shadow-[0_8px_24px_rgba(0,0,0,0.15)] group-hover:scale-110 group-hover:shadow-[0_12px_32px_rgba(0,0,0,0.2)] transition-all duration-300`}>
+                    <badge.Icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                  </div>
+                  <h3 className="font-heading text-[14px] sm:text-[17px] font-bold text-[#1A1A18] mb-1 sm:mb-2">{badge.title}</h3>
+                  <p className="text-[11px] sm:text-[13px] leading-[1.6] text-[#6B6560] font-body">{badge.desc}</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* --------------- EXPERIENCES � Categories --------------- */}
+      {/* --------------- EXPLORE DESTINATIONS --------------- */}
+      <section className="py-10 sm:py-12 px-4 sm:px-6 md:px-12 bg-gradient-to-br from-[#58bdae]/5 via-white to-[#E8943A]/5">
+        <div className="mb-8">
+          <p className="text-[10.5px] font-semibold tracking-[0.2em] uppercase text-[#58bdae] mb-2">Destinations</p>
+          <h2 className="font-heading text-[clamp(20px,2.5vw,28px)] font-bold leading-[1.3] text-[#1A1A18]">
+            Explore <em className="italic text-[#58bdae]">Popular</em> Destinations
+          </h2>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-5">
+          {(activeStatesFromDB as any[]).slice(0, 8).map((st: any) => (
+            <Link
+              key={st.slug}
+              href={`/explore/${st.slug}`}
+              className="group bg-gradient-to-br from-white to-[#58bdae]/5 rounded-2xl overflow-hidden border border-[#58bdae]/10 hover:shadow-[0_8px_30px_rgba(88,189,174,0.12)] hover:-translate-y-1 transition-all duration-300"
+            >
+              <div className="relative aspect-[4/3] overflow-hidden">
+                {st.heroImage ? (
+                  <Image src={st.heroImage} alt={`${st.name} — travel destination in India`} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover group-hover:scale-[1.06] transition-transform duration-500" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-[#58bdae]/20 to-[#E8943A]/10 flex items-center justify-center">
+                    <span className="text-4xl">🏔️</span>
+                  </div>
+                )}
+              </div>
+              <div className="p-3 sm:p-4 text-center">
+                <h3 className="font-heading text-[15px] sm:text-[18px] font-bold text-[#1A1A18] mb-0.5 sm:mb-1 group-hover:text-[#58bdae] transition-colors">{st.name}</h3>
+                <p className="text-[11px] sm:text-[13px] text-[#6B6560]">{stateExpCount[st.name] || 0} listed experiences</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+        <div className="text-center mt-8">
+          <Link href="/destinations" className="inline-block text-sm font-bold text-white bg-btg-cta px-8 py-3 rounded-full hover:bg-btg-cta-hover hover:-translate-y-0.5 transition-all tracking-wide font-heading">
+            View All Destinations \u2192
+          </Link>
+        </div>
+      </section>
+
+      {/* --------------- SEO DESCRIPTION --------------- */}
+      <section className="py-10 sm:py-12 px-4 sm:px-6 md:px-12">
+        <div className="max-w-6xl mx-auto">
+        <h1 className="font-heading text-[clamp(22px,2.8vw,28px)] font-bold leading-[1.4] text-[#1A1A18] mb-3">
+          Book Verified Local Guides for Treks, Adventure Sports &amp; Offbeat Trips Across India
+        </h1>
+        <h2 className="font-heading text-[clamp(16px,2vw,20px)] font-semibold text-[#58bdae] mb-5">
+          Your One-Stop Platform to Discover Certified Trek Leaders, Adventure Specialists &amp; Curated Local Experiences
+        </h2>
+        <p className="text-[15px] leading-[1.85] text-[#6B6560] font-body">
+          Book The Guide is India&apos;s most trusted guide booking platform, purpose-built for travellers who seek authentic, expert-led experiences beyond the ordinary. Whether you&apos;re planning a Himalayan trek through Uttarakhand and Himachal Pradesh, an adrenaline-pumping adventure sports session in Rishikesh or Manali, or an offbeat journey into hidden villages and unexplored valleys of Ladakh and Kashmir — we connect you directly with verified, locally-rooted guides who know every trail, every shortcut, and every hidden gem. Our platform hosts 50+ certified trek leaders, experienced adventure sports instructors, heritage walk storytellers, group trip organisers, and local experience curators — all vetted through rigorous background checks, certification verification, and community ratings. Every guide on Book The Guide has been handpicked by our regional admin teams to ensure quality, safety, and authenticity. From fixed-date group departures that let you travel with like-minded strangers to fully customised private itineraries, from weekend escapes near Delhi and Bangalore to multi-day expeditions in Spiti and Zanskar — we cover it all. Our transparent pricing model means no hidden fees; guides set their own rates and you see exactly what you pay for. Read real reviews from verified travellers, compare guides side-by-side, check live availability, and book securely — all in one place. Whether you&apos;re a solo backpacker, a couple seeking a romantic getaway, a family looking for safe curated holidays, or a corporate team planning an offsite, Book The Guide makes the entire journey seamless — from discovery to booking to the summit.
+        </p>
+        </div>
+      </section>
+
+      {/* --------------- TRUST SIGNALS --------------- */}
+      <section className="py-10 sm:py-14 px-4 sm:px-6 md:px-12">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              { Icon: Mountain, gradient: 'from-[#58bdae] to-[#3d9b8e]', glow: 'rgba(88,189,174,0.18)', number: '50+', label: 'Certified Trek Leaders', desc: 'Expert-led summit expeditions and high-altitude trails' },
+              { Icon: Users, gradient: 'from-[#E8943A] to-[#c97e2a]', glow: 'rgba(232,148,58,0.18)', number: '50+', label: 'Adventure Sports Guides', desc: 'Rafting, paragliding, skiing & more with certified pros' },
+              { Icon: Sparkles, gradient: 'from-[#8B6DB5] to-[#7058a0]', glow: 'rgba(139,109,181,0.18)', number: '20+', label: 'Local-Curated Experiences', desc: 'Offbeat destinations handpicked by locals who live there' },
+            ].map((badge) => (
+              <div key={badge.label} className="relative group text-center px-6 py-10 rounded-3xl overflow-hidden hover:-translate-y-1 transition-all duration-300">
+                {/* Radial gradient glow */}
+                <div
+                  className="absolute inset-0 opacity-60 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ background: `radial-gradient(ellipse 90% 90% at 50% 70%, ${badge.glow} 0%, transparent 70%)` }}
+                />
+                <div className="relative">
+                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${badge.gradient} flex items-center justify-center mx-auto mb-4 shadow-[0_6px_20px_rgba(0,0,0,0.12)] group-hover:scale-110 transition-transform duration-300`}>
+                    <badge.Icon className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="font-heading text-[36px] font-bold text-[#1A1A18] leading-none mb-1">{badge.number}</div>
+                  <h3 className="font-heading text-[15px] font-bold text-[#1A1A18] mb-1.5">{badge.label}</h3>
+                  <p className="text-[13px] text-[#6B6560] font-body leading-relaxed">{badge.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* --------------- EXPERIENCES — Categories (3 only) --------------- */}
       {isSectionVisible(uiConfig, 'categories') && (
-      <section className="py-12 px-6 md:px-12">
+      <section className="py-10 sm:py-12 px-4 sm:px-6 md:px-12">
         <p className="text-[10.5px] font-semibold tracking-[0.2em] uppercase text-[#58bdae] mb-2">{content.plainText('categories_label', 'Explore Categories')}</p>
         <div className="mb-8">
-          <h2 className="font-heading text-[clamp(26px,3.5vw,40px)] font-bold leading-[1.1] text-[#1A1A18]">{content.plainText('categories_title', 'Experiences led by Verified Experts')}</h2>
+          <h2 className="font-heading text-[clamp(20px,2.5vw,28px)] font-bold leading-[1.3] text-[#1A1A18]">{content.plainText('categories_title', 'Experiences led by Verified Experts')}</h2>
           <p className="text-[15px] text-[#6B6560] font-medium mt-1 font-body">{content.plainText('categories_subtitle', 'Select how you wish to see India')}</p>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {displayCategories.map((cat) => {
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          {displayCategories.filter(cat => ['TREKKING', 'ADVENTURE_GUIDES', 'OFFBEAT_TRAVEL'].includes(cat.slug)).map((cat) => {
             const subtexts: Record<string, string> = {
-              'Tourist Guides': content.plainText('cat_tourist_guides_desc', 'Hire a verified local guide for personalised sightseeing tours across India.'),
-              'Group Trips': content.plainText('cat_group_trips_desc', 'Join fixed-date group departures with fellow travellers and expert trip leaders.'),
               'Adventure Sports': content.plainText('cat_adventure_guides_desc', 'Trek, raft, climb and explore with certified adventure specialists.'),
-              'Heritage Walks': content.plainText('cat_heritage_walks_desc', 'Walk through India\'s rich history with storytellers who bring monuments alive.'),
-              'Travel with Influencers': content.plainText('cat_influencers_desc', 'Travel alongside popular creators on curated, content-worthy experiences.'),
               'Offbeat Travel': content.plainText('cat_offbeat_travel_desc', 'Discover hidden gems and unexplored destinations beyond the tourist trail.'),
               'Trekking': content.plainText('cat_trekking_desc', 'Summit iconic peaks and traverse breathtaking trails with experienced trek leaders.'),
             };
             return (
-              <Link key={cat.slug} href={cat.href} className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300">
+              <Link key={cat.slug} href={cat.href} className="group bg-gradient-to-br from-white to-[#58bdae]/5 rounded-2xl overflow-hidden border border-[#58bdae]/10 hover:shadow-[0_8px_30px_rgba(88,189,174,0.12)] hover:-translate-y-1 transition-all duration-300">
                 <div className="relative aspect-[4/3] overflow-hidden">
-                  <img src={cat.image} alt={cat.label} className="w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-500" />
+                  <Image src={cat.image} alt={`${cat.label} — guided experiences in India`} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover group-hover:scale-[1.06] transition-transform duration-500" />
                 </div>
                 <div className="p-4">
                   <h3 className="font-heading text-[18px] font-bold text-[#1A1A18] mb-1.5 group-hover:text-[#58bdae] transition-colors">{cat.label}</h3>
@@ -464,7 +581,7 @@ export default async function HomePage() {
         </div>
         <div className="text-center mt-8">
           <Link href="/search" className="inline-block text-sm font-bold text-white bg-btg-cta px-8 py-3 rounded-full hover:bg-btg-cta-hover hover:text-white hover:-translate-y-0.5 transition-all tracking-wide font-heading">
-            Explore More ?
+            Explore More →
           </Link>
         </div>
       </section>
@@ -472,40 +589,41 @@ export default async function HomePage() {
 
       {/* --------------- TRENDING TREKS --------------- */}
       {isSectionVisible(uiConfig, 'trending') && (
-      <section className="py-12 px-6 md:px-12">
+      <section className="py-10 sm:py-12 px-4 sm:px-6 md:px-12">
         <div className="mb-8">
-          <p className="text-[10.5px] font-semibold tracking-[0.2em] uppercase text-[#58bdae] mb-2">{content.plainText('trending_label', "Season's Favorite")}</p>
-          <h2 className="font-heading text-[clamp(26px,3.5vw,40px)] font-bold leading-[1.1] text-[#1A1A18]"
-              dangerouslySetInnerHTML={{ __html: content.text('trending_title', 'Trending <em class="italic text-[#58bdae]">Treks</em> � Season\'s Favorite') }} />
+          <p className="text-[10.5px] font-semibold tracking-[0.2em] uppercase text-[#58bdae] mb-2">Popular Treks</p>
+          <h2 className="font-heading text-[clamp(20px,2.5vw,28px)] font-bold leading-[1.3] text-[#1A1A18]">
+            Explore Popular <em className="italic text-[#58bdae]">Treks</em> with certified local guides
+          </h2>
         </div>
         <PackageScroller cards={trendingCards} emptyMsg="Trending treks coming soon!" />
         <div className="text-center mt-8">
           <Link href="/experiences/trekking" className="inline-block text-sm font-bold text-white bg-btg-cta px-8 py-3 rounded-full hover:bg-btg-cta-hover hover:-translate-y-0.5 transition-all tracking-wide">
-            Explore All ?
+            Explore All →
           </Link>
         </div>
       </section>
       )}
 
       {/* --------------- MEET THE LOCAL GUIDES --------------- */}
-      <section className="py-12 px-6 md:px-12 bg-[#EDE8DF]">
-        <div className="mb-8">
+      <section className="py-10 sm:py-12 px-4 sm:px-6 md:px-12 bg-gradient-to-br from-[#58bdae]/5 via-white to-[#E8943A]/5">
+        <div className="mb-6 sm:mb-8">
           <p className="text-[10.5px] font-semibold tracking-[0.2em] uppercase text-[#58bdae] mb-2 font-body">Local Expertise</p>
-          <h2 className="font-heading text-[clamp(26px,3.5vw,40px)] font-bold leading-[1.1] text-[#1A1A18]">
-            Meet the Local Guides behind your <em className="italic text-[#58bdae]">perfect vacation</em>
+          <h2 className="font-heading text-[clamp(20px,2.5vw,28px)] font-bold leading-[1.3] text-[#1A1A18]">
+            Meet the people of mountains, <em className="italic text-[#58bdae]">waiting to show you around</em>
           </h2>
         </div>
         {topGuides.length > 0 ? (
-          <div className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+          <div className="flex gap-4 sm:gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-1 px-1">
             {topGuides.map((guide: any) => (
               <Link
                 key={guide.id}
                 href={`/guides/${guide.slug}`}
-                className="flex-shrink-0 w-[240px] bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 snap-start group"
+                className="flex-shrink-0 w-[200px] sm:w-[240px] bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 snap-start group card-tap"
               >
                 <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-[#58bdae]/20 to-[#7A9E7E]/20">
                   {guide.photo ? (
-                    <img src={guide.photo} alt={guide.name} className="w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-500" />
+                    <Image src={guide.photo} alt={`${guide.name} — local travel guide in India`} fill sizes="240px" className="object-cover group-hover:scale-[1.06] transition-transform duration-500" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <span className="text-5xl font-heading font-bold text-[#58bdae]/40">{guide.name?.[0] || 'G'}</span>
@@ -529,7 +647,7 @@ export default async function HomePage() {
           </div>
         ) : (
           <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-[#58bdae]/30">
-            <span className="text-5xl mb-4 block">?????</span>
+            <span className="text-5xl mb-4 block">{String.fromCodePoint(0x1F3D4, 0xFE0F)}</span>
             <h3 className="font-heading text-[22px] font-bold text-[#1A1A18] mb-2">Guides Coming Soon</h3>
             <p className="text-[15px] text-[#6B6560]">Our verified local guides are being onboarded. Check back shortly!</p>
           </div>
@@ -538,132 +656,81 @@ export default async function HomePage() {
 
       {/* --------------- ADVENTURE PICKS (DYNAMIC) --------------- */}
       {isSectionVisible(uiConfig, 'adventure') && adventureCards.length > 0 && (
-        <section className="py-12 px-6 md:px-12 bg-btg-sand">
+        <section className="py-10 sm:py-12 px-4 sm:px-6 md:px-12 bg-gradient-to-r from-[#E8943A]/5 via-white to-[#58bdae]/5">
           <div className="mb-8">
             <p className="text-[10.5px] font-semibold tracking-[0.2em] uppercase text-[#58bdae] mb-2">{content.plainText('adventure_label', 'Push Your Limits')}</p>
-            <h2 className="font-heading text-[clamp(26px,3.5vw,40px)] font-bold leading-[1.1] text-[#1A1A18]"
+            <h2 className="font-heading text-[clamp(20px,2.5vw,28px)] font-bold leading-[1.3] text-[#1A1A18]"
                 dangerouslySetInnerHTML={{ __html: content.text('adventure_title', 'Best Adventure Sports <em class="italic text-[#58bdae]">Packages in India</em>') }} />
             <p className="text-[16px] text-btg-mid font-bold mt-1">{content.plainText('adventure_subtitle', 'For that extra adrenaline rush!')}</p>
           </div>
           <PackageScroller cards={adventureCards} emptyMsg="" />
           <div className="text-center mt-8">
             <Link href="/experiences/adventure-guides" className="inline-block text-sm font-bold text-white bg-btg-cta px-8 py-3 rounded-full hover:bg-btg-cta-hover hover:-translate-y-0.5 transition-all tracking-wide">
-              Explore More ?
+              Explore More →
             </Link>
           </div>
         </section>
       )}
 
       {/* --------------- OFFBEAT TRAVEL --------------- */}
-      <section className="py-12 px-6 md:px-12">
+      <section className="py-10 sm:py-12 px-4 sm:px-6 md:px-12">
         <div className="mb-8">
           <p className="text-[10.5px] font-semibold tracking-[0.2em] uppercase text-[#58bdae] mb-2">Offbeat Travel</p>
-          <h2 className="font-heading text-[clamp(26px,3.5vw,40px)] font-bold leading-[1.1] text-[#1A1A18]">
-            Can&apos;t decide what to do? Explore packages <em className="italic text-[#58bdae]">combining all</em> in Offbeat Destinations in India
+          <h2 className="font-heading text-[clamp(20px,2.5vw,28px)] font-bold leading-[1.3] text-[#1A1A18]">
+            Offbeat trails and <em className="italic text-[#58bdae]">experiences</em> for you
           </h2>
-          <p className="text-[16px] text-btg-mid font-bold mt-1">Group trip packages combining treks, adventure sports and activities � all inclusive.</p>
         </div>
         {offbeatCards.length > 0 ? (
           <PackageScroller cards={offbeatCards} emptyMsg="" />
         ) : (
           <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-[#58bdae]/30">
-            <span className="text-5xl mb-4 block">???</span>
+            <span className="text-5xl mb-4 block">{String.fromCodePoint(0x1F30D)}</span>
             <h3 className="font-heading text-[22px] font-bold text-[#1A1A18] mb-2">Coming Soon</h3>
             <p className="text-[15px] text-[#6B6560]">Offbeat travel packages combining treks, adventure sports &amp; local experiences are being curated. Stay tuned!</p>
           </div>
         )}
         <div className="text-center mt-8">
           <Link href="/experiences/offbeat-travel" className="inline-block text-sm font-bold text-white bg-btg-cta px-8 py-3 rounded-full hover:bg-btg-cta-hover hover:-translate-y-0.5 transition-all tracking-wide">
-            Explore Offbeat Trips ?
+            Explore Offbeat Trips →
           </Link>
         </div>
       </section>
 
-      {/* --------------- WEEKEND TRAVEL PACKAGES --------------- */}
-      <section className="py-12 px-6 md:px-12 bg-gradient-to-b from-white to-btg-sand/30">
+      {/* --------------- RECOMMENDED TREKS FOR THE SEASON --------------- */}
+      <section className="py-10 sm:py-12 px-4 sm:px-6 md:px-12 bg-gradient-to-br from-white via-[#58bdae]/5 to-white">
         <div className="mb-8">
-          <p className="text-[10.5px] font-semibold tracking-[0.2em] uppercase text-[#58bdae] mb-2">This Weekend</p>
-          <h2 className="font-heading text-[clamp(26px,3.5vw,40px)] font-bold leading-[1.1] text-[#1A1A18]">
-            Weekend Travel <em className="italic text-[#58bdae]">Packages India</em>
+          <p className="text-[10.5px] font-semibold tracking-[0.2em] uppercase text-[#58bdae] mb-2">Curated for You</p>
+          <h2 className="font-heading text-[clamp(20px,2.5vw,28px)] font-bold leading-[1.3] text-[#1A1A18]">
+            Recommended <em className="italic text-[#58bdae]">Treks</em> for the season
           </h2>
-          <p className="text-[16px] text-btg-mid font-bold mt-1">Trekking, adventure sports and offbeat travel packages for the upcoming weekend.</p>
         </div>
-        {weekendCards.length > 0 ? (
-          <PackageScroller cards={weekendCards as PackageCardData[]} emptyMsg="" />
-        ) : (
-          <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-[#58bdae]/30">
-            <span className="text-5xl mb-4 block">??</span>
-            <h3 className="font-heading text-[22px] font-bold text-[#1A1A18] mb-2">No Weekend Trips Yet</h3>
-            <p className="text-[15px] text-[#6B6560]">Check back soon for this weekend&apos;s best trekking, adventure &amp; offbeat packages.</p>
-          </div>
-        )}
+        <PackageScroller cards={trendingCards} emptyMsg="Recommended treks coming soon!" />
         <div className="text-center mt-8">
-          <Link href="/upcoming-trips" className="inline-block text-sm font-bold text-white bg-btg-cta px-8 py-3 rounded-full hover:bg-btg-cta-hover hover:-translate-y-0.5 transition-all tracking-wide">
-            View All Weekend Trips ?
+          <Link href="/experiences/trekking" className="inline-block text-sm font-bold text-white bg-btg-cta px-8 py-3 rounded-full hover:bg-btg-cta-hover hover:-translate-y-0.5 transition-all tracking-wide">
+            Explore All Treks →
           </Link>
         </div>
       </section>
 
-      {/* --------------- DESTINATIONS � State Cards --------------- */}
-      {isSectionVisible(uiConfig, 'destinations') && (
-      <section className="py-12 px-6 md:px-12 bg-[#EDE8DF]">
-        <p className="text-[10.5px] font-semibold tracking-[0.2em] uppercase text-[#58bdae] mb-2 font-body">{content.plainText('destinations_label', 'Top Destinations')}</p>
+      {/* --------------- ADVENTURE SPORTS — BUCKET LIST --------------- */}
+      <section className="py-10 sm:py-12 px-4 sm:px-6 md:px-12 bg-gradient-to-br from-[#E8943A]/5 via-white to-[#58bdae]/5">
         <div className="mb-8">
-          <h2 className="font-heading text-[clamp(26px,3.5vw,40px)] font-bold leading-[1.1] text-[#1A1A18]">{content.plainText('destinations_title', 'Where to go in India?')}</h2>
-          <p className="text-[15px] text-[#6B6560] font-bold mt-1 font-body">{content.plainText('destinations_subtitle', 'Choose where you wish to travel')}</p>
+          <p className="text-[10.5px] font-semibold tracking-[0.2em] uppercase text-[#58bdae] mb-2">Adventure Sports</p>
+          <h2 className="font-heading text-[clamp(20px,2.5vw,28px)] font-bold leading-[1.3] text-[#1A1A18]">
+            Biking Trips, Rafting, Paragliding.. <em className="italic text-[#58bdae]">Tick it off</em> the bucket list
+          </h2>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {(activeStatesFromDB as any[]).map((st: any) => (
-            <div
-              key={st.slug}
-              className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300"
-            >
-              <Link href={`/explore/${st.slug}`} className="block">
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  {st.heroImage ? (
-                    <img src={st.heroImage} alt={st.name} className="w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-500" />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-[#58bdae]/20 to-[#7A9E7E]/20 flex items-center justify-center">
-                      <span className="text-4xl">???</span>
-                    </div>
-                  )}
-                </div>
-                <div className="px-4 pt-4">
-                  <p className="text-[11px] font-semibold tracking-[0.15em] uppercase text-[#58bdae] mb-1">{st.isNorthIndia ? 'North India' : 'India'} � {st.code}</p>
-                  <h3 className="font-heading text-[18px] font-bold text-[#1A1A18] mb-1 group-hover:text-[#58bdae] transition-colors">{st.name}</h3>
-                  <p className="text-[13px] text-[#6B6560] line-clamp-1 mb-2">{st.tagline}</p>
-                </div>
-              </Link>
-              {(() => {
-                const cities = cityByState[st.name]?.length ? cityByState[st.name] : st.popularCities;
-                return cities && cities.length > 0 ? (
-                  <div className="flex flex-wrap gap-1.5 px-4 pb-4">
-                    {cities.slice(0, 6).map((city: string) => (
-                      <Link
-                        key={city}
-                        href={`/explore/${(st as any).slug}?city=${encodeURIComponent(city as string)}`}
-                        className="text-[11px] font-medium text-[#58bdae] bg-[#58bdae]/10 px-2.5 py-1 rounded-full hover:bg-[#58bdae] hover:text-white transition-colors"
-                      >
-                        {city}
-                      </Link>
-                    ))}
-                  </div>
-                ) : null;
-              })()}
-            </div>
-          ))}
-        </div>
+        <PackageScroller cards={adventureCards} emptyMsg="Adventure sports packages coming soon!" />
         <div className="text-center mt-8">
-          <Link href="/explore" className="inline-block text-sm font-bold text-white bg-btg-cta px-8 py-3 rounded-full hover:bg-btg-cta-hover hover:-translate-y-0.5 transition-all tracking-wide">
-            Explore All States ?
+          <Link href="/experiences/adventure-guides" className="inline-block text-sm font-bold text-white bg-btg-cta px-8 py-3 rounded-full hover:bg-btg-cta-hover hover:-translate-y-0.5 transition-all tracking-wide">
+            Explore All →
           </Link>
         </div>
       </section>
-      )}
 
-      {/* --------------- TRAVEL WITH INFLUENCERS (DYNAMIC) � Star Offering --------------- */}
+      {/* --------------- TRAVEL WITH INFLUENCERS (DYNAMIC) — Star Offering --------------- */}
       {isSectionVisible(uiConfig, 'influencers') && influencerCards.length > 0 && (
-        <section className="relative py-16 px-6 md:px-12 overflow-hidden">
+        <section className="relative py-10 sm:py-16 px-4 sm:px-6 md:px-12 overflow-hidden">
           {/* Animated background */}
           <div className="absolute inset-0 bg-gradient-to-br from-[#1A1A18] via-[#2a2a28] to-[#1A1A18]" />
           <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, #58bdae 1px, transparent 1px), radial-gradient(circle at 80% 20%, #FF7F50 1px, transparent 1px)', backgroundSize: '60px 60px, 40px 40px' }} />
@@ -672,9 +739,9 @@ export default async function HomePage() {
           <div className="relative z-10">
             <div className="text-center mb-10">
               <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[#FF7F50]/20 to-[#FFD96A]/20 border border-[#FF7F50]/30 rounded-full px-5 py-2 mb-4">
-                <span className="text-[13px] font-bold tracking-wide text-[#FFD96A]">{content.plainText('influencer_badge', '? STAR EXPERIENCE')}</span>
+                <span className="text-[13px] font-bold tracking-wide text-[#FFD96A]">{content.plainText('influencer_badge', '⭐ STAR EXPERIENCE')}</span>
               </div>
-              <h2 className="font-heading text-[clamp(28px,4vw,46px)] font-bold leading-[1.1] text-white mb-3"
+              <h2 className="font-heading text-[clamp(22px,3vw,30px)] font-bold leading-[1.3] text-white mb-3"
                   dangerouslySetInnerHTML={{ __html: content.text('influencer_title', 'Travel with Your <em class="italic bg-gradient-to-r from-[#FF7F50] to-[#FFD96A] bg-clip-text text-transparent">Favourite Influencer!</em>') }} />
               <p className="text-[16px] text-white/50 font-medium max-w-lg mx-auto">{content.plainText('influencer_subtitle', "Curated group trips led by India's best content creators. Live the reel life, for real.")}</p>
             </div>
@@ -687,10 +754,10 @@ export default async function HomePage() {
                 >
                   <div className="relative aspect-[3/4] overflow-hidden">
                     {pkg.coverImage ? (
-                      <img src={pkg.coverImage} alt={pkg.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                      <Image src={pkg.coverImage} alt={pkg.title} fill sizes="280px" className="object-cover group-hover:scale-110 transition-transform duration-700" />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-[#FF7F50]/30 to-[#FFD96A]/30 flex items-center justify-center">
-                        <span className="text-5xl">?</span>
+                        <span className="text-5xl">{String.fromCodePoint(0x1F3D4, 0xFE0F)}</span>
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
@@ -700,17 +767,17 @@ export default async function HomePage() {
                       </div>
                     )}
                     <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white text-lg">
-                      ?
+                      &#x2661;
                     </div>
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 p-5">
                     <div className="inline-flex items-center gap-1.5 bg-[#58bdae]/20 backdrop-blur-sm rounded-full px-3 py-1 mb-2">
                       <span className="text-[11px] font-semibold text-[#58bdae]">by {pkg.guideName}</span>
                     </div>
-                    <div className="font-heading text-[20px] text-white font-bold mb-2 line-clamp-2 leading-tight">{pkg.title}</div>
+                    <div className="font-heading text-[17px] text-white font-bold mb-2 line-clamp-2 leading-tight">{pkg.title}</div>
                     <div className="flex items-center justify-between text-[13px]">
-                      <span className="text-white/60">{pkg.destinationName} � {pkg.durationDays}D{pkg.durationNights > 0 ? `/${pkg.durationNights}N` : ''}</span>
-                      <span className="text-[#FFD96A] font-bold">{pkg.price ? `?${pkg.price.toLocaleString('en-IN')}` : 'On Request'}</span>
+                      <span className="text-white/60">{pkg.destinationName} &middot; {pkg.durationDays}D{pkg.durationNights > 0 ? `/${pkg.durationNights}N` : ''}</span>
+                      <span className="text-[#FFD96A] font-bold">{pkg.price ? `\u20B9${pkg.price.toLocaleString('en-IN')}` : 'On Request'}</span>
                     </div>
                   </div>
                 </Link>
@@ -718,48 +785,42 @@ export default async function HomePage() {
             </div>
             <div className="text-center mt-10">
               <Link href="/experiences/travel-with-influencers" className="inline-flex items-center gap-2 text-[15px] font-bold text-[#1A1A18] bg-gradient-to-r from-[#FFD96A] to-[#FF7F50] px-10 py-4 rounded-full hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(255,127,80,0.3)] transition-all tracking-wide">
-                Explore Creator Trips ?
+                Explore Creator Trips →
               </Link>
             </div>
           </div>
         </section>
       )}
 
-      {/* --------------- NEEV � AI Travel Planner --------------- */}
+      {/* --------------- Pablo — AI Travel Buddy --------------- */}
       {isSectionVisible(uiConfig, 'neev_ai') && (
       <section className="mx-6 md:mx-12 my-10 relative">
-        <div className="rounded-[24px] overflow-hidden relative bg-gradient-to-r from-[#0f2027] via-[#203a43] to-[#58bdae]">
-          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 30% 50%, #FFD96A 1px, transparent 1px), radial-gradient(circle at 70% 30%, #58bdae 1px, transparent 1px)', backgroundSize: '40px 40px, 30px 30px' }} />
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#FF7F50] via-[#FFD96A] to-[#58bdae]" />
+        <div className="rounded-[24px] overflow-hidden relative bg-gradient-to-br from-[#FFF5EE] via-[#FFF0E6] to-[#FFE8D6] border border-[#FF7F50]/15">
+          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#FF7F50] via-[#FFD96A] to-[#FF7F50]" />
           
           <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 px-6 py-8 md:px-10 md:py-8">
-            {/* Left: Icon + Content */}
+            {/* Left: Pablo mascot + Content */}
             <div className="flex items-center gap-5 flex-1">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#58bdae] to-[#FFD96A] flex items-center justify-center flex-shrink-0 shadow-lg animate-pulse">
-                <Sparkles className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden flex-shrink-0 shadow-lg ring-2 ring-[#FF7F50]/20">
+                <Image src="/images/btg/pablo-mascot.png" alt="Pablo" width={80} height={80} className="object-cover w-full h-full" />
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[11px] font-bold tracking-[0.15em] uppercase text-[#FFD96A]">Meet NEEV</span>
-                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                  <span className="text-[11px] font-bold tracking-[0.12em] uppercase text-[#FF7F50]">Meet Pablo</span>
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                 </div>
-                <h2 className="font-heading text-[clamp(20px,3vw,28px)] font-bold text-white leading-tight mb-1"
-                    dangerouslySetInnerHTML={{ __html: content.text('neev_title', 'Not sure where to go? Let <em class="italic text-[#FFD96A]">NEEV</em> plan it!') }} />
-                <p className="text-[14px] text-white/50 max-w-md hidden sm:block">
-                  {content.plainText('neev_description', "Your AI travel buddy that knows every trail, hidden spot and the perfect guide for you.")}
+                <h2 className="font-heading text-[clamp(18px,2.5vw,24px)] font-bold text-[#1A1A18] leading-tight mb-1"
+                    dangerouslySetInnerHTML={{ __html: content.text('neev_title', 'Not sure where to go? Let <em class="italic text-[#FF7F50]">Pablo</em> figure it out!') }} />
+                <p className="text-[14px] text-[#6B6560] max-w-md hidden sm:block">
+                    {content.plainText('neev_description', "Your local mountain doggo who knows every trail, hidden spot and the perfect guide for you.")}
                 </p>
               </div>
             </div>
             
             {/* Right: CTA */}
             <div className="flex items-center gap-4 flex-shrink-0">
-              <Link
-                href="/search"
-                className="inline-flex items-center gap-2 text-[14px] font-bold text-[#0f2027] bg-gradient-to-r from-[#FFD96A] to-[#FF7F50] px-7 py-3.5 rounded-full hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(255,217,106,0.4)] transition-all"
-              >
-                <MessageCircle className="w-4 h-4" /> Talk to NEEV
-              </Link>
-              <span className="text-[12px] text-white/30 hidden sm:block">Free � No sign-up</span>
+              <TalkToPabloButton />
+              <span className="text-[12px] text-[#6B6560]/50 hidden sm:block">Free — No sign-up</span>
             </div>
           </div>
         </div>
@@ -768,16 +829,16 @@ export default async function HomePage() {
 
       {/* --------------- HERITAGE & CULTURE (DYNAMIC) --------------- */}
       {isSectionVisible(uiConfig, 'heritage') && heritageCards.length > 0 && (
-        <section className="py-12 px-6 md:px-12">
+        <section className="py-10 sm:py-12 px-4 sm:px-6 md:px-12">
           <div className="mb-8">
             <p className="text-[10.5px] font-semibold tracking-[0.2em] uppercase text-[#58bdae] mb-2">{content.plainText('heritage_label', 'Curated for You')}</p>
-            <h2 className="font-heading text-[clamp(24px,3.5vw,38px)] font-bold leading-[1.1] text-[#1A1A18]"
+            <h2 className="font-heading text-[clamp(20px,2.5vw,28px)] font-bold leading-[1.3] text-[#1A1A18]"
                 dangerouslySetInnerHTML={{ __html: content.text('heritage_title', 'Most Loved <em class="italic text-[#58bdae]">Heritage Walks</em>') }} />
           </div>
           <PackageScroller cards={heritageCards} emptyMsg="" />
           <div className="text-center mt-8">
             <Link href="/experiences/heritage-walks" className="inline-block text-sm font-bold text-white bg-btg-cta px-8 py-3 rounded-full hover:bg-btg-cta-hover hover:-translate-y-0.5 transition-all tracking-wide">
-              Explore More ?
+              Explore More →
             </Link>
           </div>
         </section>
@@ -785,33 +846,33 @@ export default async function HomePage() {
 
       {/* --------------- GROUP TRIPS (DYNAMIC) --------------- */}
       {groupCards.length > 0 && (
-        <section className="py-12 px-6 md:px-12 bg-btg-sand">
+        <section className="py-10 sm:py-12 px-4 sm:px-6 md:px-12 bg-gradient-to-br from-white via-[#58bdae]/5 to-white">
           <div className="mb-8">
             <p className="text-[10.5px] font-semibold tracking-[0.2em] uppercase text-[#58bdae] mb-2">{content.plainText('group_trips_label', 'Travel with New Friends')}</p>
-            <h2 className="font-heading text-[clamp(26px,3.5vw,40px)] font-bold leading-[1.1] text-[#1A1A18]"
+            <h2 className="font-heading text-[clamp(20px,2.5vw,28px)] font-bold leading-[1.3] text-[#1A1A18]"
                 dangerouslySetInnerHTML={{ __html: content.text('group_trips_title', 'Trending <em class="italic text-[#58bdae]">Group Trips</em>') }} />
             <p className="text-[16px] text-btg-mid font-bold mt-1">{content.plainText('group_trips_subtitle', 'Because You Only Live Once!')}</p>
           </div>
           <PackageScroller cards={groupCards} emptyMsg="" />
           <div className="text-center mt-8">
             <Link href="/experiences/group-trips" className="inline-block text-sm font-bold text-white bg-btg-cta px-8 py-3 rounded-full hover:bg-btg-cta-hover hover:-translate-y-0.5 transition-all tracking-wide">
-              Explore More ?
+              Explore More →
             </Link>
           </div>
         </section>
       )}
 
       {/* --------------- REVIEWS & GALLERY --------------- */}
-      <section className="py-14 px-6 md:px-12 bg-btg-cream">
-        <div className="text-center mb-10">
+      <section className="py-10 sm:py-12 px-4 sm:px-6 md:px-12 bg-white">
+        <div className="text-center mb-8">
           <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#58bdae] mb-2">{content.plainText('reviews_label', 'What Travellers Say')}</p>
-          <h2 className="font-heading text-[clamp(28px,3.5vw,42px)] font-bold leading-[1.1] text-[#1A1A18]"
+          <h2 className="font-heading text-[clamp(22px,2.8vw,28px)] font-bold leading-[1.3] text-[#1A1A18]"
               dangerouslySetInnerHTML={{ __html: content.text('reviews_title', 'Real Stories, Real <em class="italic text-[#58bdae]">Experiences</em>') }} />
           <p className="text-[15px] text-[#6B6560] mt-2 max-w-md mx-auto">{content.plainText('reviews_subtitle', 'Hear from fellow travellers who explored India with our verified guides')}</p>
         </div>
 
         {/* Reviews */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-14">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           {(content.reviews && content.reviews.length > 0 ? content.reviews.map((review: any) => ({
             name: review.name,
             location: review.location,
@@ -822,24 +883,24 @@ export default async function HomePage() {
             avatarImage: review.avatar?.sourceUrl || null,
           })) : [
             { name: 'Priya Sharma', location: 'Delhi', rating: 5, text: 'An incredible trek to Hampta Pass with a guide who knew every trail and story. The whole experience was seamless from booking to the summit!', avatar: 'PS', trip: 'Hampta Pass Trek', avatarImage: null },
-            { name: 'Rohit Agarwal', location: 'Mumbai', rating: 5, text: 'Booked a heritage walk in Jaipur � our guide\'s knowledge of Rajasthani history was outstanding. Highly recommend for culture lovers.', avatar: 'RA', trip: 'Jaipur Heritage Walk', avatarImage: null },
+            { name: 'Rohit Agarwal', location: 'Mumbai', rating: 5, text: 'Booked a heritage walk in Jaipur — our guide\'s knowledge of Rajasthani history was outstanding. Highly recommend for culture lovers.', avatar: 'RA', trip: 'Jaipur Heritage Walk', avatarImage: null },
             { name: 'Ananya Reddy', location: 'Bangalore', rating: 4, text: 'The group trip to Ladakh was life-changing. Met amazing people and our guide made sure every detail was perfect. Will book again!', avatar: 'AR', trip: 'Ladakh Group Trip', avatarImage: null },
           ]).map((review: any) => (
             <div key={review.name} className="bg-white rounded-2xl p-6 border border-btg-dark/[0.06] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300">
               <div className="flex items-center gap-3 mb-4">
                 {review.avatarImage ? (
-                  <img src={review.avatarImage} alt={review.name} className="w-12 h-12 rounded-full object-cover shadow-sm" />
+                  <Image src={review.avatarImage} alt={review.name} width={48} height={48} className="w-12 h-12 rounded-full object-cover shadow-sm" loading="lazy" />
                 ) : (
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#58bdae] to-[#4aa99b] flex items-center justify-center text-white text-sm font-bold shadow-sm">{review.avatar}</div>
                 )}
                 <div>
                   <div className="font-heading text-[15px] font-bold text-btg-dark">{review.name}</div>
-                  <div className="text-[13px] text-btg-light-text">{review.location} � {review.trip}</div>
+                  <div className="text-[13px] text-btg-light-text">{review.location} — {review.trip}</div>
                 </div>
               </div>
               <div className="flex gap-0.5 mb-3">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <span key={i} className={`text-[15px] ${i < review.rating ? 'text-[#E8943A]' : 'text-gray-300'}`}>?</span>
+                  <span key={i} className={`text-[15px] ${i < review.rating ? 'text-[#E8943A]' : 'text-gray-300'}`}>&#x2605;</span>
                 ))}
               </div>
               <p className="text-[14px] text-[#6B6560] leading-relaxed">&ldquo;{review.text}&rdquo;</p>
@@ -847,20 +908,20 @@ export default async function HomePage() {
           ))}
         </div>
 
-        {/* Image Gallery Grid � 2 rows with travel images */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-14">
+        {/* Image Gallery Grid — 2 rows with travel images */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-10">
           {[
-            'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80',
-            'https://images.unsplash.com/photo-1585464231875-d9ef1f5ad396?w=400&q=80',
-            'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=400&q=80',
-            'https://images.unsplash.com/photo-1548013146-72479768bada?w=400&q=80',
-            'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&q=80',
-            'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=400&q=80',
-            'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=400&q=80',
-            'https://images.unsplash.com/photo-1477587458883-47145ed94245?w=400&q=80',
+            'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80&fm=webp',
+            'https://images.unsplash.com/photo-1585464231875-d9ef1f5ad396?w=400&q=80&fm=webp',
+            'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=400&q=80&fm=webp',
+            'https://images.unsplash.com/photo-1548013146-72479768bada?w=400&q=80&fm=webp',
+            'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&q=80&fm=webp',
+            'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=400&q=80&fm=webp',
+            'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=400&q=80&fm=webp',
+            'https://images.unsplash.com/photo-1477587458883-47145ed94245?w=400&q=80&fm=webp',
           ].map((src, idx) => (
-            <div key={idx} className="rounded-xl overflow-hidden aspect-square group cursor-pointer">
-              <img src={src} alt={`Travel Gallery ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+            <div key={idx} className="relative rounded-xl overflow-hidden aspect-square group cursor-pointer">
+              <Image src={src} alt={`India travel adventure photo ${idx + 1} — Book The Guide gallery`} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover group-hover:scale-110 transition-transform duration-500" />
             </div>
           ))}
         </div>
@@ -868,7 +929,7 @@ export default async function HomePage() {
         {/* Join us on Social Media */}
         <div>
           <div className="text-center mb-8">
-            <h3 className="font-heading text-[clamp(22px,3vw,32px)] font-bold text-[#1A1A18]">
+            <h3 className="font-heading text-[clamp(18px,2.5vw,24px)] font-bold text-[#1A1A18]">
               Join us on <span className="bg-gradient-to-r from-[#E1306C] via-[#F77737] to-[#FCAF45] bg-clip-text text-transparent">Instagram</span> & <span className="text-[#FF0000]">YouTube</span>
             </h3>
             <p className="text-[14px] text-[#6B6560] mt-1">Follow our journey and get inspired for your next adventure</p>
@@ -891,15 +952,15 @@ export default async function HomePage() {
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&q=80',
-                  'https://images.unsplash.com/photo-1585464231875-d9ef1f5ad396?w=300&q=80',
-                  'https://images.unsplash.com/photo-1548013146-72479768bada?w=300&q=80',
-                  'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=300&q=80',
-                  'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=300&q=80',
-                  'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=300&q=80',
+                  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&q=80&fm=webp',
+                  'https://images.unsplash.com/photo-1585464231875-d9ef1f5ad396?w=300&q=80&fm=webp',
+                  'https://images.unsplash.com/photo-1548013146-72479768bada?w=300&q=80&fm=webp',
+                  'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=300&q=80&fm=webp',
+                  'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=300&q=80&fm=webp',
+                  'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=300&q=80&fm=webp',
                 ].map((src, idx) => (
-                  <div key={idx} className="aspect-square rounded-lg overflow-hidden group cursor-pointer">
-                    <img src={src} alt={`Instagram post ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                  <div key={idx} className="relative aspect-square rounded-lg overflow-hidden group cursor-pointer">
+                    <Image src={src} alt={`Book The Guide Instagram travel photo ${idx + 1}`} fill sizes="120px" className="object-cover group-hover:scale-110 transition-transform duration-300" />
                   </div>
                 ))}
               </div>
@@ -921,16 +982,16 @@ export default async function HomePage() {
               </div>
               <div className="space-y-3">
                 {[
-                  { title: 'Top 5 Hidden Treks in Himachal Pradesh', views: '12K views', duration: '8:42', thumb: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&q=80' },
-                  { title: 'Heritage Walk Through Old Delhi', views: '8.5K views', duration: '12:15', thumb: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=400&q=80' },
-                  { title: 'Ladakh Road Trip with Local Guide', views: '21K views', duration: '15:30', thumb: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80' },
+                  { title: 'Top 5 Hidden Treks in Himachal Pradesh', views: '12K views', duration: '8:42', thumb: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&q=80&fm=webp' },
+                  { title: 'Heritage Walk Through Old Delhi', views: '8.5K views', duration: '12:15', thumb: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=400&q=80&fm=webp' },
+                  { title: 'Ladakh Road Trip with Local Guide', views: '21K views', duration: '15:30', thumb: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80&fm=webp' },
                 ].map((video, idx) => (
                   <div key={idx} className="flex gap-3 group cursor-pointer hover:bg-gray-50 rounded-lg p-2 -mx-2 transition-colors">
                     <div className="relative w-[140px] h-[80px] rounded-lg overflow-hidden flex-shrink-0">
-                      <img src={video.thumb} alt={video.title} className="w-full h-full object-cover" />
+                      <Image src={video.thumb} alt={video.title} fill sizes="140px" className="object-cover" />
                       <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center">
-                          <span className="text-[#FF0000] text-sm ml-0.5">?</span>
+                          <span className="text-[#FF0000] text-sm ml-0.5">&#x25B6;</span>
                         </div>
                       </div>
                       <span className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1.5 py-0.5 rounded">{video.duration}</span>
@@ -947,23 +1008,102 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* --------------- WHY BOOK THE GUIDE --------------- */}
-      <section className="py-14 px-6 md:px-12 bg-btg-sand">
-        <div className="text-center mb-10">
+      {/* --------------- GET INSPIRED — Blog --------------- */}
+      <section className="py-10 sm:py-14 px-4 sm:px-6 md:px-12 bg-gradient-to-br from-[#1A1A18] to-[#2a2a28]">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-end justify-between mb-10">
+            <div>
+              <p className="text-[10.5px] font-semibold tracking-[0.2em] uppercase text-[#58bdae] mb-2">From Our Journal</p>
+              <h2 className="font-heading text-[clamp(22px,2.8vw,30px)] font-bold leading-[1.3] text-white">
+                Get <em className="italic text-[#58bdae]">Inspired</em>
+              </h2>
+              <p className="text-[15px] text-white/50 mt-1.5 max-w-md">Stories, tips and guides from the mountains</p>
+            </div>
+            <Link
+              href="/blog"
+              className="hidden sm:inline-flex items-center gap-2 text-[13px] font-bold text-[#58bdae] border border-[#58bdae]/30 px-5 py-2.5 rounded-full hover:bg-[#58bdae] hover:text-white transition-all"
+            >
+              <BookOpen className="w-4 h-4" /> View All Posts
+            </Link>
+          </div>
+
+          {latestPosts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              {latestPosts.map((post: any) => (
+                <Link
+                  key={post.slug}
+                  href={`/blog/${post.slug}`}
+                  className="group bg-white/5 rounded-2xl overflow-hidden border border-white/10 hover:border-[#58bdae]/40 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(88,189,174,0.1)] transition-all duration-300"
+                >
+                  {post.featuredImage?.node?.sourceUrl && (
+                    <div className="relative aspect-[16/9] overflow-hidden">
+                      <Image src={post.featuredImage.node.sourceUrl} alt={post.title} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                    </div>
+                  )}
+                  <div className="p-5">
+                    {post.categories?.nodes?.[0] && (
+                      <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#58bdae] mb-2 block">{post.categories.nodes[0].name}</span>
+                    )}
+                    <h3 className="font-heading text-[16px] font-bold text-white leading-snug mb-2 group-hover:text-[#58bdae] transition-colors line-clamp-2">{post.title}</h3>
+                    {post.excerpt && (
+                      <p className="text-[13px] text-white/50 line-clamp-2 leading-relaxed" dangerouslySetInnerHTML={{ __html: post.excerpt.replace(/<[^>]*>/g, '').slice(0, 120) + '…' }} />
+                    )}
+                    <div className="mt-4 text-[12px] text-[#58bdae] font-semibold">Read more →</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            /* Fallback: static preview cards when WP not configured */
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              {[
+                { tag: 'Trekking Tips', title: 'Top 10 Beginner Treks in Uttarakhand', excerpt: 'A curated list of trails that are perfect for first-time trekkers — safe, scenic and unforgettable.', img: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=640&q=80&fm=webp', slug: 'beginner-treks-uttarakhand' },
+                { tag: 'Adventure', title: 'River Rafting in Rishikesh: The Complete Guide', excerpt: 'Everything you need to know before you hit the rapids — gear, grades, and the best season to go.', img: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=640&q=80&fm=webp', slug: 'rafting-rishikesh-guide' },
+                { tag: 'Offbeat', title: 'Hidden Villages of Spiti Valley', excerpt: 'Beyond the tourist trail — these ancient villages in Spiti are still untouched by mass tourism.', img: 'https://images.unsplash.com/photo-1585464231875-d9ef1f5ad396?w=640&q=80&fm=webp', slug: 'hidden-villages-spiti' },
+              ].map((post) => (
+                <Link
+                  key={post.slug}
+                  href="/blog"
+                  className="group bg-white/5 rounded-2xl overflow-hidden border border-white/10 hover:border-[#58bdae]/40 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(88,189,174,0.1)] transition-all duration-300"
+                >
+                  <div className="relative aspect-[16/9] overflow-hidden">
+                    <Image src={post.img} alt={post.title} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                  </div>
+                  <div className="p-5">
+                    <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#58bdae] mb-2 block">{post.tag}</span>
+                    <h3 className="font-heading text-[16px] font-bold text-white leading-snug mb-2 group-hover:text-[#58bdae] transition-colors">{post.title}</h3>
+                    <p className="text-[13px] text-white/50 line-clamp-2 leading-relaxed">{post.excerpt}</p>
+                    <div className="mt-4 text-[12px] text-[#58bdae] font-semibold">Read more →</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          <div className="text-center mt-8 sm:hidden">
+            <Link href="/blog" className="inline-flex items-center gap-2 text-[13px] font-bold text-[#58bdae] border border-[#58bdae]/30 px-5 py-2.5 rounded-full hover:bg-[#58bdae] hover:text-white transition-all">
+              <BookOpen className="w-4 h-4" /> View All Posts
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* --------------- WHY BOOK THE GUIDE --------------- */}      <section className="py-10 sm:py-12 px-4 sm:px-6 md:px-12 bg-gradient-to-br from-[#58bdae]/5 via-white to-[#E8943A]/5">
+        <div className="text-center mb-8">
           <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[#58bdae] mb-2">{content.plainText('why_btg_label', 'Our Promise')}</p>
-          <h2 className="font-heading text-[clamp(28px,3.5vw,42px)] font-bold leading-[1.1] text-[#1A1A18]"
+          <h2 className="font-heading text-[clamp(22px,2.8vw,28px)] font-bold leading-[1.3] text-[#1A1A18]"
               dangerouslySetInnerHTML={{ __html: content.text('why_btg_title', 'Why Book <em class="italic text-[#58bdae]">The Guide?</em>') }} />
           <p className="text-[15px] text-btg-light-text font-light max-w-[600px] leading-[1.7] mt-3 mx-auto">
-            {content.plainText('why_btg_description', 'We connect you with verified, experienced local guides who know every trail, every shortcut, and every hidden gem. No middlemen, no surprises � just authentic local expertise.')}
+            {content.plainText('why_btg_description', 'We connect you with verified, experienced local guides who know every trail, every shortcut, and every hidden gem. No middlemen, no surprises — just authentic local expertise.')}
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 max-w-6xl mx-auto">
           {[
-            { icon: '???', title: content.plainText('why_1_title', 'Verified Local Guides'), desc: content.plainText('why_1_desc', 'Every guide is verified by our regional admins with background checks and certification validation.') },
-            { icon: '??', title: content.plainText('why_2_title', 'Transparent Pricing'), desc: content.plainText('why_2_desc', 'Guides set their own prices. No hidden fees. See exactly what you pay for, always.') },
-            { icon: '?', title: content.plainText('why_3_title', 'Real Reviews'), desc: content.plainText('why_3_desc', 'Only verified customers who completed trips can leave reviews. 100% authentic feedback.') },
-            { icon: '???', title: content.plainText('why_4_title', 'Flexible Booking'), desc: content.plainText('why_4_desc', 'Join group departures or hire a personal guide. Fixed dates or custom trips � your choice.') },
-            { icon: '??', title: content.plainText('why_5_title', 'Secure Booking'), desc: content.plainText('why_5_desc', 'Your personal details stay private. We never share contact info between guests and guides before booking.') },
+            { icon: String.fromCodePoint(0x2705), title: content.plainText('why_1_title', 'Verified Local Guides'), desc: content.plainText('why_1_desc', 'Every guide is verified by our regional admins with background checks and certification validation.') },
+            { icon: String.fromCodePoint(0x1F4B0), title: content.plainText('why_2_title', 'Transparent Pricing'), desc: content.plainText('why_2_desc', 'Guides set their own prices. No hidden fees. See exactly what you pay for, always.') },
+            { icon: String.fromCodePoint(0x2B50), title: content.plainText('why_3_title', 'Real Reviews'), desc: content.plainText('why_3_desc', 'Only verified customers who completed trips can leave reviews. 100% authentic feedback.') },
+            { icon: String.fromCodePoint(0x1F4C5), title: content.plainText('why_4_title', 'Flexible Booking'), desc: content.plainText('why_4_desc', 'Join group departures or hire a personal guide. Fixed dates or custom trips — your choice.') },
+            { icon: String.fromCodePoint(0x1F512), title: content.plainText('why_5_title', 'Secure Booking'), desc: content.plainText('why_5_desc', 'Your personal details stay private. We never share contact info between guests and guides before booking.') },
           ].map((card) => (
             <div key={card.title} className="bg-white rounded-[20px] p-7 border border-btg-dark/[0.06] hover:border-[#58bdae] hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(88,189,174,0.1)] transition-all duration-300 text-center">
               <div className="w-14 h-14 rounded-[16px] bg-[#58bdae]/10 flex items-center justify-center mb-4 text-[26px] mx-auto">{card.icon}</div>
@@ -974,14 +1114,14 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* --------------- GUIDE CTA � Centre Aligned --------------- */}
+      {/* --------------- GUIDE CTA — Centre Aligned --------------- */}
       <div className="mx-6 md:mx-12 my-12 rounded-[32px] bg-btg-dark p-8 md:py-14 md:px-[60px] text-center relative overflow-hidden">
         <div className="absolute right-[60px] top-1/2 -translate-y-1/2 font-heading text-[200px] font-bold text-white/[0.03] tracking-tight pointer-events-none select-none">
           BTG
         </div>
         <div className="relative z-10 max-w-2xl mx-auto">
           <p className="text-[10.5px] font-semibold tracking-[0.2em] uppercase text-[#58bdae] mb-2">{content.plainText('guide_cta_label', 'Join Our Community')}</p>
-          <h2 className="font-heading text-[clamp(26px,3.5vw,40px)] font-bold leading-[1.1] text-btg-cream"
+          <h2 className="font-heading text-[clamp(22px,2.8vw,30px)] font-bold leading-[1.3] text-btg-cream"
               dangerouslySetInnerHTML={{ __html: content.text('guide_cta_title', 'Are you a Guide or <em class="italic text-[#58bdae]">Experience Leader?</em>') }} />
           <p className="text-[15px] font-light text-btg-cream/55 leading-[1.7] mt-3 max-w-[480px] mx-auto">
             {content.plainText('guide_cta_description', "Join India's fastest-growing guide booking platform. Create your profile, set your prices, get verified and start getting bookings from travellers across the world.")}

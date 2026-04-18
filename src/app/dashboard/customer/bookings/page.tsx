@@ -137,7 +137,7 @@ export default function CustomerBookingsPage() {
                       <div className="flex items-start gap-4 flex-1">
                         <div className="w-12 h-12 rounded-xl bg-btg-sand flex items-center justify-center flex-shrink-0 overflow-hidden">
                           {booking.fixedDeparture?.product.coverImage ? (
-                            <img src={booking.fixedDeparture.product.coverImage} alt="" className="w-full h-full object-cover" />
+                            <img src={booking.fixedDeparture.product.coverImage} alt={booking.fixedDeparture.product.title} className="w-full h-full object-cover" />
                           ) : (
                             <MapPin className="w-6 h-6 text-btg-terracotta" />
                           )}

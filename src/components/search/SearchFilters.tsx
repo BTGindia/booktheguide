@@ -4,12 +4,19 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ACTIVITY_LABELS } from '@/lib/utils';
 import { SlidersHorizontal, RotateCcw, ChevronDown } from 'lucide-react';
 
+interface Category {
+  slug: string;
+  urlSlug: string;
+  label: string;
+}
+
 interface SearchFiltersProps {
   states: { id: string; name: string; code: string; isNorthIndia: boolean }[];
+  categories: Category[];
   currentFilters: Record<string, string | undefined>;
 }
 
-export function SearchFilters({ states, currentFilters }: SearchFiltersProps) {
+export function SearchFilters({ states, categories, currentFilters }: SearchFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -44,6 +51,24 @@ export function SearchFilters({ states, currentFilters }: SearchFiltersProps) {
           <RotateCcw className="w-3 h-3" />
           Clear All
         </button>
+      </div>
+
+      {/* Category Filter */}
+      <div className="mb-5">
+        <label className="block text-[11px] font-semibold tracking-[0.12em] uppercase text-btg-light-text mb-2">Category</label>
+        <div className="relative">
+          <select
+            value={currentFilters.category || ''}
+            onChange={(e) => updateFilter('category', e.target.value)}
+            className={selectClass}
+          >
+            <option value="">All Categories</option>
+            {categories.map((c) => (
+              <option key={c.urlSlug} value={c.urlSlug}>{c.label}</option>
+            ))}
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-btg-light-text pointer-events-none" />
+        </div>
       </div>
 
       {/* State Filter */}

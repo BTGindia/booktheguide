@@ -11,7 +11,7 @@ const HOMEPAGE_SECTIONS = [
   { key: 'trending', label: 'Trending Experiences', description: 'Most popular packages right now', supportsSorting: true, maxLimit: 12 },
   { key: 'adventure', label: 'Adventure Picks', description: 'Top adventure experiences', supportsSorting: true, maxLimit: 12 },
   { key: 'influencers', label: 'Travel with Influencers', description: 'Influencer-led trips', supportsSorting: true, maxLimit: 8 },
-  { key: 'neev_ai', label: 'NEEV AI Section', description: 'AI trip planner CTA', supportsSorting: false, supportsLimit: false },
+  { key: 'neev_ai', label: 'Pablo AI Section', description: 'AI travel buddy CTA', supportsSorting: false, supportsLimit: false },
   { key: 'heritage', label: 'Heritage Walks', description: 'Heritage walk experiences', supportsSorting: true, maxLimit: 12 },
 ];
 

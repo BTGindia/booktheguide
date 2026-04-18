@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
+
+export const revalidate = 300;
 import { MapPin, Calendar, Users, Star, ArrowRight, ChevronRight, Clock, Sparkles, TrendingUp, Heart, Filter, Search, Mountain, Camera, Compass, Map, Users2, Flame } from 'lucide-react';
 import { CATEGORIES_ORDERED, CATEGORY_MAP } from '@/lib/categories';
 import { getActiveCategories } from '@/lib/active-packages';

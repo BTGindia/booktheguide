@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
 export async function middleware(request: NextRequest) {
-  const token = await getToken({ req: request });
+  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
   const { pathname } = request.nextUrl;
 
   // Public routes - always accessible (exact match)
@@ -12,7 +12,8 @@ export async function middleware(request: NextRequest) {
     '/upcoming-trips', '/destinations', '/trending', '/inspiration',
     '/experiences', '/explore', '/group-trips', '/blog',
     '/terms', '/privacy', '/corporate-trip', '/forgot-password',
-    '/wishlist',
+    '/wishlist', '/guides',
+    '/himachal-pradesh', '/uk', '/ladakh', '/kashmir',
   ];
   const isPublicRoute = publicRoutes.some(route => pathname === route);
 
@@ -27,6 +28,10 @@ export async function middleware(request: NextRequest) {
     '/blog/',          // /blog/{slug}
     '/book/',          // booking pages
     '/reset-password/',// password reset
+    '/himachal-pradesh/', // SEO landing pages
+    '/uk/',               // SEO landing pages
+    '/ladakh/',           // SEO landing pages
+    '/kashmir/',          // SEO landing pages
   ];
   const isPublicPrefix = publicPrefixes.some(prefix => pathname.startsWith(prefix));
 
@@ -38,6 +43,14 @@ export async function middleware(request: NextRequest) {
   }
 
   if (isPublicRoute || isPublicPrefix) {
+    return NextResponse.next();
+  }
+
+  // Only protect dashboard routes — let all other routes through
+  // so Next.js can render 404 for unknown pages
+  const isProtectedRoute = pathname.startsWith('/dashboard');
+
+  if (!isProtectedRoute) {
     return NextResponse.next();
   }
 
@@ -53,7 +66,7 @@ export async function middleware(request: NextRequest) {
 
   // Admin routes
   if (pathname.startsWith('/dashboard/admin')) {
-    if (role !== 'ADMIN' && role !== 'SUPER_ADMIN' && role !== 'STATE_ADMIN') {
+    if (role !== 'ADMIN' && role !== 'SUPER_ADMIN') {
       return NextResponse.redirect(new URL('/', request.url));
     }
   }

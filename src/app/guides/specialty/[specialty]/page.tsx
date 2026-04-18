@@ -77,9 +77,10 @@ export async function generateMetadata({ params }: { params: { specialty: string
 }
 
 export async function generateStaticParams() {
-  return Object.keys(SLUG_TO_CATEGORY)
-    .filter((s) => s !== 'influencer-trips')
-    .map((specialty) => ({ specialty }));
+  const disabledSlugs = await getDisabledCategorySlugs();
+  return Object.entries(SLUG_TO_CATEGORY)
+    .filter(([s, catSlug]) => s !== 'influencer-trips' && !disabledSlugs.has(catSlug))
+    .map(([specialty]) => ({ specialty }));
 }
 
 interface GuideData {

@@ -104,7 +104,7 @@ export default function CustomerBookingDetailPage() {
             <div className="flex items-center gap-3 mb-3">
               <div className="w-12 h-12 rounded-xl bg-btg-sand flex items-center justify-center overflow-hidden">
                 {booking.guide.user.image ? (
-                  <img src={booking.guide.user.image} alt="" className="w-full h-full object-cover" />
+                  <img src={booking.guide.user.image} alt={booking.guide.user.name} className="w-full h-full object-cover" />
                 ) : (
                   <User className="w-6 h-6 text-btg-terracotta" />
                 )}

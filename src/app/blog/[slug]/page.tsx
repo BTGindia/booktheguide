@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ChevronRight, BookOpen, Calendar, ArrowRight, ArrowLeft, Clock, Share2, Tag } from 'lucide-react';
 import prisma from '@/lib/prisma';
 import { sanitizeHtml } from '@/lib/sanitize-html';
@@ -138,9 +139,9 @@ async function StateBlogHub({ stateSlug }: { stateSlug: string }) {
                 href={`/blog/${article.slug}`}
                 className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all border border-btg-sand"
               >
-                <div className="h-[180px] overflow-hidden bg-gradient-to-br from-btg-primary/10 to-btg-sage/10">
+                <div className="h-[180px] overflow-hidden bg-gradient-to-br from-btg-primary/10 to-btg-sage/10 relative">
                   {article.thumbnail ? (
-                    <img src={article.thumbnail} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <Image src={article.thumbnail} alt={article.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                   ) : (
                     <div className="flex items-center justify-center h-full"><BookOpen className="w-10 h-10 text-btg-primary/30" /></div>
                   )}
@@ -312,9 +313,9 @@ async function ArticlePage({ slug }: { slug: string }) {
                 href={`/blog/${rel.slug}`}
                 className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all border border-btg-sand"
               >
-                <div className="h-[140px] overflow-hidden bg-gradient-to-br from-btg-primary/10 to-btg-sage/10">
+                <div className="h-[140px] overflow-hidden bg-gradient-to-br from-btg-primary/10 to-btg-sage/10 relative">
                   {rel.thumbnail ? (
-                    <img src={rel.thumbnail} alt={rel.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <Image src={rel.thumbnail} alt={rel.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                   ) : (
                     <div className="flex items-center justify-center h-full"><BookOpen className="w-8 h-8 text-btg-primary/30" /></div>
                   )}

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { StarRating } from '@/components/ui/StarRating';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
@@ -124,7 +125,7 @@ export function GuideCard({ guide }: GuideCardProps) {
         <div className="px-4 py-3 border-t border-gray-50 bg-gray-50/50 flex items-center justify-between">
           <div className="flex items-center gap-2">
             {guide.user.image && (
-              <img src={guide.user.image} alt="" className="w-8 h-8 rounded-full object-cover border border-btg-sand" />
+              <Image src={guide.user.image} alt={guide.user.name} width={32} height={32} className="w-8 h-8 rounded-full object-cover border border-btg-sand" />
             )}
             <div>
               <p className="text-xs text-btg-light-text">{guide.experienceYears} yrs experience</p>

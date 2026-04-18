@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import Link from 'next/link';
 import { MapPin, Calendar, Users, Star, Search, Sparkles, ArrowRight, ChevronRight, Compass, Heart, TrendingUp, Sun, Snowflake, CloudRain, Leaf, Filter } from 'lucide-react';
 import { CATEGORIES_ORDERED } from '@/lib/categories';
+import { getAllStates } from '@/lib/states';
 
 export const revalidate = 120;
 import { getActiveCategories } from '@/lib/active-packages';
@@ -33,16 +34,21 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// States we cater to with metadata
-const STATES_DATA = [
-  { name: 'Uttarakhand', slug: 'uttarakhand', tagline: 'Land of the Gods', icon: '🏔️', season: 'Mar-Jun, Sep-Nov', color: 'from-emerald-600 to-teal-700' },
-  { name: 'Himachal Pradesh', slug: 'himachal-pradesh', tagline: 'Adventure Paradise', icon: '⛰️', season: 'Mar-Jun, Sep-Nov', color: 'from-blue-600 to-indigo-700' },
-  { name: 'Ladakh', slug: 'ladakh', tagline: 'Land of High Passes', icon: '🗻', season: 'Jun-Sep', color: 'from-slate-600 to-slate-800' },
-  { name: 'Kashmir', slug: 'kashmir', tagline: 'Paradise on Earth', icon: '🌸', season: 'Apr-Oct', color: 'from-pink-500 to-rose-600' },
-  { name: 'Delhi', slug: 'delhi', tagline: 'Heritage Capital', icon: '🏛️', season: 'Oct-Mar', color: 'from-amber-600 to-orange-700' },
-  { name: 'Rajasthan', slug: 'rajasthan', tagline: 'Land of Kings', icon: '🏰', season: 'Oct-Mar', color: 'from-yellow-600 to-amber-700' },
-  { name: 'Uttar Pradesh', slug: 'uttar-pradesh', tagline: 'Spiritual Heartland', icon: '🕌', season: 'Oct-Mar', color: 'from-purple-600 to-violet-700' },
+// Build STATES_DATA dynamically from static state metadata (respects admin-enabled states)
+const _allStaticStates = getAllStates();
+const _defaultColors = [
+  'from-emerald-600 to-teal-700', 'from-blue-600 to-indigo-700', 'from-slate-600 to-slate-800',
+  'from-pink-500 to-rose-600', 'from-amber-600 to-orange-700', 'from-yellow-600 to-amber-700',
+  'from-purple-600 to-violet-700', 'from-teal-600 to-cyan-700', 'from-red-500 to-rose-700',
 ];
+const STATES_DATA = _allStaticStates.map((s, i) => ({
+  name: s.name,
+  slug: s.slug,
+  tagline: s.tagline,
+  icon: s.isNorthIndia ? String.fromCodePoint(0x1F3D4, 0xFE0F) : String.fromCodePoint(0x1F30D),
+  season: s.bestTimeToVisit || '',
+  color: _defaultColors[i % _defaultColors.length],
+}));
 
 // Seasonal recommendations
 const SEASONAL_PICKS: Record<string, { states: string[]; activities: string[] }> = {

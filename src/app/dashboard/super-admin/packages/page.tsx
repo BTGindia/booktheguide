@@ -246,7 +246,7 @@ export default function SuperAdminPackagesPage() {
                                 {/* Thumbnail */}
                                 <div className="w-16 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                                   {pkg.coverImage ? (
-                                    <img src={pkg.coverImage} alt="" className="w-full h-full object-cover" />
+                                    <img src={pkg.coverImage} alt={pkg.title} className="w-full h-full object-cover" />
                                   ) : (
                                     <div className="w-full h-full flex items-center justify-center text-gray-400">
                                       <Package className="w-5 h-5" />

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { useState, useEffect, useRef } from 'react';
@@ -61,17 +62,31 @@ export function Header() {
   const [navData, setNavData] = useState<NavData | null>(null);
   const dropdownRef = useRef<HTMLUListElement>(null);
 
-  // Fetch dynamic navigation data
+  // Fetch dynamic navigation data (cached in sessionStorage to avoid re-fetch)
   useEffect(() => {
+    const cached = sessionStorage.getItem('btg-nav-data');
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        // Use cached data if less than 5 minutes old
+        if (parsed._ts && Date.now() - parsed._ts < 300000) {
+          setNavData(parsed.data);
+          return;
+        }
+      } catch {}
+    }
     fetch('/api/navigation')
       .then(r => r.json())
-      .then(data => setNavData(data))
+      .then(data => {
+        setNavData(data);
+        try { sessionStorage.setItem('btg-nav-data', JSON.stringify({ data, _ts: Date.now() })); } catch {}
+      })
       .catch(() => {}); // Fall back to static
   }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener('scroll', onScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
@@ -165,14 +180,14 @@ export function Header() {
     <nav
       className={`fixed top-0 left-0 right-0 z-[100] flex items-center justify-between transition-all duration-300 ${
         scrolled
-          ? 'py-4 px-6 md:px-14 shadow-[0_4px_32px_rgba(0,0,0,0.25)]'
-          : 'py-5 px-6 md:px-14'
+          ? 'py-2.5 sm:py-4 px-4 sm:px-6 md:px-14 shadow-[0_4px_32px_rgba(0,0,0,0.25)]'
+          : 'py-3 sm:py-5 px-4 sm:px-6 md:px-14'
       }`}
       style={{ background: '#1A1A18' }}
     >
       {/* Logo */}
       <Link href="/" className="flex items-center flex-shrink-0">
-        <img src={logoUrl || '/images/btg-logo-cropped.png'} alt="Book The Guide" className="block h-12 md:h-14 self-center object-contain leading-none my-auto" />
+        <Image src={logoUrl || '/images/btg-logo-cropped.webp'} alt="Book The Guide — India's premier travel guide booking platform" width={160} height={56} className="block h-9 sm:h-12 md:h-14 w-auto self-center object-contain leading-none my-auto" priority />
       </Link>
 
       {/* Center Nav Links */}
@@ -182,13 +197,23 @@ export function Header() {
             {navItems.map((item) => (
               <li key={item.label} className="relative">
                 {item.hasDropdown ? (
-                  <div onMouseEnter={() => openDropdownOnHover(item.label)}>
-                    <button
-                      className="text-[15px] font-semibold text-white/90 tracking-[0.04em] hover:text-[#58bdae] transition-colors flex items-center gap-1 font-body whitespace-nowrap leading-none"
-                    >
-                      {item.label}
-                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${openDropdown === item.label ? 'rotate-180' : ''}`} />
-                    </button>
+                  <div onMouseEnter={() => openDropdownOnHover(item.label)} className="relative">
+                    <div className="flex items-center gap-0.5">
+                      <Link
+                        href={item.href}
+                        onClick={() => setOpenDropdown(null)}
+                        className="text-[15px] font-semibold text-white/90 tracking-[0.04em] hover:text-[#58bdae] transition-colors font-body whitespace-nowrap leading-none"
+                      >
+                        {item.label}
+                      </Link>
+                      <button
+                        onClick={(e) => { e.preventDefault(); setOpenDropdown(openDropdown === item.label ? null : item.label); }}
+                        className="p-0.5 text-white/70 hover:text-[#58bdae] transition-colors"
+                        aria-label={`show ${item.label} options`}
+                      >
+                        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${openDropdown === item.label ? 'rotate-180' : ''}`} />
+                      </button>
+                    </div>
                     {openDropdown === item.label && renderDropdown(item.label, item)}
                   </div>
                 ) : (
@@ -277,7 +302,7 @@ export function Header() {
         {/* Mobile Menu Toggle */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="lg:hidden p-2 rounded-lg hover:bg-white/10 transition-colors text-white"
+          className="lg:hidden p-2.5 rounded-xl active:bg-white/10 transition-colors text-white min-w-[44px] min-h-[44px] flex items-center justify-center"
         >
           {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
@@ -285,40 +310,87 @@ export function Header() {
 
       {/* Mobile Nav */}
       {mobileOpen && (
-        <div className="absolute top-full left-0 right-0 lg:hidden border-t border-white/10 py-4 bg-[#1A1A18] animate-slideIn">
-          <div className="flex flex-col gap-1 px-6">
+        <div className="absolute top-full left-0 right-0 lg:hidden border-t border-white/10 bg-[#1A1A18] animate-slideIn max-h-[80vh] overflow-y-auto">
+          <div className="flex flex-col gap-0.5 px-4 py-3">
             {(!session?.user || (session.user as any).role === 'CUSTOMER') && (
               <>
+                {/* Quick search link */}
+                <Link
+                  href="/search"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3.5 text-[15px] text-white/90 bg-white/5 rounded-xl mb-2 font-body"
+                >
+                  <Compass className="w-5 h-5 text-[#58bdae]" />
+                  Search Trips & Guides
+                </Link>
+
                 {navItems.map((item) => (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="px-4 py-3 text-[14px] text-white/80 hover:text-[#58bdae] hover:bg-white/5 rounded-lg transition-colors font-body"
-                  >
-                    {item.label}
-                  </Link>
+                  <div key={item.label}>
+                    <div className="flex items-center">
+                      <Link
+                        href={item.href}
+                        onClick={() => setMobileOpen(false)}
+                        className="flex-1 px-4 py-3.5 text-[15px] text-white/80 active:text-[#58bdae] active:bg-white/5 rounded-xl transition-colors font-body"
+                      >
+                        {item.label}
+                      </Link>
+                      {item.hasDropdown && item.subCategories?.length > 0 && (
+                        <button
+                          onClick={() => setOpenDropdown(openDropdown === item.label ? null : item.label)}
+                          className="p-3 text-white/50 active:text-[#58bdae]"
+                        >
+                          <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${openDropdown === item.label ? 'rotate-180' : ''}`} />
+                        </button>
+                      )}
+                    </div>
+                    {/* Mobile sub-menu accordion */}
+                    {openDropdown === item.label && item.subCategories?.length > 0 && (
+                      <div className="pl-6 pb-2 space-y-0.5 animate-slideIn">
+                        {item.subCategories.map((sub: { name: string; slug: string }) => (
+                          <Link
+                            key={sub.slug}
+                            href={`/search?category=${item.key}&activity=${encodeURIComponent(sub.name)}`}
+                            onClick={() => setMobileOpen(false)}
+                            className="block px-4 py-2.5 text-[14px] text-white/60 active:text-[#58bdae] rounded-lg font-body"
+                          >
+                            {sub.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ))}
+
+                {/* Destinations quick links */}
+                <div className="border-t border-white/10 mt-2 pt-2">
+                  <p className="px-4 py-2 text-[11px] font-bold tracking-[0.15em] uppercase text-[#58bdae]/70">Popular Destinations</p>
+                  <div className="flex flex-wrap gap-2 px-4 pb-2">
+                    {STATIC_DESTINATIONS.slice(0, 5).map((d) => (
+                      <Link
+                        key={d.href}
+                        href={d.href}
+                        onClick={() => setMobileOpen(false)}
+                        className="text-[13px] text-white/60 bg-white/5 px-3 py-1.5 rounded-full active:bg-[#58bdae]/20 active:text-[#58bdae] transition-colors font-body"
+                      >
+                        {d.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
                 <Link
                   href="/register?role=guide"
                   onClick={() => setMobileOpen(false)}
-                  className="mx-4 mt-2 px-4 py-3 text-[15px] font-bold text-[#FFD96A] border border-[#FFD96A]/40 rounded-full text-center hover:bg-[#FFD96A] hover:text-[#1A1A18] transition-all duration-300 font-body"
+                  className="mx-2 mt-2 px-4 py-3 text-[15px] font-bold text-[#FFD96A] border border-[#FFD96A]/40 rounded-full text-center active:bg-[#FFD96A] active:text-[#1A1A18] transition-all duration-300 font-body"
                 >
                   Become a Guide
-                </Link>
-                <Link
-                  href="/wishlist"
-                  onClick={() => setMobileOpen(false)}
-                  className="px-4 py-3 text-[14px] text-white/80 hover:text-[#58bdae] hover:bg-white/5 rounded-lg transition-colors font-body"
-                >
-                  Wishlist
                 </Link>
               </>
             )}
             {!session?.user && (
-              <div className="flex gap-3 px-4 pt-3 border-t border-white/10 mt-2">
-                <Link href="/login" onClick={() => setMobileOpen(false)} className="flex-1 text-center py-2.5 text-[13px] font-semibold text-white rounded-full font-heading" style={{ background: '#58bdae' }}>
-                  Account
+              <div className="flex gap-3 px-2 pt-3 border-t border-white/10 mt-2">
+                <Link href="/login" onClick={() => setMobileOpen(false)} className="flex-1 text-center py-3 text-[14px] font-semibold text-white rounded-full font-heading" style={{ background: '#58bdae' }}>
+                  Sign In / Register
                 </Link>
               </div>
             )}

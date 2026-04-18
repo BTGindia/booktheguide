@@ -1,9 +1,14 @@
 ﻿import type { Metadata } from 'next';
 import prisma from '@/lib/prisma';
-import { CATEGORY_MAP, type PackageCategorySlug } from '@/lib/categories';
+import { CATEGORY_MAP, CATEGORIES_ORDERED, type PackageCategorySlug } from '@/lib/categories';
 import { PackageCard, type PackageCardData } from '@/components/PackageCard';
 import { SearchFilters } from '@/components/search/SearchFilters';
 import { getPageBySlug, wpSeoToMetadata } from '@/lib/wordpress';
+
+// Accept both URL slugs (e.g. 'adventure-guides') and enum keys (e.g. 'ADVENTURE_GUIDES')
+const URL_SLUG_TO_ENUM: Record<string, PackageCategorySlug> = Object.fromEntries(
+  CATEGORIES_ORDERED.map((c) => [c.urlSlug, c.slug])
+) as Record<string, PackageCategorySlug>;
 
 export async function generateMetadata(): Promise<Metadata> {
   const wpPage = await getPageBySlug('search');
@@ -23,6 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 interface SearchPageProps {
   searchParams: {
+    q?: string;
     destination?: string;
     category?: string;
     activity?: string;
@@ -37,21 +43,25 @@ interface SearchPageProps {
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const { destination, category, activity, experience, state, gender, minPrice, maxPrice, rating, sort } = searchParams;
+  const { q, destination, category, activity, experience, state, gender, minPrice, maxPrice, rating, sort } = searchParams;
 
   // ── Build Product-level filter (shows ALL packages for a destination) ──
   const productWhere: any = { isActive: true, status: 'APPROVED' };
 
-  // Build destination filter conditions
-  const destinationFilter: any = {};
-  
-  if (destination) {
-    destinationFilter.OR = [
-      { name: { contains: destination, mode: 'insensitive' } },
-      { city: { name: { contains: destination, mode: 'insensitive' } } },
-      { city: { state: { name: { contains: destination, mode: 'insensitive' } } } },
+  // Keyword search — matches title, destination, city, state, or activityType
+  const keyword = q || destination;
+  if (keyword) {
+    productWhere.OR = [
+      { title: { contains: keyword, mode: 'insensitive' } },
+      { activityType: { contains: keyword, mode: 'insensitive' } },
+      { destination: { name: { contains: keyword, mode: 'insensitive' } } },
+      { destination: { city: { name: { contains: keyword, mode: 'insensitive' } } } },
+      { destination: { city: { state: { name: { contains: keyword, mode: 'insensitive' } } } } },
     ];
   }
+
+  // Build destination filter conditions
+  const destinationFilter: any = {};
 
   // State filter - merge with destination filter instead of overwriting
   if (state) {
@@ -67,15 +77,18 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     productWhere.destination = destinationFilter;
   }
 
-  // Category filter - map category slug to activity types
-  if (category && CATEGORY_MAP[category as PackageCategorySlug]) {
-    productWhere.packageCategory = category;
+  // Category filter - accepts both URL slug ('adventure-guides') and enum key ('ADVENTURE_GUIDES')
+  const categoryEnum: PackageCategorySlug | null = category
+    ? (CATEGORY_MAP[category as PackageCategorySlug] ? (category as PackageCategorySlug) : (URL_SLUG_TO_ENUM[category] ?? null))
+    : null;
+  if (categoryEnum) {
+    productWhere.packageCategory = categoryEnum;
   }
 
-  // Activity / experience filter (experience from HeroSearch = activityType)
+  // Activity / experience filter — match against activityType
   const activityFilter = activity || experience;
   if (activityFilter) {
-    productWhere.activityType = activityFilter;
+    productWhere.activityType = { equals: activityFilter, mode: 'insensitive' as const };
   }
 
   // Sort
@@ -203,7 +216,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   });
 
   // Derive title
-  const categoryDef = category ? CATEGORY_MAP[category as PackageCategorySlug] : null;
+  const categoryDef = categoryEnum ? CATEGORY_MAP[categoryEnum] : null;
   const pageTitle = categoryDef
     ? categoryDef.label
     : destination
@@ -233,7 +246,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Sidebar */}
             <aside className="w-full lg:w-72 flex-shrink-0">
-              <SearchFilters states={states} currentFilters={searchParams} />
+              <SearchFilters states={states} categories={CATEGORIES_ORDERED} currentFilters={searchParams} />
             </aside>
 
             {/* Results */}

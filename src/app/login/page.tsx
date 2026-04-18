@@ -4,6 +4,7 @@ import { useState, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Eye, EyeOff } from 'lucide-react';
@@ -30,27 +31,25 @@ function LoginForm() {
       });
 
       if (result?.error) {
-        toast.error(result.error);
+        toast.error(result.error === 'CredentialsSignin' ? 'Invalid email or password' : result.error);
       } else {
         toast.success('Welcome back!');
         // Role-based redirect
-        const res = await fetch('/api/auth/session');
+        const res = await fetch('/api/auth/session', { credentials: 'include' });
         const session = await res.json();
         const role = session?.user?.role;
-        let redirectTo = callbackUrl;
-        if (callbackUrl === '/' || !callbackUrl) {
+        let redirectTo = callbackUrl && callbackUrl !== '/login' ? callbackUrl : '/';
+        if (!role || redirectTo === '/') {
           switch (role) {
             case 'GUIDE': redirectTo = '/dashboard/guide'; break;
             case 'ADMIN': redirectTo = '/dashboard/admin'; break;
             case 'SUPER_ADMIN': redirectTo = '/dashboard/super-admin'; break;
-            case 'UI_MANAGER': redirectTo = '/dashboard/ui-manager'; break;
             case 'GUIDE_MANAGER': redirectTo = '/dashboard/guide-manager'; break;
             case 'CUSTOMER': redirectTo = '/dashboard/customer'; break;
             default: redirectTo = '/';
           }
         }
         router.push(redirectTo);
-        router.refresh();
       }
     } catch {
       toast.error('Something went wrong. Please try again.');
@@ -64,7 +63,7 @@ function LoginForm() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-block mb-6">
-            <img src="/images/btg-logo.png" alt="Book The Guide" className="h-10 object-contain" />
+            <Image src="/images/btg-logo.webp" alt="Book The Guide" width={120} height={40} className="h-10 w-auto object-contain" />
           </Link>
           <h1 className="font-heading text-2xl font-normal text-btg-dark">
             Welcome Back
