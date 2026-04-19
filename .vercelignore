@@ -1,0 +1,9 @@
+.env
+.env.local
+.env.production.example
+.env.example
+*.log
+Brand Mascot/
+Photos/
+Seller Agreements/
+content-templates/

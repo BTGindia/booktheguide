@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getLandingPagesByRegion } from '@/lib/landing-pages';
 import { fetchLandingPageData, buildLandingMetadata } from '@/lib/landing-page-data';
 import LandingPageTemplate from '@/components/landing/LandingPageTemplate';
 
@@ -13,7 +12,9 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  return getLandingPagesByRegion(REGION).map((lp) => ({ slug: lp.slug }));
+  // Return empty to skip build-time prerendering (avoids DB queries during build)
+  // Pages are generated on-demand with ISR (revalidate = 300)
+  return [];
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
