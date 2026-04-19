@@ -156,16 +156,12 @@ export async function generateMetadata({ params }: { params: { category: string 
   };
 }
 
+// ISR: render on-demand, cache for 60s, regenerate in background
+export const revalidate = 60;
+
 export async function generateStaticParams() {
-  try {
-    const disabledSlugs = await getDisabledCategorySlugs();
-    return Object.entries(SLUG_TO_CATEGORY)
-      .filter(([, catSlug]) => !disabledSlugs.has(catSlug))
-      .map(([category]) => ({ category }));
-  } catch {
-    // Fallback if DB unavailable during build
-    return Object.keys(SLUG_TO_CATEGORY).map((category) => ({ category }));
-  }
+  // Return empty to skip build-time prerendering (avoids DB connection exhaustion)
+  return [];
 }
 
 export default async function ExperienceCategoryPage({ params }: { params: { category: string } }) {

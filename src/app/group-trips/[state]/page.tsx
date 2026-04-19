@@ -55,8 +55,12 @@ function toCard(p: any): PackageCardData {
   };
 }
 
+// ISR: render on-demand, cache for 60s, regenerate in background
+export const revalidate = 60;
+
 export async function generateStaticParams() {
-  return getAllStateSlugs().map((state) => ({ state }));
+  // Return empty to skip build-time prerendering (avoids DB connection exhaustion)
+  return [];
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

@@ -76,11 +76,12 @@ export async function generateMetadata({ params }: { params: { specialty: string
   };
 }
 
+// ISR: render on-demand, cache for 60s, regenerate in background
+export const revalidate = 60;
+
 export async function generateStaticParams() {
-  const disabledSlugs = await getDisabledCategorySlugs();
-  return Object.entries(SLUG_TO_CATEGORY)
-    .filter(([s, catSlug]) => s !== 'influencer-trips' && !disabledSlugs.has(catSlug))
-    .map(([specialty]) => ({ specialty }));
+  // Return empty to skip build-time prerendering (avoids DB connection exhaustion)
+  return [];
 }
 
 interface GuideData {

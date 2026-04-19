@@ -56,32 +56,13 @@ function toCard(p: any): PackageCardData {
   };
 }
 
+// ISR: render on-demand, cache for 60s, regenerate in background
+export const revalidate = 60;
+
 export async function generateStaticParams() {
-  try {
-    const stateSlugs = getAllStateSlugs();
-    const disabledSlugs = await getDisabledCategorySlugs();
-    const categorySlugs = CATEGORIES_ORDERED
-      .filter((c) => !disabledSlugs.has(c.slug))
-      .map((c) => c.urlSlug);
-    const params: { state: string; category: string }[] = [];
-    for (const state of stateSlugs) {
-      for (const category of categorySlugs) {
-        params.push({ state, category });
-      }
-    }
-    return params;
-  } catch {
-    // Fallback if DB unavailable during build
-    const stateSlugs = getAllStateSlugs();
-    const categorySlugs = CATEGORIES_ORDERED.map((c) => c.urlSlug);
-    const params: { state: string; category: string }[] = [];
-    for (const state of stateSlugs) {
-      for (const category of categorySlugs) {
-        params.push({ state, category });
-      }
-    }
-    return params;
-  }
+  // Return empty to skip build-time prerendering (avoids DB connection exhaustion)
+  // Pages will be rendered on first request via ISR
+  return [];
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
