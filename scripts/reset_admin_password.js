@@ -1,6 +1,6 @@
 // scripts/reset_admin_password.js
 const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 const email = process.env.ADMIN_EMAIL || 'admin@example.com';
 const password = process.env.NEW_PASSWORD;
