@@ -27,6 +27,15 @@ services:
       WORDPRESS_DB_PASSWORD: wordpress
       WORDPRESS_DB_NAME: wordpress
       WORDPRESS_DEBUG: "1"
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_HOME', 'http://localhost:8000');
+        define('WP_SITEURL', 'http://localhost:8000');
+        define('BTG_NEXT_URL', 'http://localhost:3000');
+        define('BTG_REVALIDATION_SECRET', 'btg-revalidation-secret-2026');
+        define('BTG_PREVIEW_SECRET', 'btg-preview-secret-2026');
+        define('GRAPHQL_JWT_AUTH_SECRET_KEY', 'btg-jwt-local-dev-secret-2026');
+        define('WP_MEMORY_LIMIT', '256M');
+        define('DISABLE_WP_CRON', true);
     volumes:
       - wp_data:/var/www/html
       - ./wordpress/theme:/var/www/html/wp-content/themes/btg-headless
@@ -41,6 +50,9 @@ services:
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress
       WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_HOME', 'http://localhost:8000');
+        define('WP_SITEURL', 'http://localhost:8000');
     volumes:
       - wp_data:/var/www/html
       - ./wordpress/theme:/var/www/html/wp-content/themes/btg-headless
