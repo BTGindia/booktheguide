@@ -17,7 +17,7 @@ SITE_URL="${WORDPRESS_SITE_URL:-https://cms.booktheguide.com}"
 NEXT_URL="${BTG_NEXT_URL:-https://www.booktheguide.com}"
 ADMIN_USER="${BTG_ADMIN_USER:-btg_admin}"
 ADMIN_PASS="${BTG_ADMIN_PASSWORD:-BTG@Admin2026!}"
-ADMIN_EMAIL="${BTG_ADMIN_EMAIL:-admin@booktheguide.com}"
+ADMIN_EMAIL="${BTG_ADMIN_EMAIL:-tushar@booktheguide.com}"
 
 echo "═══════════════════════════════════════════"
 echo "  BTG WordPress Setup — $(date)"

@@ -9,10 +9,10 @@ async function main() {
   // ============ SUPER ADMIN ============
   const superAdminPw = await bcrypt.hash('SuperAdmin@123', 12);
   const superAdmin = await prisma.user.upsert({
-    where: { email: 'admin@booktheguide.com' },
+    where: { email: 'tushar@booktheguide.com' },
     update: { password: superAdminPw, role: 'SUPER_ADMIN', isActive: true },
     create: {
-      email: 'admin@booktheguide.com',
+      email: 'tushar@booktheguide.com',
       name: 'Super Admin',
       password: superAdminPw,
       role: 'SUPER_ADMIN',
@@ -708,7 +708,7 @@ async function main() {
 
   console.log('\n🎉 Seeding complete!\n');
   console.log('Demo Accounts:');
-  console.log('  Super Admin:  admin@booktheguide.com / SuperAdmin@123');
+  console.log('  Super Admin:  tushar@booktheguide.com / SuperAdmin@123');
   console.log('  State Admin:  admin.uk@booktheguide.com / Admin@123');
   console.log('  Guide:        guide@booktheguide.com / Guide@123');
   console.log('  Guide 2:      guide2@booktheguide.com / Guide@123');

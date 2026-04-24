@@ -8,7 +8,7 @@ param(
     [string]$SiteTitle   = "Book The Guide",
     [string]$AdminUser   = "btg_admin",
     [string]$AdminPass   = "BTG@Admin2026!",
-    [string]$AdminEmail  = "admin@booktheguide.com",
+    [string]$AdminEmail  = "tushar@booktheguide.com",
     [string]$SiteUrl     = "http://localhost:8000"
 )
 
