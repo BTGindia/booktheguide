@@ -23,6 +23,13 @@ echo "════════════════════════�
 echo "  BTG WordPress Setup — $(date)"
 echo "═══════════════════════════════════════════"
 
+# ── Wait for WordPress files (docker-entrypoint copies them) ─
+echo "⏳ Waiting for WordPress files to be copied..."
+until [ -f /var/www/html/wp-includes/version.php ]; do
+  sleep 2
+done
+echo "✅ WordPress files present"
+
 # ── Wait for DB ───────────────────────────────
 echo "⏳ Waiting for database..."
 until mysqladmin ping -h"$WORDPRESS_DB_HOST" -u"$WORDPRESS_DB_USER" -p"$WORDPRESS_DB_PASSWORD" --silent 2>/dev/null; do

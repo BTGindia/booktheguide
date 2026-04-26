@@ -4,11 +4,13 @@
 #
 #  Flow:
 #   1. Fix MPM conflict (hard-delete conflicting module symlinks)
-#   2. Write $PORT directly into ports.conf
-#   3. Run docker-entrypoint.sh true  → creates wp-config.php
-#   4. Start apache2-foreground in background (healthcheck passes)
-#   5. Run btg-setup.sh in background (installs WP + plugins)
-#   6. Wait on Apache PID (keeps container alive)
+#   2. Write $PORT directly into ports.conf + fix VirtualHost
+#   3. Start docker-entrypoint.sh apache2-foreground in background
+#      → copies /usr/src/wordpress → /var/www/html (readme.html)
+#      → creates wp-config.php from WORDPRESS_* env vars
+#      → starts Apache on the corrected port
+#   4. Run btg-setup.sh in background (installs WP + plugins)
+#   5. Wait on the entrypoint PID (keeps container alive)
 # ─────────────────────────────────────────────────────────────
 set -e
 
@@ -42,26 +44,24 @@ for conf in /etc/apache2/sites-enabled/000-default.conf \
 done
 echo "[railway] Apache will listen on port ${LISTEN_PORT}"
 
-# ── 3. Create wp-config.php (wordpress entrypoint, no Apache) ─
-# Calling docker-entrypoint.sh with 'true' runs all WP setup
-# (creates wp-config.php from env vars) then exits immediately.
-docker-entrypoint.sh true || true
+# ── 3. Start WP entrypoint (copies files + wp-config + Apache) ─
+# IMPORTANT: docker-entrypoint.sh only copies /usr/src/wordpress
+# to /var/www/html when the command argument is apache2-foreground.
+# Using 'true' skips the copy entirely, leaving /var/www/html empty.
+docker-entrypoint.sh apache2-foreground &
+ENTRYPOINT_PID=$!
+echo "[railway] WordPress entrypoint started (PID ${ENTRYPOINT_PID})"
 
-# ── 4. Start Apache in background so healthcheck can pass ────
-apache2-foreground &
-APACHE_PID=$!
-echo "[railway] Apache started (PID ${APACHE_PID})"
-
-# ── 5. Run BTG setup in background (installs WP + plugins) ──
-# Runs asynchronously - Apache already serves /readme.html
-# so healthcheck passes while plugins install.
+# ── 4. Run BTG setup in background (installs WP + plugins) ──
+# Runs asynchronously - setup.sh waits for DB and for WP files
+# before running wp-cli commands.
 (
   echo "[railway] Starting BTG WordPress setup..."
   bash /usr/local/bin/btg-setup.sh 2>&1
   echo "[railway] BTG setup complete."
 ) &
 
-# ── 6. Wait on Apache (keeps container alive) ────────────────
-wait ${APACHE_PID}
+# ── 5. Wait on entrypoint (keeps container alive) ────────────
+wait ${ENTRYPOINT_PID}
 
 
