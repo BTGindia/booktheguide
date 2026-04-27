@@ -98,6 +98,12 @@ echo "🎨 Activating btg-headless theme..."
 $WP theme activate btg-headless
 echo "✅ Theme active"
 
+# ── Always sync siteurl/home to SITE_URL ─────
+# Runs every boot so URL stays correct even if env var changes
+echo "🔗 Syncing siteurl/home to ${SITE_URL}..."
+$WP option update siteurl "$SITE_URL"
+$WP option update home "$BTG_NEXT_URL"
+
 # ── Configure settings ────────────────────────
 echo "⚙️  Configuring settings..."
 $WP rewrite structure '/%postname%/' --hard
