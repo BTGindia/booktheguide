@@ -102,7 +102,7 @@ echo "✅ Theme active"
 # Runs every boot so URL stays correct even if env var changes
 echo "🔗 Syncing siteurl/home to ${SITE_URL}..."
 $WP option update siteurl "$SITE_URL"
-$WP option update home "$BTG_NEXT_URL"
+$WP option update home "$SITE_URL"
 
 # ── Configure settings ────────────────────────
 echo "⚙️  Configuring settings..."
