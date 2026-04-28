@@ -13,7 +13,7 @@
 defined('ABSPATH') || exit;
 
 add_action('init', function () {
-    // Secret token — change after use
+    // Priority 20 ensures the theme's CPT registrations (priority 10) fire first.
     $secret = 'BTG_SEED_2026';
 
     if (!isset($_GET['btg_seed']) || $_GET['btg_seed'] !== $secret) {
@@ -224,4 +224,4 @@ add_action('init', function () {
         'details' => $results,
     ]);
     exit;
-});
+}, 20);  // Priority 20: run AFTER theme registers CPTs (priority 10)
