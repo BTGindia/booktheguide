@@ -46,12 +46,21 @@ add_action('admin_init', function () {
 });
 
 // ═══════════════════════════════════════════════════════════
+//  0b. FORCE HOME URL TO NEXT.JS FRONTEND
+//      siteurl = Railway WP install URL (stays as-is)
+//      home    = www.booktheguide.com (so Yoast canonicals are correct)
+// ═══════════════════════════════════════════════════════════
+add_filter('option_home', function ($value) {
+    return 'https://www.booktheguide.com';
+});
+
+// ═══════════════════════════════════════════════════════════
 //  1. REGISTER CUSTOM POST TYPES
 // ═══════════════════════════════════════════════════════════
 
 add_action('init', function () {
 
-    // ── State Hub Pages ──
+    // ── State Hub Pages ── /destinations/{slug}
     register_post_type('state_hub', [
         'labels' => [
             'name'          => 'State Hubs',
@@ -69,7 +78,7 @@ add_action('init', function () {
         'supports'            => ['title', 'editor', 'thumbnail', 'revisions', 'custom-fields'],
         'menu_icon'           => 'dashicons-location-alt',
         'has_archive'         => false,
-        'rewrite'             => false,
+        'rewrite'             => ['slug' => 'destinations', 'with_front' => false],
     ]);
 
     // ── Category Landing Pages ──
@@ -90,10 +99,10 @@ add_action('init', function () {
         'supports'            => ['title', 'editor', 'thumbnail', 'revisions', 'custom-fields'],
         'menu_icon'           => 'dashicons-category',
         'has_archive'         => false,
-        'rewrite'             => false,
+        'rewrite'             => ['slug' => 'experiences', 'with_front' => false],
     ]);
 
-    // ── Trip Pages (individual package/experience pages for SEO) ──
+    // ── Trip Pages (individual package/experience pages for SEO) ── /trips/{slug}
     register_post_type('btg_trip', [
         'labels' => [
             'name'          => 'Trips',
@@ -111,7 +120,7 @@ add_action('init', function () {
         'supports'            => ['title', 'editor', 'thumbnail', 'revisions', 'custom-fields'],
         'menu_icon'           => 'dashicons-airplane',
         'has_archive'         => false,
-        'rewrite'             => false,
+        'rewrite'             => ['slug' => 'trips', 'with_front' => false],
     ]);
 
     // ── Page Display Config (UI Manager settings per page) ──
@@ -154,10 +163,19 @@ add_action('init', function () {
         'supports'            => ['title', 'editor', 'thumbnail', 'revisions', 'custom-fields'],
         'menu_icon'           => 'dashicons-grid-view',
         'has_archive'         => false,
-        'rewrite'             => false,
+        'rewrite'             => ['slug' => 'explore', 'with_front' => false],
     ]);
 });
 
+// Flush rewrite rules once after CPT registration (only when needed)
+add_action('init', function () {
+    static $flushed = false;
+    if (!$flushed && get_option('btg_rewrite_flushed') !== '2') {
+        flush_rewrite_rules(false);
+        update_option('btg_rewrite_flushed', '2');
+        $flushed = true;
+    }
+}, 99);
 
 // ═══════════════════════════════════════════════════════════
 //  2. REGISTER ACF FIELD GROUPS (Programmatic)
