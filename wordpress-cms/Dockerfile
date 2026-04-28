@@ -8,8 +8,16 @@ RUN apt-get update \
     && chmod +x wp-cli.phar \
     && mv wp-cli.phar /usr/local/bin/wp
 
+# ── Apache: pass Authorization header through to PHP ─────────
+RUN echo 'SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1' \
+    > /etc/apache2/conf-available/auth-passthrough.conf \
+    && a2enconf auth-passthrough
+
 # ── Copy BTG headless theme ───────────────────────────────────
 COPY theme/ /var/www/html/wp-content/themes/btg-headless/
+
+# ── Copy MU-plugins (runs automatically, no activation needed) ─
+COPY mu-plugins/ /var/www/html/wp-content/mu-plugins/
 
 # ── Copy setup + Railway entrypoint scripts ───────────────────
 COPY setup.sh /usr/local/bin/btg-setup.sh
