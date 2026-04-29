@@ -551,6 +551,11 @@ add_action('template_redirect', function () {
         return;
     }
 
+    // Allow singular content to render in CMS so wp-admin "View" links work.
+    if (is_singular() || is_user_logged_in()) {
+        return;
+    }
+
     $base_url = defined('BTG_NEXT_URL') ? BTG_NEXT_URL : 'https://www.booktheguide.com';
     wp_redirect($base_url, 301);
     exit;
