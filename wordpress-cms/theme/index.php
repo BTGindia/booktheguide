@@ -9,8 +9,18 @@
  * For all public/anonymous requests, redirect to the correct Next.js page.
  */
 
+function btg_has_wp_logged_in_cookie(): bool {
+    foreach (array_keys($_COOKIE) as $cookie_name) {
+        if (strpos($cookie_name, 'wordpress_logged_in_') === 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 // ── If this is an admin preview / logged-in request, show a WP admin preview ──
-if (is_user_logged_in() && (current_user_can('edit_posts') || current_user_can('edit_pages'))) {
+$is_editor = is_user_logged_in() && (current_user_can('edit_posts') || current_user_can('edit_pages'));
+if ($is_editor || btg_has_wp_logged_in_cookie()) {
     // Show a simple preview page inside WordPress for admins
     get_header();
     ?>
