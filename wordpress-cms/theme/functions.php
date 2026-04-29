@@ -229,9 +229,9 @@ add_action('init', function () {
 // Flush rewrite rules once after CPT registration (only when needed)
 add_action('init', function () {
     static $flushed = false;
-    if (!$flushed && get_option('btg_rewrite_flushed') !== '2') {
+    if (!$flushed && get_option('btg_rewrite_flushed') !== '3') {
         flush_rewrite_rules(false);
-        update_option('btg_rewrite_flushed', '2');
+        update_option('btg_rewrite_flushed', '3');
         $flushed = true;
     }
 }, 99);
