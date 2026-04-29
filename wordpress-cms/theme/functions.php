@@ -46,12 +46,71 @@ add_action('admin_init', function () {
 });
 
 // ═══════════════════════════════════════════════════════════
-//  0b. FORCE HOME URL TO NEXT.JS FRONTEND
-//      siteurl = Railway WP install URL (stays as-is)
-//      home    = www.booktheguide.com (so Yoast canonicals are correct)
+//  0b. YOAST SEO — CORRECT CANONICAL URLS TO NEXT.JS FRONTEND
+//
+//  We do NOT override option_home (that breaks WP admin + Yoast crawl).
+//  Instead we hook into Yoast's canonical and OG URL filters to rewrite
+//  any Railway URL → www.booktheguide.com with the correct Next.js path.
 // ═══════════════════════════════════════════════════════════
-add_filter('option_home', function ($value) {
-    return 'https://www.booktheguide.com';
+
+/**
+ * Map a WordPress post to the correct Next.js canonical URL.
+ */
+function btg_get_nextjs_url(int $post_id): string {
+    $base = 'https://www.booktheguide.com';
+    $post = get_post($post_id);
+    if (!$post) return $base;
+
+    $slug = $post->post_name;
+    $type = $post->post_type;
+
+    switch ($type) {
+        case 'state_hub':
+            return "{$base}/destinations/{$slug}";
+        case 'category_landing':
+            return "{$base}/experiences/{$slug}";
+        case 'btg_trip':
+            return "{$base}/trips/{$slug}";
+        case 'state_category':
+            $state = get_post_meta($post_id, 'state_slug', true);
+            $cat   = get_post_meta($post_id, 'category_slug', true);
+            return $state && $cat
+                ? "{$base}/explore/{$state}/{$cat}"
+                : "{$base}/explore/{$slug}";
+        case 'post':
+            return "{$base}/blog/{$slug}";
+        case 'page':
+            return $slug === 'home' || $slug === 'front-page' ? $base : "{$base}/{$slug}";
+        default:
+            return $base;
+    }
+}
+
+// Override Yoast canonical URL
+add_filter('wpseo_canonical', function ($canonical) {
+    if (is_singular()) {
+        $id = get_the_ID();
+        if ($id) return btg_get_nextjs_url($id);
+    }
+    return $canonical;
+});
+
+// Override Yoast OG URL
+add_filter('wpseo_opengraph_url', function ($url) {
+    if (is_singular()) {
+        $id = get_the_ID();
+        if ($id) return btg_get_nextjs_url($id);
+    }
+    return $url;
+});
+
+// Override Yoast schema page URL
+add_filter('wpseo_schema_webpage_url', function ($url) {
+    if (is_singular()) {
+        $id = get_the_ID();
+        if ($id) return btg_get_nextjs_url($id);
+    }
+    return $url;
 });
 
 // ═══════════════════════════════════════════════════════════
