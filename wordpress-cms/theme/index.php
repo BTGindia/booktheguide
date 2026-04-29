@@ -20,25 +20,27 @@ function btg_has_wp_logged_in_cookie(): bool {
 
 // ── If this is an admin preview / logged-in request, show a WP admin preview ──
 $is_editor = is_user_logged_in() && (current_user_can('edit_posts') || current_user_can('edit_pages'));
-if ($is_editor || btg_has_wp_logged_in_cookie()) {
+if (is_singular()) {
     // Show a simple preview page inside WordPress for admins
     get_header();
     ?>
     <div style="font-family:sans-serif;max-width:900px;margin:40px auto;padding:20px;background:#fff;border:1px solid #ddd;border-radius:8px;">
         <?php if (have_posts()) : while (have_posts()) : the_post(); ?>
-            <div style="background:#0073aa;color:#fff;padding:10px 20px;border-radius:4px;margin-bottom:20px;">
-                <strong>WordPress Admin Preview</strong>
-                &nbsp;|&nbsp; Post type: <code style="background:rgba(255,255,255,0.2);padding:2px 6px;border-radius:3px;"><?php echo get_post_type(); ?></code>
-                &nbsp;|&nbsp; Slug: <code style="background:rgba(255,255,255,0.2);padding:2px 6px;border-radius:3px;"><?php echo get_post_field('post_name'); ?></code>
-                &nbsp;&nbsp;
-                <?php
-                // Link to the actual Next.js live page
-                $live_url = btg_get_nextjs_url_by_slug(get_post_type(), get_post_field('post_name'), get_the_ID());
-                if ($live_url) {
-                    echo '<a href="' . esc_url($live_url) . '" target="_blank" style="color:#fff;text-decoration:underline;">View live on booktheguide.com ↗</a>';
-                }
-                ?>
-            </div>
+            <?php if ($is_editor || btg_has_wp_logged_in_cookie()) : ?>
+                <div style="background:#0073aa;color:#fff;padding:10px 20px;border-radius:4px;margin-bottom:20px;">
+                    <strong>WordPress Admin Preview</strong>
+                    &nbsp;|&nbsp; Post type: <code style="background:rgba(255,255,255,0.2);padding:2px 6px;border-radius:3px;"><?php echo get_post_type(); ?></code>
+                    &nbsp;|&nbsp; Slug: <code style="background:rgba(255,255,255,0.2);padding:2px 6px;border-radius:3px;"><?php echo get_post_field('post_name'); ?></code>
+                    &nbsp;&nbsp;
+                    <?php
+                    // Link to the actual Next.js live page
+                    $live_url = btg_get_nextjs_url_by_slug(get_post_type(), get_post_field('post_name'), get_the_ID());
+                    if ($live_url) {
+                        echo '<a href="' . esc_url($live_url) . '" target="_blank" style="color:#fff;text-decoration:underline;">View live on booktheguide.com ↗</a>';
+                    }
+                    ?>
+                </div>
+            <?php endif; ?>
             <h1><?php the_title(); ?></h1>
             <div style="color:#666;margin-bottom:20px;">
                 <strong>Status:</strong> <?php echo get_post_status(); ?> &nbsp;|&nbsp;
@@ -69,7 +71,7 @@ if ($is_editor || btg_has_wp_logged_in_cookie()) {
     return;
 }
 
-// ── Public / anonymous request: redirect to correct Next.js page ──
+// ── Non-singular public request: redirect to correct Next.js page ──
 
 $next = 'https://www.booktheguide.com';
 
