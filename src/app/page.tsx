@@ -5,8 +5,8 @@ import { Search, MapPin, Clock, Star, Sparkles, MessageCircle, Mountain, ArrowLe
 import prisma from '@/lib/prisma';
 import { CATEGORIES_ORDERED } from '@/lib/categories';
 
-// Revalidate homepage every 5 minutes (ISR) — reduces server load
-export const revalidate = 300;
+// Force dynamic rendering — avoids build-time DB connection pool exhaustion
+export const dynamic = 'force-dynamic';
 import { getActiveCategories, getActiveStateSlugs, getActiveStates } from '@/lib/active-packages';
 import { type PackageCardData } from '@/components/PackageCard';
 import { HeroSearch } from '@/components/search/HeroSearch';
