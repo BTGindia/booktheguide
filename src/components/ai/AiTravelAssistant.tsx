@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -101,6 +102,7 @@ function generateSessionId() {
    Pablo — AI Travel Buddy Component
    ══════════════════════════════════════════════════════════════ */
 export function AiTravelAssistant() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -214,6 +216,9 @@ export function AiTravelAssistant() {
     e.preventDefault();
     sendMessage(input);
   };
+
+  // Hide on guide, admin, and super-admin dashboards
+  if (pathname?.startsWith('/dashboard')) return null;
 
   /* ── Format markdown-ish text to HTML ── */
   function formatContent(text: string): string {

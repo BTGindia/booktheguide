@@ -7,6 +7,14 @@ import prisma from '@/lib/prisma';
 import { sanitizeHtml } from '@/lib/sanitize-html';
 import { getStateBySlug, getAllStateSlugs } from '@/lib/states';
 import { formatDate } from '@/lib/utils';
+import {
+  getPostBySlug,
+  getAllPostSlugs,
+  wpSeoToMetadata,
+  buildArticleSchema,
+  buildBreadcrumbSchema,
+} from '@/lib/wordpress';
+import { WPFaqSection } from '@/components/wordpress/WPContentBlocks';
 
 interface PageProps {
   params: { slug: string };
@@ -32,7 +40,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  // Individual article
+  // Try WordPress first
+  const wpPost = await getPostBySlug(params.slug);
+  if (wpPost?.seo) {
+    return wpSeoToMetadata(wpPost.seo, {
+      title: `${wpPost.title} | Book The Guide Blog`,
+      description: wpPost.excerpt?.replace(/<[^>]*>/g, '').trim() ?? '',
+      url: `https://www.booktheguide.com/blog/${params.slug}`,
+      image: wpPost.featuredImage?.node.sourceUrl,
+    });
+  }
+
+  // Fall back to Prisma article
   const article = await prisma.inspirationContent.findUnique({
     where: { slug: params.slug },
     select: { title: true, excerpt: true, tags: true, thumbnail: true },
@@ -60,6 +79,26 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       canonical: `https://www.booktheguide.com/blog/${params.slug}`,
     },
   };
+}
+
+/** Pre-generate static paths from both WordPress and Prisma */
+export async function generateStaticParams() {
+  const [wpSlugs, prismaArticles, stateSlugs] = await Promise.all([
+    getAllPostSlugs().catch(() => [] as string[]),
+    prisma.inspirationContent.findMany({
+      where: { isPublished: true },
+      select: { slug: true },
+    }),
+    getAllStateSlugs(),
+  ]);
+
+  const allSlugs = new Set<string>([
+    ...wpSlugs,
+    ...prismaArticles.map((a) => a.slug),
+    ...stateSlugs,
+  ]);
+
+  return Array.from(allSlugs).map((slug) => ({ slug }));
 }
 
 /* ─── State Blog Hub Component ─── */
@@ -189,7 +228,147 @@ async function StateBlogHub({ stateSlug }: { stateSlug: string }) {
   );
 }
 
-/* ─── Individual Article Component ─── */
+/* ─── WordPress Article Page Component ─── */
+async function WPArticlePage({ slug }: { slug: string }) {
+  const post = await getPostBySlug(slug);
+  if (!post) return null;
+
+  const allTags = [
+    ...(post.categories?.nodes.map((c) => c.name) ?? []),
+    ...(post.tags?.nodes.map((t) => t.name) ?? []),
+  ];
+
+  const articleSchema = buildArticleSchema({
+    title: post.title,
+    excerpt: post.excerpt?.replace(/<[^>]*>/g, '').trim() ?? '',
+    date: post.date,
+    modified: post.modified,
+    slug: post.slug,
+    authorName: post.author?.node.name ?? 'Book The Guide',
+    image: post.featuredImage?.node.sourceUrl,
+  });
+
+  const breadcrumbSchema = buildBreadcrumbSchema(post.seo?.breadcrumbs) ?? {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.booktheguide.com' },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://www.booktheguide.com/blog' },
+      { '@type': 'ListItem', position: 3, name: post.title, item: `https://www.booktheguide.com/blog/${post.slug}` },
+    ],
+  };
+
+  return (
+    <main className="bg-btg-cream min-h-screen">
+      {/* ───── Article Header ───── */}
+      <section className="relative h-[50vh] min-h-[400px] flex items-end overflow-hidden">
+        {post.featuredImage?.node.sourceUrl ? (
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${post.featuredImage.node.sourceUrl})` }}
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-btg-dark to-btg-primary/40" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+        <div className="relative z-10 w-full max-w-4xl mx-auto px-6 lg:px-16 pb-10">
+          {allTags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {allTags.slice(0, 3).map((tag) => (
+                <span key={tag} className="text-[10px] font-semibold tracking-wider uppercase text-btg-primary bg-btg-primary/20 backdrop-blur-sm px-2.5 py-1 rounded-full">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+          <h1
+            className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight"
+            dangerouslySetInnerHTML={{ __html: post.title }}
+          />
+          <div className="flex items-center gap-4 text-sm text-white/60 font-body">
+            <span>by {post.author?.node.name ?? 'Book The Guide'}</span>
+            {post.date && (
+              <span className="flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5" /> {formatDate(new Date(post.date))}
+              </span>
+            )}
+            {post.blogFields?.readTime && (
+              <span className="flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5" /> {post.blogFields.readTime}
+              </span>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ───── Breadcrumb ───── */}
+      <div className="max-w-4xl mx-auto px-6 lg:px-16 py-4">
+        <nav className="flex items-center gap-2 text-sm text-btg-light-text font-body">
+          <Link href="/" className="hover:text-btg-primary transition-colors">Home</Link>
+          <ChevronRight className="w-3.5 h-3.5" />
+          <Link href="/blog" className="hover:text-btg-primary transition-colors">Blog</Link>
+          <ChevronRight className="w-3.5 h-3.5" />
+          <span className="text-btg-dark font-medium line-clamp-1" dangerouslySetInnerHTML={{ __html: post.title }} />
+        </nav>
+      </div>
+
+      {/* ───── Article Body ───── */}
+      <article className="max-w-4xl mx-auto px-6 lg:px-16 py-8">
+        <div className="bg-white rounded-2xl p-8 md:p-12 shadow-sm border border-btg-sand">
+          {/* Excerpt / intro */}
+          {post.excerpt && (
+            <p className="text-lg text-btg-dark font-body leading-relaxed mb-8 italic border-l-4 border-btg-primary pl-5"
+               dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.excerpt) }} />
+          )}
+
+          {/* Main content */}
+          {post.content ? (
+            <div
+              className="prose prose-lg max-w-none font-body text-btg-dark/90 prose-headings:font-heading prose-headings:text-btg-dark prose-a:text-btg-primary prose-a:no-underline hover:prose-a:underline"
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}
+            />
+          ) : (
+            <p className="text-btg-light-text font-body">This article is being written. Check back soon!</p>
+          )}
+
+          {/* FAQ section from ACF */}
+          {post.blogFields?.faqItems && post.blogFields.faqItems.length > 0 && (
+            <div className="mt-10">
+              <WPFaqSection faqs={post.blogFields.faqItems} />
+            </div>
+          )}
+
+          {/* Tags */}
+          {allTags.length > 0 && (
+            <div className="border-t border-btg-sand mt-10 pt-6">
+              <h4 className="font-heading text-sm font-semibold text-btg-dark mb-3 flex items-center gap-1.5">
+                <Tag className="w-4 h-4" /> Tags
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {allTags.map((tag) => (
+                  <span key={tag} className="text-xs bg-btg-sand text-btg-dark px-3 py-1.5 rounded-full font-body">{tag}</span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </article>
+
+      {/* ───── Back Link ───── */}
+      <div className="max-w-4xl mx-auto px-6 lg:px-16 pb-12">
+        <Link href="/blog" className="inline-flex items-center gap-1.5 text-sm text-btg-primary font-semibold hover:underline font-heading">
+          <ArrowLeft className="w-4 h-4" /> Back to Blog
+        </Link>
+      </div>
+
+      {/* ─── JSON-LD ─── */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+    </main>
+  );
+}
+
+/* ─── Individual Article Component (Prisma source) ─── */
 async function ArticlePage({ slug }: { slug: string }) {
   const article = await prisma.inspirationContent.findUnique({
     where: { slug },
@@ -383,9 +562,12 @@ async function ArticlePage({ slug }: { slug: string }) {
 }
 
 /* ─── Main Router ─── */
-export default function BlogSlugPage({ params }: PageProps) {
+export default async function BlogSlugPage({ params }: PageProps) {
   if (isStateSlug(params.slug)) {
     return <StateBlogHub stateSlug={params.slug} />;
   }
+  // Try WordPress post first; fall back to Prisma article
+  const wpResult = await WPArticlePage({ slug: params.slug });
+  if (wpResult) return wpResult;
   return <ArticlePage slug={params.slug} />;
 }

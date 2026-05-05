@@ -1,13 +1,11 @@
 ﻿import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
-import { existsSync } from 'fs';
+import { uploadToStorage } from '@/lib/supabase-storage';
 
 export const dynamic = 'force-dynamic';
 
-const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = [
   'image/jpeg', 'image/png', 'image/webp', 'image/jpg',
   'application/pdf',
@@ -40,34 +38,19 @@ export async function POST(request: Request) {
 
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
-        { error: `File too large. Maximum size is 2MB. Your file is ${(file.size / (1024 * 1024)).toFixed(1)}MB.` },
+        { error: `File too large. Maximum size is 5MB. Your file is ${(file.size / (1024 * 1024)).toFixed(1)}MB.` },
         { status: 400 }
       );
-    }
-
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads', folder);
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true });
     }
 
     const rawExt = file.name.split('.').pop() || 'pdf';
     const ext = rawExt.replace(/[^a-zA-Z0-9]/g, '').slice(0, 4);
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 8);
-    const filename = `${timestamp}-${random}.${ext}`;
-    const filepath = path.join(uploadsDir, filename);
-
-    // Verify resolved path is still under uploads directory
-    const resolvedPath = path.resolve(filepath);
-    const resolvedUploads = path.resolve(path.join(process.cwd(), 'public', 'uploads'));
-    if (!resolvedPath.startsWith(resolvedUploads)) {
-      return NextResponse.json({ error: 'Invalid file path' }, { status: 400 });
-    }
+    const filename = `${folder}/${timestamp}-${random}.${ext}`;
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(filepath, buffer);
-
-    const url = `/uploads/${folder}/${filename}`;
+    const url = await uploadToStorage('documents', filename, buffer, file.type);
 
     return NextResponse.json({ url, filename, size: file.size, type: file.type });
   } catch (error) {

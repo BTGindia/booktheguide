@@ -6,8 +6,21 @@ import { getActiveStates } from '@/lib/active-packages';
 
 export const revalidate = 300;
 import { formatDate } from '@/lib/utils';
-import { getPageBySlug, wpSeoToMetadata, getPageContent } from '@/lib/wordpress';
+import { getPageBySlug, wpSeoToMetadata, getPageContent, getPosts } from '@/lib/wordpress';
 import { WPSeoContentBlock, WPFaqSection, WPInternalLinksGrid } from '@/components/wordpress/WPContentBlocks';
+
+/** Unified shape for rendering articles from either source */
+interface UnifiedArticle {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  thumbnail: string | null;
+  tags: string[];
+  publishedAt: Date | null;
+  authorName: string;
+  source: 'wp' | 'prisma';
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   const wpPage = await getPageBySlug('blog');
@@ -35,21 +48,65 @@ export default async function BlogIndexPage() {
   const wp = await getPageContent('blog');
   const activeStates = await getActiveStates();
 
-  /* Fetch published blog articles from InspirationContent */
-  const articles = await prisma.inspirationContent.findMany({
-    where: { isPublished: true, type: 'BLOG' },
-    include: { author: { select: { name: true, image: true } } },
-    orderBy: { publishedAt: 'desc' },
-    take: 12,
-  });
+  /* Fetch from both sources in parallel */
+  const [prismaArticles, { posts: wpPosts }, mediaContent] = await Promise.all([
+    prisma.inspirationContent.findMany({
+      where: { isPublished: true, type: 'BLOG' },
+      include: { author: { select: { name: true, image: true } } },
+      orderBy: { publishedAt: 'desc' },
+      take: 12,
+    }),
+    getPosts({ first: 12 }).catch(() => ({ posts: [], pageInfo: null as any })),
+    prisma.inspirationContent.findMany({
+      where: { isPublished: true, type: { in: ['VIDEO', 'PODCAST'] } },
+      include: { author: { select: { name: true, image: true } } },
+      orderBy: { publishedAt: 'desc' },
+      take: 4,
+    }),
+  ]);
 
-  /* Also fetch video/podcast content */
-  const mediaContent = await prisma.inspirationContent.findMany({
-    where: { isPublished: true, type: { in: ['VIDEO', 'PODCAST'] } },
-    include: { author: { select: { name: true, image: true } } },
-    orderBy: { publishedAt: 'desc' },
-    take: 4,
-  });
+  /* Normalise both sources to UnifiedArticle */
+  const prismaUnified: UnifiedArticle[] = prismaArticles.map((a) => ({
+    id: `prisma-${a.id}`,
+    slug: a.slug,
+    title: a.title,
+    excerpt: a.excerpt ?? null,
+    thumbnail: a.thumbnail ?? null,
+    tags: a.tags ?? [],
+    publishedAt: a.publishedAt,
+    authorName: a.author.name,
+    source: 'prisma' as const,
+  }));
+
+  const wpUnified: UnifiedArticle[] = wpPosts.map((p) => ({
+    id: `wp-${p.id}`,
+    slug: p.slug,
+    title: p.title,
+    excerpt: p.excerpt ? p.excerpt.replace(/<[^>]*>/g, '').trim() : null,
+    thumbnail: p.featuredImage?.node.sourceUrl ?? null,
+    tags: [
+      ...(p.categories?.nodes.map((c) => c.name) ?? []),
+      ...(p.tags?.nodes.map((t) => t.name) ?? []),
+    ],
+    publishedAt: p.date ? new Date(p.date) : null,
+    authorName: p.author?.node.name ?? 'Book The Guide',
+    source: 'wp' as const,
+  }));
+
+  /* Merge, deduplicate by slug, sort newest first */
+  const seenSlugs = new Set<string>();
+  const articles: UnifiedArticle[] = [...wpUnified, ...prismaUnified]
+    .filter((a) => {
+      if (seenSlugs.has(a.slug)) return false;
+      seenSlugs.add(a.slug);
+      return true;
+    })
+    .sort((a, b) => {
+      const ta = a.publishedAt?.getTime() ?? 0;
+      const tb = b.publishedAt?.getTime() ?? 0;
+      return tb - ta;
+    })
+    .slice(0, 12);
 
   return (
     <main className="bg-btg-cream min-h-screen">
@@ -147,7 +204,7 @@ export default async function BlogIndexPage() {
                     <p className="text-sm text-btg-light-text font-body line-clamp-2 mb-3">{article.excerpt}</p>
                   )}
                   <div className="flex items-center justify-between text-xs text-btg-light-text font-body">
-                    <span>by {article.author.name}</span>
+                    <span>by {article.authorName}</span>
                     {article.publishedAt && (
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" /> {formatDate(article.publishedAt)}

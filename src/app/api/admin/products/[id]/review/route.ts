@@ -2,6 +2,7 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+import { sendGuideProductReviewNotifications } from '@/lib/notifications/guide-review-notifications';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +24,13 @@ export async function POST(
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
     }
 
+    if ((status === 'APPROVED' || status === 'REJECTED') && !reviewNotes?.trim()) {
+      return NextResponse.json(
+        { error: 'Review notes are required. This message will be sent to the guide.' },
+        { status: 400 }
+      );
+    }
+
     // Get admin profile including managed states (if any)
     const adminProfile = await prisma.adminProfile.findUnique({
       where: { userId: (session.user as any).id },
@@ -32,7 +40,14 @@ export async function POST(
     // Load the product and its destination state
     const productToCheck = await prisma.product.findUnique({
       where: { id: params.id },
-      include: { destination: { include: { city: { include: { state: true } } } } },
+      include: {
+        destination: { include: { city: { include: { state: true } } } },
+        guide: {
+          include: {
+            user: { select: { name: true, email: true, phone: true } },
+          },
+        },
+      },
     });
 
     if (!productToCheck) {
@@ -58,7 +73,23 @@ export async function POST(
       },
     });
 
-    return NextResponse.json({ product, message: `Product ${status.toLowerCase()}` });
+    let notificationResult = null;
+    if (status === 'APPROVED' || status === 'REJECTED') {
+      notificationResult = await sendGuideProductReviewNotifications({
+        guideName: productToCheck.guide.user.name,
+        guideEmail: productToCheck.guide.email || productToCheck.guide.user.email,
+        guidePhone: productToCheck.guide.phone || productToCheck.guide.user.phone,
+        productTitle: productToCheck.title,
+        decision: status,
+        reviewNote: reviewNotes.trim(),
+      });
+    }
+
+    return NextResponse.json({
+      product,
+      message: `Product ${status.toLowerCase()}`,
+      notification: notificationResult,
+    });
   } catch (error) {
     console.error('Product review error:', error);
     return NextResponse.json({ error: 'Failed to review product' }, { status: 500 });

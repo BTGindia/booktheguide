@@ -68,6 +68,8 @@ export default function GuideProfilePage() {
   const [agreementTab, setAgreementTab] = useState<'trek' | 'adventure'>('trek');
   const [certUploading, setCertUploading] = useState<Record<number, boolean>>({});
   const certInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
+  const [otpCooldown, setOtpCooldown] = useState(0);
+  const cooldownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [form, setForm] = useState({
     bio: '',
@@ -102,6 +104,11 @@ export default function GuideProfilePage() {
     maritalStatus: '',
     guideTypes: [] as string[],
     termsAccepted: false,
+    specWildernessFirstAid: '',
+    specEmergencyResponse: '',
+    specRescueOperations: '',
+    specLargestGroupSize: '',
+    specInfoVerified: false,
   });
 
   useEffect(() => {
@@ -174,6 +181,11 @@ export default function GuideProfilePage() {
             maritalStatus: data.profile.maritalStatus || '',
             guideTypes: data.profile.guideTypes || [],
             termsAccepted: data.profile.termsAccepted || false,
+            specWildernessFirstAid: data.profile.specWildernessFirstAid || '',
+            specEmergencyResponse: data.profile.specEmergencyResponse || '',
+            specRescueOperations: data.profile.specRescueOperations || '',
+            specLargestGroupSize: data.profile.specLargestGroupSize || '',
+            specInfoVerified: data.profile.specInfoVerified || false,
           });
         }
       })
@@ -254,6 +266,10 @@ export default function GuideProfilePage() {
       toast.error('Enter a valid 10-digit phone number');
       return;
     }
+    if (otpCooldown > 0) {
+      toast.error(`Please wait ${otpCooldown}s before resending.`);
+      return;
+    }
     setOtpLoading(true);
     try {
       const res = await fetch('/api/guide/verify-otp', {
@@ -265,6 +281,18 @@ export default function GuideProfilePage() {
       if (res.ok) {
         setOtpSent(true);
         toast.success('OTP sent to your phone');
+        // Start 60s cooldown
+        setOtpCooldown(60);
+        if (cooldownTimerRef.current) clearInterval(cooldownTimerRef.current);
+        cooldownTimerRef.current = setInterval(() => {
+          setOtpCooldown((prev) => {
+            if (prev <= 1) {
+              if (cooldownTimerRef.current) clearInterval(cooldownTimerRef.current);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
       } else {
         toast.error(data.error || 'Failed to send OTP');
       }
@@ -344,10 +372,14 @@ export default function GuideProfilePage() {
     if (form.portfolioImages.length < 4) { toast.error('Please upload at least 4 portfolio photos'); return; }
     if (!form.selectedState) { toast.error('Please select your operating state'); return; }
     if (form.guideTypes.length === 0) { toast.error('Please select at least one guide type'); return; }
-    if (!form.phone || !phoneVerified) { toast.error('Phone verification is mandatory'); return; }
     if (!form.idProofType || !form.idProofNumber) { toast.error('ID verification is mandatory'); return; }
     if (!form.termsAccepted) { toast.error('Please accept the terms and conditions'); return; }
     if (form.specializations.includes('Other') && !form.otherSpecialization.trim()) { toast.error('Please describe your "Other" specialization'); return; }
+    if (!form.specWildernessFirstAid) { toast.error('Please answer all Specialization Check questions'); return; }
+    if (!form.specEmergencyResponse) { toast.error('Please answer all Specialization Check questions'); return; }
+    if (!form.specRescueOperations) { toast.error('Please answer all Specialization Check questions'); return; }
+    if (!form.specLargestGroupSize.trim()) { toast.error('Please enter the largest group size you have handled'); return; }
+    if (!form.specInfoVerified) { toast.error('Please verify that the specialization information is true'); return; }
 
     setLoading(true);
     try {
@@ -475,6 +507,11 @@ export default function GuideProfilePage() {
                 {!phoneVerified ? (
                   <div className="space-y-3">
                     <p className="text-xs text-amber-700">We will send an OTP to your phone number: <strong>{form.phone || '(enter phone above)'}</strong></p>
+                    {otpSent && (
+                      <p className="text-xs text-green-700 font-medium flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3" /> OTP sent. Please check your phone.
+                      </p>
+                    )}
                     {!otpSent ? (
                       <Button type="button" onClick={sendOtp} isLoading={otpLoading} size="sm" disabled={!form.phone || form.phone.length !== 10}>
                         Send OTP
@@ -488,8 +525,13 @@ export default function GuideProfilePage() {
                         <Button type="button" onClick={verifyOtp} isLoading={otpLoading} size="sm">
                           Verify
                         </Button>
-                        <button type="button" onClick={sendOtp} className="text-xs text-btg-terracotta hover:underline whitespace-nowrap pb-2.5">
-                          Resend
+                        <button
+                          type="button"
+                          onClick={sendOtp}
+                          disabled={otpCooldown > 0 || otpLoading}
+                          className="text-xs whitespace-nowrap pb-2.5 disabled:text-gray-400 disabled:cursor-not-allowed text-btg-terracotta hover:underline"
+                        >
+                          {otpCooldown > 0 ? `Please wait ${otpCooldown}s` : 'Resend OTP'}
                         </button>
                       </div>
                     )}
@@ -686,42 +728,91 @@ export default function GuideProfilePage() {
           </CardContent>
         </Card>
 
-        {/* Specialization Proofs */}
-        {form.specializations.filter(s => s !== 'Other').length > 0 && (
-          <Card>
-            <CardContent className="p-6 space-y-4">
-              <div>
-                <h2 className="font-bold text-btg-dark mb-1">Proof of Specialization</h2>
-                <p className="text-sm text-gray-500">Upload certificates or documents proving your expertise</p>
+        {/* Specialization Check */}
+        <Card>
+          <CardContent className="p-6 space-y-5">
+            <div>
+              <h2 className="font-bold text-btg-dark mb-1">Specialization Check <span className="text-red-500">*</span></h2>
+              <p className="text-sm text-gray-500">Answer the following expertise verification questions. All questions are mandatory.</p>
+            </div>
+
+            {/* Q1 */}
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-800">Are you trained in Wilderness First Aid &amp; Medical Management? <span className="text-red-500">*</span></p>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="specWildernessFirstAid" value="yes" checked={form.specWildernessFirstAid === 'yes'} onChange={() => setForm(prev => ({ ...prev, specWildernessFirstAid: 'yes' }))} className="w-4 h-4 text-btg-terracotta border-gray-300 focus:ring-btg-terracotta/40" />
+                  <span className="text-sm text-gray-700">Yes</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="specWildernessFirstAid" value="no" checked={form.specWildernessFirstAid === 'no'} onChange={() => setForm(prev => ({ ...prev, specWildernessFirstAid: 'no' }))} className="w-4 h-4 text-btg-terracotta border-gray-300 focus:ring-btg-terracotta/40" />
+                  <span className="text-sm text-gray-700">No</span>
+                </label>
               </div>
-              <div className="space-y-4">
-                {form.specializations.filter(s => s !== 'Other').map((spec) => {
-                  const existingProof = form.specializationProofs.find((p) => p.specialization === spec);
-                  return (
-                    <div key={spec} className="p-4 border border-gray-200 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-gray-800">{spec}</span>
-                        {existingProof ? <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Uploaded</span> : <span className="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Pending</span>}
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <input type="text" value={existingProof?.description || ''} onChange={(e) => {
-                          const proofIdx = form.specializationProofs.findIndex((p) => p.specialization === spec);
-                          if (proofIdx >= 0) updateSpecProof(proofIdx, 'description', e.target.value);
-                          else setForm((prev) => ({ ...prev, specializationProofs: [...prev.specializationProofs, { specialization: spec, description: e.target.value, documentUrl: '' }] }));
-                        }} placeholder="Certificate name / description" className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-btg-terracotta/40" />
-                        <input type="url" value={existingProof?.documentUrl || ''} onChange={(e) => {
-                          const proofIdx = form.specializationProofs.findIndex((p) => p.specialization === spec);
-                          if (proofIdx >= 0) updateSpecProof(proofIdx, 'documentUrl', e.target.value);
-                          else setForm((prev) => ({ ...prev, specializationProofs: [...prev.specializationProofs, { specialization: spec, description: '', documentUrl: e.target.value }] }));
-                        }} placeholder="Document URL (uploaded link)" className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-btg-terracotta/40" />
-                      </div>
-                    </div>
-                  );
-                })}
+            </div>
+
+            {/* Q2 */}
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-800">Are you trained in Emergency Responses such as CPR, Oximeter, or managing severe allergic reactions? <span className="text-red-500">*</span></p>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="specEmergencyResponse" value="yes" checked={form.specEmergencyResponse === 'yes'} onChange={() => setForm(prev => ({ ...prev, specEmergencyResponse: 'yes' }))} className="w-4 h-4 text-btg-terracotta border-gray-300 focus:ring-btg-terracotta/40" />
+                  <span className="text-sm text-gray-700">Yes</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="specEmergencyResponse" value="no" checked={form.specEmergencyResponse === 'no'} onChange={() => setForm(prev => ({ ...prev, specEmergencyResponse: 'no' }))} className="w-4 h-4 text-btg-terracotta border-gray-300 focus:ring-btg-terracotta/40" />
+                  <span className="text-sm text-gray-700">No</span>
+                </label>
               </div>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+
+            {/* Q3 */}
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-800">Are you trained in Rescue Operations to ensure safety of travelers if a natural or man-made mishappening occurs? <span className="text-red-500">*</span></p>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="specRescueOperations" value="yes" checked={form.specRescueOperations === 'yes'} onChange={() => setForm(prev => ({ ...prev, specRescueOperations: 'yes' }))} className="w-4 h-4 text-btg-terracotta border-gray-300 focus:ring-btg-terracotta/40" />
+                  <span className="text-sm text-gray-700">Yes</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="specRescueOperations" value="no" checked={form.specRescueOperations === 'no'} onChange={() => setForm(prev => ({ ...prev, specRescueOperations: 'no' }))} className="w-4 h-4 text-btg-terracotta border-gray-300 focus:ring-btg-terracotta/40" />
+                  <span className="text-sm text-gray-700">No</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Q4 */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-800" htmlFor="specLargestGroupSize">
+                What is the largest group size you have handled in the past? <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="specLargestGroupSize"
+                type="number"
+                min="1"
+                max="500"
+                value={form.specLargestGroupSize}
+                onChange={(e) => setForm(prev => ({ ...prev, specLargestGroupSize: e.target.value }))}
+                placeholder="e.g. 20"
+                className="w-32 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-btg-terracotta/40 focus:border-transparent"
+              />
+            </div>
+
+            {/* Verification checkbox */}
+            <label className="flex items-start gap-3 cursor-pointer pt-2 border-t border-gray-100">
+              <input
+                type="checkbox"
+                checked={form.specInfoVerified}
+                onChange={(e) => setForm(prev => ({ ...prev, specInfoVerified: e.target.checked }))}
+                className="mt-0.5 w-4 h-4 text-btg-terracotta border-gray-300 rounded focus:ring-btg-terracotta/40"
+              />
+              <span className="text-sm text-gray-700">I verify that the above information submitted by me is true. <span className="text-red-500">*</span></span>
+            </label>
+            {!form.specInfoVerified && (
+              <p className="text-xs text-red-500">You must verify the information to save your profile</p>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Terms & Conditions */}
         <Card>
@@ -981,7 +1072,7 @@ export default function GuideProfilePage() {
         </Card>
 
         <div className="flex justify-end">
-          <Button type="submit" isLoading={loading} size="lg">Save Profile</Button>
+          <Button type="submit" isLoading={loading} size="lg" disabled={loading || !form.termsAccepted || !form.specInfoVerified}>Save Profile</Button>
         </div>
       </form>
     </div>

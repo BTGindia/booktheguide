@@ -17,10 +17,19 @@ export function ProductReviewForm({ productId, currentStatus }: Props) {
   const [loading, setLoading] = useState(false);
 
   const handleAction = async (action: 'APPROVED' | 'REJECTED' | 'CHANGES_REQUESTED') => {
-    if (action === 'CHANGES_REQUESTED' && !reviewNotes.trim()) {
-      toast.error('Please describe the changes required');
+    if ((action === 'CHANGES_REQUESTED' || action === 'APPROVED' || action === 'REJECTED') && !reviewNotes.trim()) {
+      toast.error('Review notes are required. This message will be sent to the guide.');
       return;
     }
+
+    if (action === 'APPROVED' || action === 'REJECTED') {
+      const actionText = action === 'APPROVED' ? 'approve' : 'reject';
+      const confirmed = window.confirm(
+        `Are you sure you want to ${actionText} this package? The review note will be sent to the guide on WhatsApp and email.`
+      );
+      if (!confirmed) return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch(`/api/admin/products/${productId}/review`, {
@@ -33,12 +42,22 @@ export function ProductReviewForm({ productId, currentStatus }: Props) {
       });
 
       if (res.ok) {
+        const data = await res.json();
         const messages: Record<string, string> = {
           APPROVED: 'Product approved!',
           REJECTED: 'Product rejected.',
           CHANGES_REQUESTED: 'Changes requested — guide will be notified.',
         };
         toast.success(messages[action]);
+
+        if (data?.notification) {
+          const emailFailed = data.notification.email?.attempted && !data.notification.email?.sent;
+          const whatsappFailed = data.notification.whatsapp?.attempted && !data.notification.whatsapp?.sent;
+          if (emailFailed || whatsappFailed) {
+            toast.error('Status updated, but one or more notifications failed. Check webhook configuration.');
+          }
+        }
+
         router.push('/dashboard/admin/products');
         router.refresh();
       } else {
@@ -60,10 +79,10 @@ export function ProductReviewForm({ productId, currentStatus }: Props) {
 
       <Textarea
         id="reviewNotes"
-        label="Review Notes (visible to guide)"
+        label="Review Notes (sent to guide via WhatsApp & email)"
         value={reviewNotes}
         onChange={(e) => setReviewNotes(e.target.value)}
-        placeholder="Any feedback for the guide..."
+        placeholder="Type the exact message the guide should receive..."
       />
 
       <div className="flex gap-3 pt-2 flex-wrap">

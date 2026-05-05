@@ -34,8 +34,8 @@ export function ImageUpload({
   };
 
   const handleUpload = async (file: File) => {
-    if (file.size > 100 * 1024) {
-      toast.error(`File too large (${(file.size / 1024).toFixed(0)}KB). Max 100KB allowed.`);
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(`File too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Max 5MB allowed.`);
       return;
     }
     if (!['image/jpeg', 'image/png', 'image/webp', 'image/jpg'].includes(file.type)) {
@@ -113,8 +113,7 @@ export function ImageUpload({
               <>
                 <Upload className="w-6 h-6 text-gray-400 mb-1" />
                 <p className="text-xs text-gray-500">Click or drag</p>
-                <p className="text-[10px] text-gray-400">Max 100KB</p>
-              </>
+                <p className="text-[10px] text-gray-400">Max 5MB</p>  </>
             )}
           </div>
         )}
@@ -153,8 +152,8 @@ export function MultiImageUpload({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleUpload = async (file: File) => {
-    if (file.size > 100 * 1024) {
-      toast.error(`File too large (${(file.size / 1024).toFixed(0)}KB). Max 100KB allowed.`);
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(`File too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Max 5MB allowed.`);
       return;
     }
     if (!['image/jpeg', 'image/png', 'image/webp', 'image/jpg'].includes(file.type)) {
@@ -249,7 +248,7 @@ export function MultiImageUpload({
             ) : (
               <>
                 <Upload className="w-5 h-5 text-gray-400 mb-1" />
-                <p className="text-[10px] text-gray-400">Max 100KB</p>
+                <p className="text-[10px] text-gray-400">Max 5MB</p>
               </>
             )}
           </div>
@@ -257,7 +256,7 @@ export function MultiImageUpload({
       </div>
       <p className="text-xs text-gray-400 mt-1.5 flex items-center gap-1">
         <AlertCircle className="w-3 h-3" />
-        {values.length}/{maxImages} images · JPEG, PNG, WebP · Max 100KB each
+        {values.length}/{maxImages} images · JPEG, PNG, WebP · Max 5MB each
         {onCoverSelect && ' · Click "Set Cover" to select cover photo'}
       </p>
       <input
